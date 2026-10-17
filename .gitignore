@@ -1,2 +1,6 @@
 frames/
 *.mp4
+venv/
+__pycache__/
+*.db
+.env
