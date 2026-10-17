@@ -151,15 +151,39 @@ function updateMatchCard(card, m) {
 }
 
 async function loadUpcomingMatches() {
+   const MATCH_KEYS = ["alanya", "slavia", "gs"];
+const COMPETITION_LABEL = {
+    super_lig: "Trendyol Süper Lig",
+    uefa: "UEFA Avrupa Kupası",
+};
+
+function syncMatchMeta(m, key) {
+    // main.js içindeki matchMeta'nın üzerine API verisini yazar
+    if (typeof matchMeta === "undefined") return;
+    const live = m.status === "live";
+    matchMeta[key] = {
+        home: m.home.toUpperCase(),
+        away: m.away.toUpperCase(),
+        score: m.home_score === null ? "v" : `${m.home_score} - ${m.away_score}`,
+        minute: live ? m.minute : (matchMeta[key]?.minute ?? "Ön İzleme"),
+        league: COMPETITION_LABEL[m.competition] ?? matchMeta[key]?.league,
+    };
+}
+
+async function loadUpcomingMatches() {
     const cards = document.querySelectorAll(".recent-match-card");
     if (!cards.length) return;
     try {
         const matches = await apiGet("/matches/upcoming");
-        matches.forEach((m, i) => cards[i] && updateMatchCard(cards[i], m));
+        matches.forEach((m, i) => {
+            if (cards[i]) updateMatchCard(cards[i], m);
+            if (MATCH_KEYS[i]) syncMatchMeta(m, MATCH_KEYS[i]);
+        });
         console.log("Yakın maçlar API'den yüklendi");
     } catch (err) {
         console.warn("Maç API'sine ulaşılamadı, statik kartlar gösteriliyor:", err);
     }
+}
 }
 
 // ---------- Fikstür ----------
