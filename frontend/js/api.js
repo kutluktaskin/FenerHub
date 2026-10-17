@@ -162,9 +162,39 @@ async function loadUpcomingMatches() {
     }
 }
 
+// ---------- Fikstür ----------
+function fixtureDate(m) {
+    if (!m.match_date) return "Sezon Sonu";
+    const d = new Date(m.match_date + "T00:00:00");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    return `${dd}/${mm} ${DAYS_TR[d.getDay()]}`;
+}
+
+function renderFixtures(container, matches) {
+    container.innerHTML = matches.map(m => `
+        <div class="fixture-item">
+            <div class="fixture-date">${fixtureDate(m)}</div>
+            <div class="fixture-teams">${m.home} - ${m.away}</div>
+            <div class="fixture-time">${m.kickoff_time ?? "Henüz belirlenmedi"}</div>
+        </div>`).join("");
+}
+
+async function loadFixtures() {
+    const container = document.querySelector(".fixtures-grid");
+    if (!container) return;
+    try {
+        renderFixtures(container, await apiGet("/matches"));
+        console.log("Fikstür API'den yüklendi");
+    } catch (err) {
+        console.warn("Fikstür API'sine ulaşılamadı, statik içerik gösteriliyor:", err);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     loadStandings();
     loadSquad();
     loadAbsences();
     loadUpcomingMatches();
+    loadFixtures();
 });
