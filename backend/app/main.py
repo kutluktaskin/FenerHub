@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import models
 from .database import engine, Base
-from .routers import standings, squad
+from .routers import standings, squad, matches
 
 Base.metadata.create_all(bind=engine)
 
@@ -22,6 +22,7 @@ app.add_middleware(
 
 app.include_router(standings.router)
 app.include_router(squad.router)
+app.include_router(matches.router)
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
