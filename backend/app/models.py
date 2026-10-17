@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Integer, String, DateTime, Date, ForeignKey, UniqueConstraint
+    Column, Integer, String, Date, Time, ForeignKey, UniqueConstraint
 )
 from sqlalchemy.orm import relationship
 from .database import Base
@@ -27,14 +27,16 @@ class Player(Base):
 class Match(Base):
     __tablename__ = "matches"
     id = Column(Integer, primary_key=True)
-    competition = Column(String, nullable=False)  # super_lig | uefa_el
+    competition = Column(String, nullable=False)  # super_lig | uefa
     matchday = Column(Integer)
-    kickoff = Column(DateTime, nullable=False)
+    match_date = Column(Date)          # "Sezon Sonu" gibi belirsizse boş
+    kickoff_time = Column(Time)        # saat belirlenmediyse boş
     home_team_id = Column(Integer, ForeignKey("teams.id"), nullable=False)
     away_team_id = Column(Integer, ForeignKey("teams.id"), nullable=False)
     home_score = Column(Integer)
     away_score = Column(Integer)
     status = Column(String, default="scheduled")  # scheduled | live | finished
+    minute = Column(String)            # canlı maçta: "89'"
     home_team = relationship("Team", foreign_keys=[home_team_id])
     away_team = relationship("Team", foreign_keys=[away_team_id])
     absences = relationship("Absence", back_populates="match")
@@ -53,13 +55,14 @@ class PlayerStat(Base):
 
 
 class Absence(Base):
+    """match_id boşsa genel sakatlık/ceza raporu, doluysa o maçın eksikleri."""
     __tablename__ = "absences"
     id = Column(Integer, primary_key=True)
     player_id = Column(Integer, ForeignKey("players.id"), nullable=False)
     match_id = Column(Integer, ForeignKey("matches.id"), nullable=True)
-    type = Column(String, nullable=False)  # injury | suspension
+    type = Column(String, nullable=False)  # injury | suspension | returned
     reason = Column(String)
-    expected_return = Column(Date, nullable=True)
+    return_note = Column(String)           # "Mart 2027", "2 Hafta"
     player = relationship("Player")
     match = relationship("Match", back_populates="absences")
 
@@ -68,14 +71,14 @@ class Standing(Base):
     __tablename__ = "standings"
     __table_args__ = (UniqueConstraint("competition", "season", "team_id"),)
     id = Column(Integer, primary_key=True)
-    competition = Column(String, nullable=False)
+    competition = Column(String, nullable=False)  # super_lig | uefa
     season = Column(String, default="2026-27")
+    position = Column(Integer, nullable=False)
     team_id = Column(Integer, ForeignKey("teams.id"), nullable=False)
     played = Column(Integer, default=0)
     won = Column(Integer, default=0)
     drawn = Column(Integer, default=0)
     lost = Column(Integer, default=0)
-    goals_for = Column(Integer, default=0)
-    goals_against = Column(Integer, default=0)
+    goal_difference = Column(Integer, default=0)
     points = Column(Integer, default=0)
     team = relationship("Team")
