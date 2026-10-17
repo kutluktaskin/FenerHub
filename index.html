@@ -4,356 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fenerbahçe Canlı Maç Merkezi & Sezon Fikstürü</title>
+    <!-- GSAP Kütüphaneleri -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <style>
-        :root {
-            --bg-color: #010a15;
-            --nav-bg: rgba(0, 25, 75, 0.7);
-            --card-bg: rgba(0, 25, 75, 0.55);
-            --primary-color: #fcd116;
-            --text-color: #ffffff;
-            --border-color: rgba(252, 209, 22, 0.4);
-        }
-
-        body, html {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            overflow-x: hidden;
-            font-family: 'Arial', sans-serif;
-            scroll-behavior: smooth;
-            color: var(--text-color);
-        }
-
-        /* YÜKLEME EKRANI */
-        #preloader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: var(--bg-color);
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            color: var(--primary-color);
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(252, 209, 22, 0.2);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* ÜST MENÜ */
-        .navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: var(--nav-bg);
-            backdrop-filter: blur(15px);
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 40px;
-            box-sizing: border-box;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .logo {
-            color: var(--primary-color);
-            font-size: 1.4em;
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .live-pulse {
-            width: 12px;
-            height: 12px;
-            background-color: #ff3333;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #ff3333;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 51, 51, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 51, 51, 0); }
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            margin-left: 25px;
-            font-size: 1em;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary-color);
-        }
-
-        /* ARKA PLAN TUVALİ */
-        .canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        #bogaCanvas {
-            width: 100%;
-            height: 100%;
-            filter: blur(5px) brightness(0.5); 
-        }
-
-        .vignette-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.95);
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        /* ANA YERLEŞİM (GRID) */
-        .main-layout {
-            position: relative;
-            z-index: 10;
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 30px;
-            max-width: 1450px;
-            margin: 0 auto;
-            padding: 120vh 30px 100px 30px;
-        }
-
-        .content-area {
-            display: flex;
-            flex-direction: column;
-            gap: 80vh;
-        }
-
-        /* SİMÜLASYON KARTI */
-        .match-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(14px);
-            border: 1px solid var(--border-color);
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9);
-            opacity: 0;
-            transform: translateY(60px);
-        }
-
-        .match-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 15px;
-        }
-
-        .tab-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.9em;
-            transition: all 0.3s;
-        }
-
-        .tab-btn.active {
-            background: var(--primary-color);
-            color: #000;
-        }
-
-        .simulation-header {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            font-size: 1.4em;
-            font-weight: bold;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 20px;
-        }
-
-        .score-box {
-            color: var(--primary-color);
-            font-size: 1.2em;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 5px 15px;
-            border-radius: 8px;
-        }
-
-        /* SAHA CANVAS'I */
-        .match-pitch {
-            width: 100%;
-            height: 400px;
-            background: linear-gradient(135deg, #164225, #0a2313);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
-            display: block;
-            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7);
-        }
-
-        .timeline-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            font-size: 0.9em;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* YAN KISIM (SİDEBAR - PUAN DURUMLARI) */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-            position: sticky;
-            top: 100px;
-            height: fit-content;
-        }
-
-        .standings-box {
-            background: var(--card-bg);
-            backdrop-filter: blur(14px);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85);
-        }
-
-        .standings-box h2 {
-            font-size: 1em;
-            color: var(--primary-color);
-            margin-top: 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .standings-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.82em;
-        }
-
-        .standings-table th, .standings-table td {
-            padding: 6px 4px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .standings-table th {
-            color: #aaa;
-        }
-
-        .standings-table tr.fb-row {
-            background: rgba(252, 209, 22, 0.25);
-            font-weight: bold;
-        }
-
-        /* ALT KISIM: DETAYLI SEZON FİKSTÜRÜ */
-        .fixtures-section {
-            grid-column: 1 / -1;
-            background: var(--card-bg);
-            backdrop-filter: blur(14px);
-            border: 1px solid var(--border-color);
-            padding: 30px;
-            border-radius: 20px;
-            margin-top: 30px;
-            opacity: 0;
-            transform: translateY(60px);
-        }
-
-        .fixtures-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-            max-height: 500px;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-
-        /* Özel Kaydırma Çubuğu */
-        .fixtures-grid::-webkit-scrollbar {
-            width: 6px;
-        }
-        .fixtures-grid::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
-            border-radius: 10px;
-        }
-
-        .fixture-item {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(252, 209, 22, 0.25);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            transition: transform 0.2s;
-        }
-
-        .fixture-item:hover {
-            transform: translateY(-3px);
-            border-color: var(--primary-color);
-        }
-
-        .fixture-date {
-            font-size: 0.8em;
-            color: var(--primary-color);
-            margin-bottom: 6px;
-            font-weight: bold;
-        }
-
-        .fixture-teams {
-            font-weight: bold;
-            font-size: 0.95em;
-            margin-bottom: 4px;
-        }
-
-        .fixture-time {
-            font-size: 0.75em;
-            color: #bbb;
-        }
-
-        @media(max-width: 1024px) {
-            .main-layout { grid-template-columns: 1fr; }
-            .sidebar { position: static; }
-        }
-    </style>
+    <!-- Harici CSS Dosyası -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -362,113 +17,337 @@
         <h2 style="letter-spacing: 3px;">MAÇ MERKEZİ YÜKLENİYOR...</h2>
     </div>
 
+    <!-- SABİT ÜST MENÜ -->
     <nav class="navbar">
-        <a href="#" class="logo">
+        <a onclick="scrollToSection('yakindakiMaclar')" class="logo">
             <div class="live-pulse"></div> FB CANLI MAÇ MERKEZİ
         </a>
         <div class="nav-links">
-            <a href="#simulasyon">Canlı Simülasyon</a>
-            <a href="#puanlar">Puan Durumu</a>
-            <a href="#fikstur">Fikstür</a>
+            <button onclick="scrollToSection('yakindakiMaclar')">Yakın Maçlar</button>
+            <button onclick="scrollToSection('takimIstatistikBolumu')">Takım Kadrosu</button>
+            <button onclick="openSimulation('alanya')">Canlı Simülasyon</button>
+            <button onclick="scrollToSection('puanlar')">Puan Durumu</button>
+            <button onclick="scrollToSection('fikstur')">Fikstür</button>
         </div>
     </nav>
 
+    <!-- ARKA PLAN CANVAS -->
     <div class="canvas-container">
         <canvas id="bogaCanvas"></canvas>
         <div class="vignette-overlay"></div>
     </div>
 
-    <div class="main-layout">
-        <!-- ORTA ALAN: SİMÜLASYON VE DETAYLI FİKSTÜR -->
-        <div class="content-area">
-            
-            <div class="match-card" id="simulasyon">
-                <div class="match-tabs">
-                    <button class="tab-btn active">Akıllı Canlı Simülasyon</button>
-                    <button class="tab-btn">Maç Bilgisi</button>
-                    <button class="tab-btn">İstatistikler</button>
-                </div>
+    <div class="page-container">
 
-                <div class="simulation-header">
-                    <span>FENERBAHÇE</span>
-                    <span class="score-box">2 - 1</span>
-                    <span>RAKİP TAKIM</span>
-                </div>
+        <!-- 1. BÖLÜM: YAKIN MAÇLAR -->
+        <section class="page-section hero-matches-section" id="yakindakiMaclar">
+            <h1 class="hero-title">🔥 Yakın Zamanda Maçlar & Maç Günü Eksikleri</h1>
+            <p class="hero-subtitle">Her maçın kendi maç günü sakat/cezalı eksikleri kart üzerinde ayrı gösterilir.</p>
 
-                <canvas id="matchPitch" class="match-pitch"></canvas>
-
-                <div class="timeline-bar">
-                    <span style="color: #ff3333; font-weight: bold;" id="matchMinute">🔴 89'</span>
-                    <span id="matchStatusText">Fenerbahçe sol kanattan etkili geliyor, atak kuruluyor...</span>
-                    <span style="color: var(--primary-color);">Canlı Veri Motoru</span>
-                </div>
-            </div>
-
-            <!-- ALT KISIM: TÜM SEZON FİKSTÜRÜ -->
-            <div class="fixtures-section" id="fikstur">
-                <h2 style="color: var(--primary-color); margin-top: 0; text-transform: uppercase; font-size: 1.2em;">🗓️ Fenerbahçe Sezon Fikstürü (2026/2027)</h2>
-                <p style="font-size: 0.85em; color: #aaa; margin-bottom: 15px;">Tüm saatler Türkiye Saati (TSİ) olarak gösterilmektedir.</p>
+            <div class="recent-matches-grid">
                 
-                <div class="fixtures-grid">
-                    <div class="fixture-item"><div class="fixture-date">20/10 Sal</div><div class="fixture-teams">Fenerbahçe - Alanyaspor</div><div class="fixture-time">19:45</div></div>
-                    <div class="fixture-item"><div class="fixture-date">26/10 Pzt</div><div class="fixture-teams">Fenerbahçe - Slavia Prag</div><div class="fixture-time">21:30</div></div>
-                    <div class="fixture-item"><div class="fixture-date">31/10</div><div class="fixture-teams">Galatasaray - Fenerbahçe</div><div class="fixture-time">19:00</div></div>
-                    <div class="fixture-item"><div class="fixture-date">4/11</div><div class="fixture-teams">Fenerbahçe - Göztepe</div><div class="fixture-time">20:45</div></div>
-                    <div class="fixture-item"><div class="fixture-date">8/11</div><div class="fixture-teams">Fenerbahçe - Liverpool</div><div class="fixture-time">16:00</div></div>
-                    <div class="fixture-item"><div class="fixture-date">21/11</div><div class="fixture-teams">Çorum - Fenerbahçe</div><div class="fixture-time">19:00</div></div>
-                    <div class="fixture-item"><div class="fixture-date">25/11</div><div class="fixture-teams">Kocaelispor - Fenerbahçe</div><div class="fixture-time">23:00</div></div>
-                    <div class="fixture-item"><div class="fixture-date">29/11</div><div class="fixture-teams">Şahtar Donetsk - Fenerbahçe</div><div class="fixture-time">19:00</div></div>
-                    <div class="fixture-item"><div class="fixture-date">5/12</div><div class="fixture-teams">Fenerbahçe - Erzurumspor</div><div class="fixture-time">19:00</div></div>
-                    <div class="fixture-item"><div class="fixture-date">9/12</div><div class="fixture-teams">Başakşehir - Fenerbahçe</div><div class="fixture-time">23:00</div></div>
-                    <div class="fixture-item"><div class="fixture-date">13/12</div><div class="fixture-teams">LASK Linz - Fenerbahçe</div><div class="fixture-time">19:00</div></div>
-                    <div class="fixture-item"><div class="fixture-date">20/12</div><div class="fixture-teams">Fenerbahçe - Trabzonspor</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">17.01.27</div><div class="fixture-teams">Kasımpaşa - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">20.01.27</div><div class="fixture-teams">Fenerbahçe - Amed</div><div class="fixture-time">20:45</div></div>
-                    <div class="fixture-item"><div class="fixture-date">24.01.27</div><div class="fixture-teams">Fenerbahçe - Villarreal</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">27.01.27</div><div class="fixture-teams">Fenerbahçe - Gençlerbirliği</div><div class="fixture-time">23:00</div></div>
-                    <div class="fixture-item"><div class="fixture-date">31.01.27</div><div class="fixture-teams">Atletico Madrid - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">07.02.27</div><div class="fixture-teams">Konyaspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">14.02.27</div><div class="fixture-teams">Fenerbahçe - Samsunspor</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">21.02.27</div><div class="fixture-teams">Beşiktaş - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">28.02.27</div><div class="fixture-teams">Fenerbahçe - Gaziantep FK</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">07.03.27</div><div class="fixture-teams">Eyüpspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">14.03.27</div><div class="fixture-teams">Fenerbahçe - Rizespor</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">21.03.27</div><div class="fixture-teams">Alanyaspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">04.04.27</div><div class="fixture-teams">Fenerbahçe - Galatasaray</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">11.04.27</div><div class="fixture-teams">Göztepe - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">18.04.27</div><div class="fixture-teams">Fenerbahçe - Çorum</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">25.04.27</div><div class="fixture-teams">Fenerbahçe - Kocaelispor</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">02.05.27</div><div class="fixture-teams">Erzurumspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">09.05.27</div><div class="fixture-teams">Fenerbahçe - Başakşehir</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">16.05.27</div><div class="fixture-teams">Trabzonspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">23.05.27</div><div class="fixture-teams">Fenerbahçe - Kasımpaşa</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                    <div class="fixture-item"><div class="fixture-date">Sezon Sonu</div><div class="fixture-teams">Amed - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <!-- Alanyaspor Maçı -->
+                <div class="recent-match-card active-card" id="card-alanya">
+                    <div>
+                        <div class="card-top-center">
+                            <span class="match-badge badge-live">🔴 CANLI • 20/10 Sal 19:45</span>
+                            <div class="recent-teams">
+                                <span>Fenerbahçe</span>
+                                <span class="recent-score">2 - 1</span>
+                                <span>Alanyaspor</span>
+                            </div>
+                            <div style="font-size: 0.85em; color: #ccc;">Trendyol Süper Lig • Şükrü Saracoğlu</div>
+                        </div>
+
+                        <div class="matchday-missing-box">
+                            <div class="matchday-missing-title">
+                                <span>🚨 Maç Günü Eksikleri (Alanyaspor)</span>
+                                <span style="color:#ff6b6b;">3 Eksik</span>
+                            </div>
+                            <div class="matchday-missing-item">
+                                <div class="missing-player-info">
+                                    <span class="missing-player-name">Jayden Oosterwolde</span>
+                                    <span class="missing-player-stats">9 Maç • 1 Gol • 0 Asist (Diz Bağları)</span>
+                                </div>
+                                <span class="status-tag tag-injured">🚑 Sakat</span>
+                            </div>
+                            <div class="matchday-missing-item">
+                                <div class="missing-player-info">
+                                    <span class="missing-player-name">İrfan Can Kahveci</span>
+                                    <span class="missing-player-stats">10 Maç • 2 Gol • 3 Asist (Arka Adale)</span>
+                                </div>
+                                <span class="status-tag tag-injured">🚑 Sakat</span>
+                            </div>
+                            <div class="matchday-missing-item">
+                                <div class="missing-player-info">
+                                    <span class="missing-player-name">Alexander Djiku</span>
+                                    <span class="missing-player-stats">10 Maç • 0 Gol • 1 Asist (4 Sarı Kart)</span>
+                                </div>
+                                <span class="status-tag tag-suspended">🟨 Cezalı</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="open-sim-btn" onclick="openSimulation('alanya')">⚡ Canlı 2D Simülasyonu Aç</button>
+                </div>
+
+                <!-- Slavia Prag Maçı -->
+                <div class="recent-match-card" id="card-slavia">
+                    <div>
+                        <div class="card-top-center">
+                            <span class="match-badge badge-upcoming">⏳ YAKLAŞAN • 26/10 Pzt 21:30</span>
+                            <div class="recent-teams">
+                                <span>Fenerbahçe</span>
+                                <span class="recent-score">v</span>
+                                <span>Slavia Prag</span>
+                            </div>
+                            <div style="font-size: 0.85em; color: #ccc;">Avrupa Kupası • Şükrü Saracoğlu</div>
+                        </div>
+
+                        <div class="matchday-missing-box">
+                            <div class="matchday-missing-title">
+                                <span>🚨 Maç Günü Eksikleri (Slavia Prag)</span>
+                                <span style="color:#ff6b6b;">3 Eksik</span>
+                            </div>
+                            <div class="matchday-missing-item">
+                                <div class="missing-player-info">
+                                    <span class="missing-player-name">Jayden Oosterwolde</span>
+                                    <span class="missing-player-stats">9 Maç • 1 Gol • 0 Asist</span>
+                                </div>
+                                <span class="status-tag tag-injured">🚑 Sakat</span>
+                            </div>
+                            <div class="matchday-missing-item">
+                                <div class="missing-player-info">
+                                    <span class="missing-player-name">Rodrigo Becão</span>
+                                    <span class="missing-player-stats">8 Maç • 1 Gol • 0 Asist</span>
+                                </div>
+                                <span class="status-tag tag-suspended">🟥 Cezalı</span>
+                            </div>
+                            <div class="matchday-missing-item">
+                                <div class="missing-player-info">
+                                    <span class="missing-player-name">Cengiz Ünder</span>
+                                    <span class="missing-player-stats">5 Maç • 1 Gol • 0 Asist</span>
+                                </div>
+                                <span class="status-tag tag-injured">🚑 Sakat</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="open-sim-btn" onclick="openSimulation('slavia')">⚡ Taktik Simülasyonunu Aç</button>
+                </div>
+
+                <!-- Galatasaray Derbisi -->
+                <div class="recent-match-card" id="card-gs">
+                    <div>
+                        <div class="card-top-center">
+                            <span class="match-badge badge-upcoming">🔥 DERBİ • 31/10 Cmt 19:00</span>
+                            <div class="recent-teams">
+                                <span>Galatasaray</span>
+                                <span class="recent-score">v</span>
+                                <span>Fenerbahçe</span>
+                            </div>
+                            <div style="font-size: 0.85em; color: #ccc;">Trendyol Süper Lig • Deplasman</div>
+                        </div>
+
+                        <div class="matchday-missing-box">
+                            <div class="matchday-missing-title">
+                                <span>🚨 Maç Günü Eksikleri (Derbi)</span>
+                                <span style="color:#f1c40f;">2 Eksik</span>
+                            </div>
+                            <div class="matchday-missing-item">
+                                <div class="missing-player-info">
+                                    <span class="missing-player-name">Jayden Oosterwolde</span>
+                                    <span class="missing-player-stats">9 Maç • 1 Gol • 0 Asist</span>
+                                </div>
+                                <span class="status-tag tag-injured">🚑 Sakat</span>
+                            </div>
+                            <div class="matchday-missing-item">
+                                <div class="missing-player-info">
+                                    <span class="missing-player-name">Serdar Aziz</span>
+                                    <span class="missing-player-stats">2 Maç • 0 Gol • 0 Asist</span>
+                                </div>
+                                <span class="status-tag tag-injured">🚑 Eksik</span>
+                            </div>
+                            <div class="matchday-missing-item">
+                                <div class="missing-player-info">
+                                    <span class="missing-player-name">Alexander Djiku</span>
+                                    <span class="missing-player-stats">Cezası Bitti</span>
+                                </div>
+                                <span class="status-tag" style="background:rgba(46,204,113,0.2); color:#2ecc71; border:1px solid #2ecc71;">✔ Kadroda</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="open-sim-btn" onclick="openSimulation('gs')">⚡ Derbi Simülasyonunu Aç</button>
+                </div>
+
+            </div>
+
+            <!-- SİMÜLASYON PANELİ -->
+            <div id="simulasyonWrapper">
+                <div class="match-card" id="simulasyon">
+                    <div class="match-card-top">
+                        <div class="match-tabs">
+                            <button class="tab-btn active" id="btn-pitchTab" onclick="switchTab('pitchTab')">⚽ Akıllı Canlı 2D Simülasyon</button>
+                            <button class="tab-btn" id="btn-statsTab" onclick="switchTab('statsTab')">📊 Anlık Maç İstatistikleri</button>
+                        </div>
+                        <button class="close-sim-btn" onclick="closeSimulation()">✖ Simülasyonu Kapat</button>
+                    </div>
+
+                    <div class="simulation-header">
+                        <span id="simHomeTeam">FENERBAHÇE</span>
+                        <span class="score-box" id="simScore">2 - 1</span>
+                        <span id="simAwayTeam">ALANYASPOR</span>
+                    </div>
+
+                    <div id="pitchTab" class="tab-content active-content">
+                        <canvas id="matchPitch" class="match-pitch"></canvas>
+                        <div class="timeline-bar">
+                            <span style="color: #ff3333; font-weight: bold;" id="matchMinute">🔴 89'</span>
+                            <span id="matchStatusText">⚡ Fenerbahçe rakip yarı sahada pas trafiğiyle boşluk arıyor...</span>
+                            <span style="color: var(--primary-color);" id="simLeagueName">Trendyol Süper Lig</span>
+                        </div>
+                    </div>
+
+                    <div id="statsTab" class="tab-content">
+                        <div class="info-panel">
+                            <h3 style="color:var(--primary-color); margin-top:0;">📊 Karşılaşma İstatistikleri</h3>
+                            <div class="stats-row">
+                                <div class="stats-label"><span>%64</span><span>Topla Oynama</span><span>%36</span></div>
+                                <div class="stats-bar-bg"><div class="stats-bar-fb" style="width: 64%;"></div></div>
+                            </div>
+                            <div class="stats-row">
+                                <div class="stats-label"><span>18 (8)</span><span>Toplam Şut (İsabetli)</span><span>7 (3)</span></div>
+                                <div class="stats-bar-bg"><div class="stats-bar-fb" style="width: 72%;"></div></div>
+                            </div>
+                            <div class="stats-row">
+                                <div class="stats-label"><span>482</span><span>Başarılı Pas</span><span>245</span></div>
+                                <div class="stats-bar-bg"><div class="stats-bar-fb" style="width: 66%;"></div></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-        </div>
+            <!-- TAKIM GOL/ASİST VE GENEL RAPOR -->
+            <div class="team-overview-grid page-section" id="takimIstatistikBolumu">
+                <div class="team-box">
+                    <h3>⚽ Fenerbahçe Takım Kadrosu (Maç • Gol • Asist)</h3>
+                    <table class="player-stats-table">
+                        <thead>
+                            <tr>
+                                <th>Oyuncu</th>
+                                <th>Mevki</th>
+                                <th>Maç</th>
+                                <th>Gol</th>
+                                <th>Asist</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Edin Džeko</strong></td>
+                                <td style="color:#bbb;">Santrafor</td>
+                                <td><span class="stat-badge stat-match">12</span></td>
+                                <td><span class="stat-badge stat-goal">9</span></td>
+                                <td><span class="stat-badge stat-assist">3</span></td>
+                                <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Dušan Tadić</strong></td>
+                                <td style="color:#bbb;">Kanat</td>
+                                <td><span class="stat-badge stat-match">12</span></td>
+                                <td><span class="stat-badge stat-goal">5</span></td>
+                                <td><span class="stat-badge stat-assist">7</span></td>
+                                <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sebastian Szymański</strong></td>
+                                <td style="color:#bbb;">On Numara</td>
+                                <td><span class="stat-badge stat-match">12</span></td>
+                                <td><span class="stat-badge stat-goal">4</span></td>
+                                <td><span class="stat-badge stat-assist">5</span></td>
+                                <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Youssef En-Nesyri</strong></td>
+                                <td style="color:#bbb;">Santrafor</td>
+                                <td><span class="stat-badge stat-match">11</span></td>
+                                <td><span class="stat-badge stat-goal">5</span></td>
+                                <td><span class="stat-badge stat-assist">1</span></td>
+                                <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fred</strong></td>
+                                <td style="color:#bbb;">Orta Saha</td>
+                                <td><span class="stat-badge stat-match">9</span></td>
+                                <td><span class="stat-badge stat-goal">3</span></td>
+                                <td><span class="stat-badge stat-assist">3</span></td>
+                                <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
+                            </tr>
+                            <tr>
+                                <td><strong>İrfan Can Kahveci</strong></td>
+                                <td style="color:#bbb;">Sağ Kanat</td>
+                                <td><span class="stat-badge stat-match">10</span></td>
+                                <td><span class="stat-badge stat-goal">2</span></td>
+                                <td><span class="stat-badge stat-assist">3</span></td>
+                                <td style="color:#ff6b6b; font-weight:bold;">🚑 Sakat</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Alexander Djiku</strong></td>
+                                <td style="color:#bbb;">Stoper</td>
+                                <td><span class="stat-badge stat-match">10</span></td>
+                                <td><span class="stat-badge stat-goal">0</span></td>
+                                <td><span class="stat-badge stat-assist">1</span></td>
+                                <td style="color:#f1c40f; font-weight:bold;">🟨 Cezalı</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-        <!-- YAN KISIM (SİDEBAR): PUAN DURUMLARI -->
-        <div class="sidebar" id="puanlar">
-            
+                <div class="team-box">
+                    <h3>🚑 Takım Sakatlık & Ceza Raporu</h3>
+                    <div class="injury-report-list">
+                        <div class="injury-report-card">
+                            <div>
+                                <div style="font-weight:bold; font-size:1em;">Jayden Oosterwolde (Sol Bek)</div>
+                                <div style="font-size:0.84em; color:#ccc; margin-top:4px;">9 Maç • 1 Gol • 0 Asist</div>
+                                <div style="font-size:0.8em; color:#ff9999; margin-top:3px;">Ön Çapraz Bağ • Dönüş: Mart 2027</div>
+                            </div>
+                            <span class="status-tag tag-injured">🚑 Sakat</span>
+                        </div>
+                        <div class="injury-report-card">
+                            <div>
+                                <div style="font-weight:bold; font-size:1em;">İrfan Can Kahveci (Kanat)</div>
+                                <div style="font-size:0.84em; color:#ccc; margin-top:4px;">10 Maç • 2 Gol • 3 Asist</div>
+                                <div style="font-size:0.8em; color:#ff9999; margin-top:3px;">Arka Adale • Dönüş: 2 Hafta</div>
+                            </div>
+                            <span class="status-tag tag-injured">🚑 Sakat</span>
+                        </div>
+                        <div class="injury-report-card suspended-card">
+                            <div>
+                                <div style="font-weight:bold; font-size:1em;">Alexander Djiku (Stoper)</div>
+                                <div style="font-size:0.84em; color:#ccc; margin-top:4px;">10 Maç • 0 Gol • 1 Asist</div>
+                                <div style="font-size:0.8em; color:#f1c40f; margin-top:3px;">4 Sarı Kart Sınırı</div>
+                            </div>
+                            <span class="status-tag tag-suspended">🟨 Cezalı</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. BÖLÜM: PUAN DURUMLARI -->
+        <section class="page-section standings-split-section" id="puanlar">
             <div class="standings-box">
                 <h2>🏆 Trendyol Süper Lig Puan Durumu</h2>
                 <table class="standings-table">
                     <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Takım</th>
-                            <th>O</th>
-                            <th>P</th>
-                        </tr>
+                        <tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>1</td><td>Galatasaray</td><td>7</td><td>16</td></tr>
-                        <tr><td>2</td><td>Beşiktaş</td><td>7</td><td>15</td></tr>
-                        <tr><td>3</td><td>Amed SK</td><td>7</td><td>14</td></tr>
-                        <tr class="fb-row"><td>4</td><td>Fenerbahçe</td><td>7</td><td>13</td></tr>
-                        <tr><td>5</td><td>Trabzonspor</td><td>7</td><td>13</td></tr>
-                        <tr><td>6</td><td>Kocaelispor</td><td>7</td><td>12</td></tr>
+                        <tr><td>1</td><td>Galatasaray</td><td>7</td><td>5</td><td>1</td><td>1</td><td>+11</td><td>16</td></tr>
+                        <tr><td>2</td><td>Beşiktaş</td><td>7</td><td>4</td><td>3</td><td>0</td><td>+9</td><td>15</td></tr>
+                        <tr><td>3</td><td>Amed SK</td><td>7</td><td>4</td><td>2</td><td>1</td><td>+6</td><td>14</td></tr>
+                        <tr class="fb-row"><td>4</td><td>Fenerbahçe</td><td>7</td><td>4</td><td>1</td><td>2</td><td>+10</td><td>13</td></tr>
+                        <tr><td>5</td><td>Trabzonspor</td><td>7</td><td>4</td><td>1</td><td>2</td><td>+5</td><td>13</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -477,229 +356,33 @@
                 <h2>⭐ UEFA Şampiyonlar Ligi / Avrupa Puan Durumu</h2>
                 <table class="standings-table">
                     <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Takım</th>
-                            <th>O</th>
-                            <th>P</th>
-                        </tr>
+                        <tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>1</td><td>Barcelona</td><td>2</td><td>6</td></tr>
-                        <tr><td>2</td><td>Arsenal</td><td>2</td><td>6</td></tr>
-                        <tr><td>3</td><td>Bayern München</td><td>2</td><td>4</td></tr>
-                        <tr class="fb-row"><td>...</td><td>...</td><td>...</td><td>...</td></tr>
-                        <tr class="fb-row"><td>24</td><td>Fenerbahçe</td><td>1</td><td>1</td></tr>
-                        <tr><td>34</td><td>Galatasaray</td><td>2</td><td>0</td></tr>
+                        <tr><td>1</td><td>Barcelona</td><td>2</td><td>2</td><td>0</td><td>0</td><td>+6</td><td>6</td></tr>
+                        <tr><td>2</td><td>Arsenal</td><td>2</td><td>2</td><td>0</td><td>0</td><td>+4</td><td>6</td></tr>
+                        <tr><td>3</td><td>Liverpool</td><td>2</td><td>2</td><td>0</td><td>0</td><td>+4</td><td>6</td></tr>
+                        <tr class="fb-row"><td>24</td><td>Fenerbahçe</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
                     </tbody>
                 </table>
             </div>
+        </section>
 
-        </div>
+        <!-- 3. BÖLÜM: FİKSTÜR -->
+        <section class="page-section fixtures-full-section" id="fikstur">
+            <h2 style="color: var(--primary-color); margin-top: 0; text-transform: uppercase; font-size: 1.4em;">🗓️ Fenerbahçe Sezon Fikstürü (2026/2027)</h2>
+            <div class="fixtures-grid">
+                <div class="fixture-item"><div class="fixture-date">20/10 Sal</div><div class="fixture-teams">Fenerbahçe - Alanyaspor</div><div class="fixture-time">19:45</div></div>
+                <div class="fixture-item"><div class="fixture-date">26/10 Pzt</div><div class="fixture-teams">Fenerbahçe - Slavia Prag</div><div class="fixture-time">21:30</div></div>
+                <div class="fixture-item"><div class="fixture-date">31/10</div><div class="fixture-teams">Galatasaray - Fenerbahçe</div><div class="fixture-time">19:00</div></div>
+            </div>
+        </section>
+
     </div>
 
-    <script>
-        // --- 1. ARKA PLAN VİDEO MOTORU ---
-        const canvas = document.getElementById("bogaCanvas");
-        const context = canvas.getContext("2d");
-
-        function resizeCanvas() {
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = window.innerWidth * dpr;
-            canvas.height = window.innerHeight * dpr;
-        }
-
-        const frameCount = 400; 
-        const currentFrame = index => `./frames/frame_${(index + 1).toString().padStart(4, '0')}.jpg`;
-
-        const images = [];
-        const boga = { frame: 0 };
-        let loadedImages = 0;
-
-        for (let i = 0; i < frameCount; i++) {
-            const img = new Image();
-            img.src = currentFrame(i);
-            img.onload = () => {
-                loadedImages++;
-                if (loadedImages === frameCount) {
-                    gsap.to("#preloader", {
-                        opacity: 0, 
-                        duration: 0.8, 
-                        onComplete: () => {
-                            document.getElementById("preloader").style.display = "none";
-                            resizeCanvas();
-                            renderBg();
-                        }
-                    });
-                }
-            };
-            images.push(img);
-        }
-
-        gsap.registerPlugin(ScrollTrigger);
-
-        gsap.to(boga, {
-            frame: frameCount - 1,
-            snap: "frame",
-            ease: "power1.inOut",
-            scrollTrigger: {
-                scrub: 1.5, 
-                start: "top top",
-                end: "bottom bottom"
-            },
-            onUpdate: renderBg
-        });
-
-        function renderBg() {
-            const img = images[Math.round(boga.frame)];
-            if (!img || !img.complete) return; 
-
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
-            const x = (canvas.width / 2) - (img.width / 2) * scale;
-            const y = (canvas.height / 2) - (img.height / 2) * scale;
-            context.drawImage(img, x, y, img.width * scale, img.height * scale);
-        }
-
-        // --- 2. AKILLI 2D MAÇ MOTORU ---
-        const pitchCanvas = document.getElementById("matchPitch");
-        const pCtx = pitchCanvas.getContext("2d");
-
-        function resizePitch() {
-            pitchCanvas.width = pitchCanvas.clientWidth;
-            pitchCanvas.height = pitchCanvas.clientHeight;
-        }
-        window.addEventListener('resize', resizePitch);
-        resizePitch();
-
-        let matchState = 'attack_fb'; 
-
-        let players = [
-            { x: 50, y: 200, role: 'gk', team: 'fb' },
-            { x: 120, y: 100, role: 'def', team: 'fb' }, { x: 120, y: 200, role: 'def', team: 'fb' }, { x: 120, y: 300, role: 'def', team: 'fb' },
-            { x: 220, y: 140, role: 'mid', team: 'fb' }, { x: 220, y: 260, role: 'mid', team: 'fb' }, { x: 280, y: 200, role: 'mid', team: 'fb' },
-            { x: 380, y: 80, role: 'fwd', team: 'fb' }, { x: 420, y: 180, role: 'fwd', team: 'fb' }, { x: 420, y: 220, role: 'fwd', team: 'fb' }, { x: 380, y: 320, role: 'fwd', team: 'fb' },
-
-            { x: 750, y: 200, role: 'gk', team: 'rival' },
-            { x: 680, y: 100, role: 'def', team: 'rival' }, { x: 680, y: 200, role: 'def', team: 'rival' }, { x: 680, y: 300, role: 'def', team: 'rival' },
-            { x: 580, y: 140, role: 'mid', team: 'rival' }, { x: 580, y: 260, role: 'mid', team: 'rival' }, { x: 520, y: 200, role: 'mid', team: 'rival' },
-            { x: 420, y: 80, role: 'fwd', team: 'rival' }, { x: 380, y: 180, role: 'fwd', team: 'rival' }, { x: 380, y: 220, role: 'fwd', team: 'rival' }, { x: 420, y: 320, role: 'fwd', team: 'rival' }
-        ];
-
-        let ball = { x: 400, y: 200, targetX: 400, targetY: 200 };
-
-        setInterval(() => {
-            const states = ['attack_fb', 'midfield', 'attack_rival', 'midfield'];
-            matchState = states[Math.floor(Math.random() * states.length)];
-            
-            const statusText = document.getElementById('matchStatusText');
-            if(matchState === 'attack_fb') {
-                statusText.innerText = "⚡ Fenerbahçe rakip kaleye doğru organize atak geliştiriyor!";
-            } else if(matchState === 'attack_rival') {
-                statusText.innerText = "⚠️ Dikkat! Rakip takım kalemizde tehlikeli atak arıyor.";
-            } else {
-                statusText.innerText = "⚔️ Top orta alanda iki takım arasında karşılıklı paslarla geçiyor.";
-            }
-        }, 5000);
-
-        function updateSimulation() {
-            players.forEach(p => {
-                let targetX = p.x;
-                let targetY = p.y;
-
-                if (matchState === 'attack_fb') {
-                    if (p.team === 'fb') targetX += (p.role === 'fwd' ? 1.5 : 0.8);
-                    else targetX -= 0.5;
-                } else if (matchState === 'attack_rival') {
-                    if (p.team === 'rival') targetX -= (p.role === 'fwd' ? 1.5 : 0.8);
-                    else targetX += 0.5;
-                } else {
-                    targetX += (Math.random() - 0.5) * 2;
-                    targetY += (Math.random() - 0.5) * 2;
-                }
-
-                p.x += (targetX - p.x) * 0.05;
-                p.y += (targetY - p.y) * 0.05;
-
-                if(p.x < 30) p.x = 30;
-                if(p.x > pitchCanvas.width - 30) p.x = pitchCanvas.width - 30;
-            });
-
-            if(matchState === 'attack_fb') {
-                ball.targetX = pitchCanvas.width - 120;
-                ball.targetY = 200 + (Math.random() - 0.5) * 80;
-            } else if(matchState === 'attack_rival') {
-                ball.targetX = 120;
-                ball.targetY = 200 + (Math.random() - 0.5) * 80;
-            } else {
-                ball.targetX = pitchCanvas.width / 2 + (Math.random() - 0.5) * 100;
-                ball.targetY = pitchCanvas.height / 2 + (Math.random() - 0.5) * 80;
-            }
-
-            ball.x += (ball.targetX - ball.x) * 0.08;
-            ball.y += (ball.targetY - ball.y) * 0.08;
-        }
-
-        function drawPitch() {
-            pCtx.clearRect(0, 0, pitchCanvas.width, pitchCanvas.height);
-
-            pCtx.strokeStyle = "rgba(255, 255, 255, 0.4)";
-            pCtx.lineWidth = 2;
-
-            pCtx.beginPath();
-            pCtx.moveTo(pitchCanvas.width / 2, 0);
-            pCtx.lineTo(pitchCanvas.width / 2, pitchCanvas.height);
-            pCtx.stroke();
-
-            pCtx.beginPath();
-            pCtx.arc(pitchCanvas.width / 2, pitchCanvas.height / 2, 50, 0, Math.PI * 2);
-            pCtx.stroke();
-
-            pCtx.strokeRect(0, pitchCanvas.height / 2 - 50, 30, 100);
-            pCtx.fillStyle = "rgba(255, 255, 255, 0.1)";
-            pCtx.fillRect(0, pitchCanvas.height / 2 - 50, 30, 100);
-
-            pCtx.strokeRect(pitchCanvas.width - 30, pitchCanvas.height / 2 - 50, 30, 100);
-            pCtx.fillRect(pitchCanvas.width - 30, pitchCanvas.height / 2 - 50, 30, 100);
-
-            players.forEach(p => {
-                pCtx.beginPath();
-                pCtx.arc(p.x, p.y, 8, 0, Math.PI * 2);
-                pCtx.fillStyle = p.team === 'fb' ? '#fcd116' : '#ff3333';
-                pCtx.fill();
-                pCtx.lineWidth = 2;
-                pCtx.strokeStyle = '#000';
-                pCtx.stroke();
-            });
-
-            pCtx.beginPath();
-            pCtx.arc(ball.x, ball.y, 5, 0, Math.PI * 2);
-            pCtx.fillStyle = '#ffffff';
-            pCtx.fill();
-            pCtx.strokeStyle = '#000';
-            pCtx.stroke();
-        }
-
-        function loop() {
-            updateSimulation();
-            drawPitch();
-            requestAnimationFrame(loop);
-        }
-        loop();
-
-        gsap.utils.toArray('.match-card, .standings-box, .fixtures-section').forEach((el) => {
-            gsap.to(el, {
-                scrollTrigger: {
-                    trigger: el,
-                    start: "top 85%",
-                    end: "top 55%",
-                    scrub: 1,
-                },
-                opacity: 1,
-                y: 0,
-                ease: "power2.out"
-            });
-        });
-    </script>
+    <!-- Harici JS Dosyaları -->
+    <script src="js/background.js"></script>
+    <script src="js/matchEngine.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
