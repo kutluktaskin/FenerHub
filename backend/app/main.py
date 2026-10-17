@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from . import models
+from .database import engine, Base
+
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(
     title="Fenerbahçe Match Center API",
     description="Maçlar, kadro, sakatlıklar ve puan durumu için REST API",
@@ -13,6 +18,7 @@ app.add_middleware(
     allow_methods=["GET"],
     allow_headers=["*"],
 )
+
 
 @app.get("/api/health")
 def health():
