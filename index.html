@@ -334,47 +334,131 @@
             </div>
         </section>
 
-        <!-- 2. BÖLÜM: PUAN DURUMLARI -->
+       <!-- 2. BÖLÜM: PUAN DURUMLARI (TÜM TAKIMLAR + SCROLL) -->
         <section class="page-section standings-split-section" id="puanlar">
+            
+            <!-- Sol Yarı: Trendyol Süper Lig (Tüm Takımlar) -->
             <div class="standings-box">
                 <h2>🏆 Trendyol Süper Lig Puan Durumu</h2>
-                <table class="standings-table">
-                    <thead>
-                        <tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>1</td><td>Galatasaray</td><td>7</td><td>5</td><td>1</td><td>1</td><td>+11</td><td>16</td></tr>
-                        <tr><td>2</td><td>Beşiktaş</td><td>7</td><td>4</td><td>3</td><td>0</td><td>+9</td><td>15</td></tr>
-                        <tr><td>3</td><td>Amed SK</td><td>7</td><td>4</td><td>2</td><td>1</td><td>+6</td><td>14</td></tr>
-                        <tr class="fb-row"><td>4</td><td>Fenerbahçe</td><td>7</td><td>4</td><td>1</td><td>2</td><td>+10</td><td>13</td></tr>
-                        <tr><td>5</td><td>Trabzonspor</td><td>7</td><td>4</td><td>1</td><td>2</td><td>+5</td><td>13</td></tr>
-                    </tbody>
-                </table>
+                <div class="table-scroll-container">
+                    <table class="standings-table">
+                        <thead>
+                            <tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>Galatasaray</td><td>7</td><td>5</td><td>1</td><td>1</td><td>+11</td><td>16</td></tr>
+                            <tr><td>2</td><td>Beşiktaş</td><td>7</td><td>4</td><td>3</td><td>0</td><td>+9</td><td>15</td></tr>
+                            <tr><td>3</td><td>Amed SK</td><td>7</td><td>4</td><td>2</td><td>1</td><td>+6</td><td>14</td></tr>
+                            <tr class="fb-row"><td>4</td><td>Fenerbahçe</td><td>7</td><td>4</td><td>1</td><td>2</td><td>+10</td><td>13</td></tr>
+                            <tr><td>5</td><td>Trabzonspor</td><td>7</td><td>4</td><td>1</td><td>2</td><td>+5</td><td>13</td></tr>
+                            <tr><td>6</td><td>Kocaelispor</td><td>7</td><td>3</td><td>3</td><td>1</td><td>+4</td><td>12</td></tr>
+                            <tr><td>7</td><td>Göztepe</td><td>7</td><td>3</td><td>2</td><td>2</td><td>+2</td><td>11</td></tr>
+                            <tr><td>8</td><td>Başakşehir</td><td>7</td><td>3</td><td>1</td><td>3</td><td>0</td><td>10</td></tr>
+                            <tr><td>9</td><td>Samsunspor</td><td>7</td><td>3</td><td>1</td><td>3</td><td>-1</td><td>10</td></tr>
+                            <tr><td>10</td><td>Kasımpaşa</td><td>7</td><td>2</td><td>3</td><td>2</td><td>-1</td><td>9</td></tr>
+                            <tr><td>11</td><td>Gaziantep FK</td><td>7</td><td>2</td><td>2</td><td>3</td><td>-2</td><td>8</td></tr>
+                            <tr><td>12</td><td>Konyaspor</td><td>7</td><td>2</td><td>2</td><td>3</td><td>-3</td><td>8</td></tr>
+                            <tr><td>13</td><td>Rizespor</td><td>7</td><td>2</td><td>1</td><td>4</td><td>-4</td><td>7</td></tr>
+                            <tr><td>14</td><td>Alanyaspor</td><td>7</td><td>1</td><td>3</td><td>3</td><td>-3</td><td>6</td></tr>
+                            <tr><td>15</td><td>Antalyaspor</td><td>7</td><td>1</td><td>3</td><td>3</td><td>-5</td><td>6</td></tr>
+                            <tr><td>16</td><td>Hatayspor</td><td>7</td><td>1</td><td>2</td><td>4</td><td>-6</td><td>5</td></tr>
+                            <tr><td>17</td><td>Adana Demirspor</td><td>7</td><td>1</td><td>1</td><td>5</td><td>-8</td><td>4</td></tr>
+                            <tr><td>18</td><td>Bodrum FK</td><td>7</td><td>1</td><td>1</td><td>5</td><td>-9</td><td>4</td></tr>
+                            <tr><td>19</td><td>Eyüpspor</td><td>7</td><td>0</td><td>3</td><td>4</td><td>-5</td><td>3</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
+            <!-- Sağ Yarı: UEFA Şampiyonlar Ligi / Avrupa (Genişletilmiş Lig Usulü Puan Durumu) -->
             <div class="standings-box">
                 <h2>⭐ UEFA Şampiyonlar Ligi / Avrupa Puan Durumu</h2>
-                <table class="standings-table">
-                    <thead>
-                        <tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>1</td><td>Barcelona</td><td>2</td><td>2</td><td>0</td><td>0</td><td>+6</td><td>6</td></tr>
-                        <tr><td>2</td><td>Arsenal</td><td>2</td><td>2</td><td>0</td><td>0</td><td>+4</td><td>6</td></tr>
-                        <tr><td>3</td><td>Liverpool</td><td>2</td><td>2</td><td>0</td><td>0</td><td>+4</td><td>6</td></tr>
-                        <tr class="fb-row"><td>24</td><td>Fenerbahçe</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
-                    </tbody>
-                </table>
+                <div class="table-scroll-container">
+                    <table class="standings-table">
+                        <thead>
+                            <tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>Barcelona</td><td>2</td><td>2</td><td>0</td><td>0</td><td>+6</td><td>6</td></tr>
+                            <tr><td>2</td><td>Arsenal</td><td>2</td><td>2</td><td>0</td><td>0</td><td>+4</td><td>6</td></tr>
+                            <tr><td>3</td><td>Liverpool</td><td>2</td><td>2</td><td>0</td><td>0</td><td>+4</td><td>6</td></tr>
+                            <tr><td>4</td><td>Bayern München</td><td>2</td><td>1</td><td>1</td><td>0</td><td>+5</td><td>4</td></tr>
+                            <tr><td>5</td><td>Real Madrid</td><td>2</td><td>1</td><td>1</td><td>0</td><td>+2</td><td>4</td></tr>
+                            <tr><td>6</td><td>Inter</td><td>2</td><td>1</td><td>1</td><td>0</td><td>+2</td><td>4</td></tr>
+                            <tr><td>7</td><td>Bayer Leverkusen</td><td>2</td><td>1</td><td>1</td><td>0</td><td>+1</td><td>4</td></tr>
+                            <tr><td>8</td><td>Borussia Dortmund</td><td>2</td><td>1</td><td>0</td><td>1</td><td>+3</td><td>3</td></tr>
+                            <tr><td>9</td><td>Manchester City</td><td>2</td><td>1</td><td>0</td><td>1</td><td>+2</td><td>3</td></tr>
+                            <tr><td>10</td><td>Paris Saint-Germain</td><td>2</td><td>1</td><td>0</td><td>1</td><td>+1</td><td>3</td></tr>
+                            <tr><td>11</td><td>Juventus</td><td>2</td><td>1</td><td>0</td><td>1</td><td>0</td><td>3</td></tr>
+                            <tr><td>12</td><td>Atlético Madrid</td><td>2</td><td>1</td><td>0</td><td>1</td><td>-1</td><td>3</td></tr>
+                            <tr><td>13</td><td>Milan</td><td>2</td><td>1</td><td>0</td><td>1</td><td>-1</td><td>3</td></tr>
+                            <tr><td>14</td><td>Sporting CP</td><td>2</td><td>1</td><td>0</td><td>1</td><td>-2</td><td>3</td></tr>
+                            <tr><td>15</td><td>Villarreal</td><td>2</td><td>1</td><td>0</td><td>1</td><td>-2</td><td>3</td></tr>
+                            <tr><td>16</td><td>PSV Eindhoven</td><td>2</td><td>0</td><td>2</td><td>0</td><td>0</td><td>2</td></tr>
+                            <tr><td>17</td><td>Monaco</td><td>2</td><td>0</td><td>2</td><td>0</td><td>0</td><td>2</td></tr>
+                            <tr><td>18</td><td>Stuttgart</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-1</td><td>1</td></tr>
+                            <tr><td>19</td><td>Bologna</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-1</td><td>1</td></tr>
+                            <tr><td>20</td><td>Shakhtar Donetsk</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-2</td><td>1</td></tr>
+                            <tr><td>21</td><td>Club Brugge</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-2</td><td>1</td></tr>
+                            <tr><td>22</td><td>Celtic</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-3</td><td>1</td></tr>
+                            <tr><td>23</td><td>Sparta Praha</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-3</td><td>1</td></tr>
+                            <tr class="fb-row"><td>24</td><td>Fenerbahçe</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+                            <tr><td>25</td><td>Slavia Prag</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-2</td><td>1</td></tr>
+                            <tr><td>26</td><td>Young Boys</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-3</td><td>1</td></tr>
+                            <tr><td>27</td><td>Red Bull Salzburg</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-3</td><td>0</td></tr>
+                            <tr><td>28</td><td>LASK Linz</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-4</td><td>0</td></tr>
+                            <tr><td>29</td><td>Sturm Graz</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-4</td><td>0</td></tr>
+                            <tr><td>30</td><td>Brest</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-5</td><td>0</td></tr>
+                            <tr><td>31</td><td>Girona</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-5</td><td>0</td></tr>
+                            <tr><td>32</td><td>Red Star Belgrade</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-5</td><td>0</td></tr>
+                            <tr><td>33</td><td>Slovan Bratislava</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-6</td><td>0</td></tr>
+                            <tr><td>34</td><td>Galatasaray</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-5</td><td>0</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
         </section>
 
-        <!-- 3. BÖLÜM: FİKSTÜR -->
+      <!-- 3. BÖLÜM: FİKSTÜR -->
         <section class="page-section fixtures-full-section" id="fikstur">
             <h2 style="color: var(--primary-color); margin-top: 0; text-transform: uppercase; font-size: 1.4em;">🗓️ Fenerbahçe Sezon Fikstürü (2026/2027)</h2>
+            <p style="font-size: 0.9em; color: #aaa; margin-bottom: 15px;">Tüm saatler Türkiye Saati (TSİ) olarak gösterilmektedir.</p>
+            
             <div class="fixtures-grid">
                 <div class="fixture-item"><div class="fixture-date">20/10 Sal</div><div class="fixture-teams">Fenerbahçe - Alanyaspor</div><div class="fixture-time">19:45</div></div>
                 <div class="fixture-item"><div class="fixture-date">26/10 Pzt</div><div class="fixture-teams">Fenerbahçe - Slavia Prag</div><div class="fixture-time">21:30</div></div>
                 <div class="fixture-item"><div class="fixture-date">31/10</div><div class="fixture-teams">Galatasaray - Fenerbahçe</div><div class="fixture-time">19:00</div></div>
+                <div class="fixture-item"><div class="fixture-date">4/11</div><div class="fixture-teams">Fenerbahçe - Göztepe</div><div class="fixture-time">20:45</div></div>
+                <div class="fixture-item"><div class="fixture-date">8/11</div><div class="fixture-teams">Fenerbahçe - Liverpool</div><div class="fixture-time">16:00</div></div>
+                <div class="fixture-item"><div class="fixture-date">21/11</div><div class="fixture-teams">Çorum - Fenerbahçe</div><div class="fixture-time">19:00</div></div>
+                <div class="fixture-item"><div class="fixture-date">25/11</div><div class="fixture-teams">Kocaelispor - Fenerbahçe</div><div class="fixture-time">23:00</div></div>
+                <div class="fixture-item"><div class="fixture-date">29/11</div><div class="fixture-teams">Şahtar Donetsk - Fenerbahçe</div><div class="fixture-time">19:00</div></div>
+                <div class="fixture-item"><div class="fixture-date">5/12</div><div class="fixture-teams">Fenerbahçe - Erzurumspor</div><div class="fixture-time">19:00</div></div>
+                <div class="fixture-item"><div class="fixture-date">9/12</div><div class="fixture-teams">Başakşehir - Fenerbahçe</div><div class="fixture-time">23:00</div></div>
+                <div class="fixture-item"><div class="fixture-date">13/12</div><div class="fixture-teams">LASK Linz - Fenerbahçe</div><div class="fixture-time">19:00</div></div>
+                <div class="fixture-item"><div class="fixture-date">20/12</div><div class="fixture-teams">Fenerbahçe - Trabzonspor</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">17.01.27</div><div class="fixture-teams">Kasımpaşa - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">20.01.27</div><div class="fixture-teams">Fenerbahçe - Amed</div><div class="fixture-time">20:45</div></div>
+                <div class="fixture-item"><div class="fixture-date">24.01.27</div><div class="fixture-teams">Fenerbahçe - Villarreal</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">27.01.27</div><div class="fixture-teams">Fenerbahçe - Gençlerbirliği</div><div class="fixture-time">23:00</div></div>
+                <div class="fixture-item"><div class="fixture-date">31.01.27</div><div class="fixture-teams">Atletico Madrid - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">07.02.27</div><div class="fixture-teams">Konyaspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">14.02.27</div><div class="fixture-teams">Fenerbahçe - Samsunspor</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">21.02.27</div><div class="fixture-teams">Beşiktaş - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">28.02.27</div><div class="fixture-teams">Fenerbahçe - Gaziantep FK</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">07.03.27</div><div class="fixture-teams">Eyüpspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">14.03.27</div><div class="fixture-teams">Fenerbahçe - Rizespor</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">21.03.27</div><div class="fixture-teams">Alanyaspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">04.04.27</div><div class="fixture-teams">Fenerbahçe - Galatasaray</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">11.04.27</div><div class="fixture-teams">Göztepe - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">18.04.27</div><div class="fixture-teams">Fenerbahçe - Çorum</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">25.04.27</div><div class="fixture-teams">Fenerbahçe - Kocaelispor</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">02.05.27</div><div class="fixture-teams">Erzurumspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">09.05.27</div><div class="fixture-teams">Fenerbahçe - Başakşehir</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">16.05.27</div><div class="fixture-teams">Trabzonspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">23.05.27</div><div class="fixture-teams">Fenerbahçe - Kasımpaşa</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item"><div class="fixture-date">Sezon Sonu</div><div class="fixture-teams">Amed - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
             </div>
         </section>
 

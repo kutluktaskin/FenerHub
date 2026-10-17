@@ -607,7 +607,7 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* PUAN DURUMLARI */
+/* PUAN DURUMLARI (SCROLL ALANI İLE) */
 .standings-split-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -635,6 +635,21 @@ body {
     letter-spacing: 1px;
 }
 
+.table-scroll-container {
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-top: 10px;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+.table-scroll-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
 .standings-table {
     width: 100%;
     border-collapse: collapse;
@@ -651,6 +666,10 @@ body {
     color: #aaa;
     font-size: 0.84em;
     text-transform: uppercase;
+    position: sticky;
+    top: 0;
+    background: rgba(0, 20, 55, 0.95);
+    z-index: 5;
 }
 
 .standings-table tr.fb-row {
