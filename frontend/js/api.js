@@ -137,7 +137,7 @@ function badgeInfo(m) {
     const when = `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)} ${DAYS_TR[d.getDay()]}` +
         (m.kickoff_time ? ` ${m.kickoff_time}` : "");
     if (m.status === "live") {
-               const mn = liveMinute(m);
+        const mn = liveMinute(m);
         return { cls: "badge-live", text: `🔴 CANLI${mn ? " • " + mn : ""} • ${when}` };
     }
     if (m.match_date === localISODate(new Date())) {
@@ -186,7 +186,7 @@ function updateMatchCard(card, m) {
 
     const meta = card.querySelector(".card-top-center > div:last-child");
     if (meta) {
-    const place = m.home === "Fenerbahçe" ? "Chobani Stadium" : "Deplasman";
+        const place = m.home === "Fenerbahçe" ? "Chobani Stadium" : "Deplasman";
         meta.textContent = `${COMPETITION_LABEL[m.competition] ?? ""} • ${place}`;
     }
 
@@ -215,11 +215,75 @@ function syncMatchMeta(m, key) {
     };
 }
 
+// ---------- Menüdeki "Sıradaki maç" kutusu ----------
+let navMatch = null;
+let finishedMatch = null;   // biten maçın final skoru geçici olarak gösterilir
+
+function renderNavNext() {
+    const el = document.getElementById("navNext");
+    if (!el) return;
+    const m = navMatch;
+
+    // Maç yeni bittiyse 10 dakika final skorunu göster
+    if (finishedMatch && Date.now() < finishedMatch.until && !(m && m.status === "live")) {
+        const f = finishedMatch.m;
+        el.style.display = "";
+        el.classList.add("is-live");
+        el.innerHTML = `<span class="nn-label">✅ MS</span>
+            <span class="nn-live">${f.home} ${f.home_score ?? 0} - ${f.away_score ?? 0} ${f.away}</span>`;
+        return;
+    }
+
+    if (!m) { el.style.display = "none"; return; }
+    el.style.display = "";
+
+    if (m.status === "live") {
+        const mn = liveMinute(m);
+        el.classList.add("is-live");
+        el.innerHTML = `<span class="nn-label">🔴 CANLI${mn ? " " + mn : ""}</span>
+            <span class="nn-live">${m.home} ${m.home_score ?? 0} - ${m.away_score ?? 0} ${m.away}</span>`;
+        return;
+    }
+    el.classList.remove("is-live");
+
+    const time = (m.kickoff_time || "00:00").slice(0, 5);
+    const diff = new Date(`${m.match_date}T${time}:00+03:00`) - new Date();
+    if (diff <= 0) {
+        el.innerHTML = `<span class="nn-label">${rivalOf(m)}</span><span class="nn-live">Maç başlıyor</span>`;
+        return;
+    }
+
+    const s = Math.floor(diff / 1000);
+    const parts = [
+        [Math.floor(s / 86400), "gün"],
+        [Math.floor((s % 86400) / 3600), "saat"],
+        [Math.floor((s % 3600) / 60), "dk"],
+        [s % 60, "sn"],
+    ];
+    el.innerHTML = `<span class="nn-label">${rivalOf(m)}</span>` +
+        parts.map(([v, u]) =>
+            `<span class="nn-box"><b>${String(v).padStart(2, "0")}</b><i>${u}</i></span>`
+        ).join("");
+}
+
 async function loadUpcomingMatches() {
     const cards = document.querySelectorAll(".recent-match-card");
     if (!cards.length) return;
     try {
         const matches = await apiGet("/matches/upcoming");
+
+        const prev = navMatch;
+        const next = matches[0] || null;
+        // Canlı maç bitti: final skoru çekip 10 dk göster
+        if (prev && prev.status === "live" && (!next || next.id !== prev.id)) {
+            try {
+                const fin = await apiGet(`/matches/${prev.id}`);
+                finishedMatch = { m: fin, until: Date.now() + 10 * 60 * 1000 };
+            } catch (e) { /* final skoru alınamazsa geçilir */ }
+        }
+        navMatch = next;
+        renderNavNext();
+
         cards.forEach((card, i) => {
             const m = matches[i];
             card.style.display = m ? "" : "none";
@@ -232,6 +296,7 @@ async function loadUpcomingMatches() {
         console.warn("Maç API'sine ulaşılamadı, statik kartlar gösteriliyor:", err);
     }
 }
+
 // ---------- Fikstür ----------
 function fixtureDate(m) {
     if (!m.match_date) return "Sezon Sonu";
@@ -242,12 +307,33 @@ function fixtureDate(m) {
 }
 
 function renderFixtures(container, matches) {
-    container.innerHTML = matches.map(m => `
-        <div class="fixture-item">
+    container.innerHTML = matches.map(m => {
+        const hasScore = m.home_score !== null && m.home_score !== undefined;
+        const live = m.status === "live" && hasScore;
+        const done = m.status === "finished" && hasScore;
+
+        let cls = "fixture-item";
+        let bottom = `<div class="fixture-time">${m.kickoff_time ?? "Henüz belirlenmedi"}</div>`;
+
+        if (live) {
+            cls += " is-live";
+            bottom = `<div class="fixture-score live">🔴 CANLI ${m.home_score} - ${m.away_score}</div>`;
+        } else if (done) {
+            const fbHome = m.home === "Fenerbahçe";
+            const fb = fbHome ? m.home_score : m.away_score;
+            const opp = fbHome ? m.away_score : m.home_score;
+            const res = fb > opp ? "win" : fb < opp ? "loss" : "draw";
+            const label = { win: "Galibiyet", draw: "Beraberlik", loss: "Mağlubiyet" }[res];
+            cls += ` finished ${res}`;
+            bottom = `<div class="fixture-score ${res}">${m.home_score} - ${m.away_score} • ${label}</div>`;
+        }
+
+        return `<div class="${cls}">
             <div class="fixture-date">${fixtureDate(m)}</div>
             <div class="fixture-teams">${m.home} - ${m.away}</div>
-            <div class="fixture-time">${m.kickoff_time ?? "Henüz belirlenmedi"}</div>
-        </div>`).join("");
+            ${bottom}
+        </div>`;
+    }).join("");
 }
 
 async function loadFixtures() {
@@ -262,6 +348,7 @@ async function loadFixtures() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    setInterval(renderNavNext, 1000);
     loadStandings();
     loadSquad();
     loadAbsences();
@@ -269,4 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadFixtures();
     setInterval(loadUpcomingMatches, 60 * 1000);   // kartlar dakikada bir
     setInterval(loadFixtures, 5 * 60 * 1000);      // fikstür 5 dakikada bir
+    setInterval(loadStandings, 5 * 60 * 1000);
+    setInterval(loadSquad, 10 * 60 * 1000);
+    setInterval(loadAbsences, 10 * 60 * 1000);
 });

@@ -33,7 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(standings.router)
+app.include_router(standings.router) 
 app.include_router(squad.router)
 app.include_router(matches.router)
 app.include_router(absences.router)

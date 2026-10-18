@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fenerbahçe Canlı Maç Merkezi & Sezon Fikstürü</title>
+    <title>FENERHUB | Fenerbahçe Canlı Maç Merkezi</title>
     <!-- GSAP Kütüphaneleri -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -20,15 +20,20 @@
 
     <!-- SABİT ÜST MENÜ -->
     <nav class="navbar">
-        <a onclick="scrollToSection('yakindakiMaclar')" class="logo">
-            <div class="live-pulse"></div> FB CANLI MAÇ MERKEZİ
+        <a onclick="scrollToSection('yakindakiMaclar')" class="logo fh-logo" aria-label="FENERHUB">
+            <div class="live-pulse"></div>
+            <span class="fh-word"><span style="--i:0">F</span><span style="--i:1">E</span><span style="--i:2">N</span><span style="--i:3">E</span><span style="--i:4">R</span></span><span class="fh-badge">HUB</span>
         </a>
         <div class="nav-links">
-            <button onclick="scrollToSection('yakindakiMaclar')">Yakın Maçlar</button>
-            <button onclick="scrollToSection('takimIstatistikBolumu')">Takım Kadrosu</button>
-            <button onclick="openSimulation('alanya')">Canlı Simülasyon</button>
-            <button onclick="scrollToSection('puanlar')">Puan Durumu</button>
-            <button onclick="scrollToSection('fikstur')">Fikstür</button>
+            <button style="--d:0" onclick="scrollToSection('yakindakiMaclar')">Yakın Maçlar</button>
+            <button style="--d:1" onclick="scrollToSection('takimIstatistikBolumu')">Takım Kadrosu</button>
+            <button style="--d:2" onclick="openSimulation('alanya')">Canlı Simülasyon</button>
+            <button style="--d:3" onclick="scrollToSection('puanlar')">Puan Durumu</button>
+            <button style="--d:4" onclick="scrollToSection('fikstur')">Fikstür</button>
+        </div>
+        <div class="nav-right">
+            <img src="img/fenerbahce-logo.png" alt="Fenerbahçe" class="fb-crest" onerror="this.style.display='none'">
+            <div class="nav-next" id="navNext" onclick="scrollToSection('yakindakiMaclar')" style="display:none;"></div>
         </div>
     </nav>
 
@@ -42,137 +47,91 @@
 
         <!-- 1. BÖLÜM: YAKIN MAÇLAR -->
         <section class="page-section hero-matches-section" id="yakindakiMaclar">
-            <h1 class="hero-title">🔥 Yakın Zamanda Maçlar & Maç Günü Eksikleri</h1>
-            <p class="hero-subtitle">Her maçın kendi maç günü sakat/cezalı eksikleri kart üzerinde ayrı gösterilir.</p>
+
+            <div class="hero-head">
+                <div class="hero-eyebrow"><span class="live-pulse"></span>Canlı Maç Merkezi • 2026/27 Sezonu</div>
+                <h1 class="hero-heading">Yakın Maçlar</h1>
+                <p class="hero-sub">Maç günü sakat ve cezalı eksikleri her kartta ayrı gösterilir</p>
+                <div class="hero-divider"><span></span></div>
+            </div>
 
             <div class="recent-matches-grid">
-                
-                <!-- Alanyaspor Maçı -->
+
                 <div class="recent-match-card active-card" id="card-alanya">
                     <div>
                         <div class="card-top-center">
-                            <span class="match-badge badge-live">🔴 CANLI • 20/10 Sal 19:45</span>
+                            <span class="match-badge badge-upcoming">⏳ YAKLAŞAN</span>
                             <div class="recent-teams">
                                 <span>Fenerbahçe</span>
-                                <span class="recent-score">2 - 1</span>
-                                <span>Alanyaspor</span>
+                                <span class="recent-score">v</span>
+                                <span>Rakip</span>
                             </div>
-                            <div style="font-size: 0.85em; color: #ccc;">Trendyol Süper Lig • Şükrü Saracoğlu</div>
+                            <div style="font-size: 0.85em; color: #ccc;">Yükleniyor...</div>
                         </div>
-
                         <div class="matchday-missing-box">
                             <div class="matchday-missing-title">
-                                <span>🚨 Maç Günü Eksikleri (Alanyaspor)</span>
-                                <span style="color:#ff6b6b;">3 Eksik</span>
+                                <span>🚨 Maç Günü Eksikleri</span>
+                                <span style="color:#ff6b6b;">0 Eksik</span>
                             </div>
                             <div class="matchday-missing-item">
                                 <div class="missing-player-info">
-                                    <span class="missing-player-name">Jayden Oosterwolde</span>
-                                    <span class="missing-player-stats">9 Maç • 1 Gol • 0 Asist (Diz Bağları)</span>
+                                    <span class="missing-player-name">-</span>
+                                    <span class="missing-player-stats">-</span>
                                 </div>
-                                <span class="status-tag tag-injured">🚑 Sakat</span>
-                            </div>
-                            <div class="matchday-missing-item">
-                                <div class="missing-player-info">
-                                    <span class="missing-player-name">İrfan Can Kahveci</span>
-                                    <span class="missing-player-stats">10 Maç • 2 Gol • 3 Asist (Arka Adale)</span>
-                                </div>
-                                <span class="status-tag tag-injured">🚑 Sakat</span>
-                            </div>
-                            <div class="matchday-missing-item">
-                                <div class="missing-player-info">
-                                    <span class="missing-player-name">Alexander Djiku</span>
-                                    <span class="missing-player-stats">10 Maç • 0 Gol • 1 Asist (4 Sarı Kart)</span>
-                                </div>
-                                <span class="status-tag tag-suspended">🟨 Cezalı</span>
                             </div>
                         </div>
                     </div>
                     <button class="open-sim-btn" onclick="openSimulation('alanya')">⚡ Canlı 2D Simülasyonu Aç</button>
                 </div>
 
-                <!-- Slavia Prag Maçı -->
                 <div class="recent-match-card" id="card-slavia">
                     <div>
                         <div class="card-top-center">
-                            <span class="match-badge badge-upcoming">⏳ YAKLAŞAN • 26/10 Pzt 21:30</span>
+                            <span class="match-badge badge-upcoming">⏳ YAKLAŞAN</span>
                             <div class="recent-teams">
                                 <span>Fenerbahçe</span>
                                 <span class="recent-score">v</span>
-                                <span>Slavia Prag</span>
+                                <span>Rakip</span>
                             </div>
-                            <div style="font-size: 0.85em; color: #ccc;">Avrupa Kupası • Şükrü Saracoğlu</div>
+                            <div style="font-size: 0.85em; color: #ccc;">Yükleniyor...</div>
                         </div>
-
                         <div class="matchday-missing-box">
                             <div class="matchday-missing-title">
-                                <span>🚨 Maç Günü Eksikleri (Slavia Prag)</span>
-                                <span style="color:#ff6b6b;">3 Eksik</span>
+                                <span>🚨 Maç Günü Eksikleri</span>
+                                <span style="color:#ff6b6b;">0 Eksik</span>
                             </div>
                             <div class="matchday-missing-item">
                                 <div class="missing-player-info">
-                                    <span class="missing-player-name">Jayden Oosterwolde</span>
-                                    <span class="missing-player-stats">9 Maç • 1 Gol • 0 Asist</span>
+                                    <span class="missing-player-name">-</span>
+                                    <span class="missing-player-stats">-</span>
                                 </div>
-                                <span class="status-tag tag-injured">🚑 Sakat</span>
-                            </div>
-                            <div class="matchday-missing-item">
-                                <div class="missing-player-info">
-                                    <span class="missing-player-name">Rodrigo Becão</span>
-                                    <span class="missing-player-stats">8 Maç • 1 Gol • 0 Asist</span>
-                                </div>
-                                <span class="status-tag tag-suspended">🟥 Cezalı</span>
-                            </div>
-                            <div class="matchday-missing-item">
-                                <div class="missing-player-info">
-                                    <span class="missing-player-name">Cengiz Ünder</span>
-                                    <span class="missing-player-stats">5 Maç • 1 Gol • 0 Asist</span>
-                                </div>
-                                <span class="status-tag tag-injured">🚑 Sakat</span>
                             </div>
                         </div>
                     </div>
                     <button class="open-sim-btn" onclick="openSimulation('slavia')">⚡ Taktik Simülasyonunu Aç</button>
                 </div>
 
-                <!-- Galatasaray Derbisi -->
                 <div class="recent-match-card" id="card-gs">
                     <div>
                         <div class="card-top-center">
-                            <span class="match-badge badge-upcoming">🔥 DERBİ • 31/10 Cmt 19:00</span>
+                            <span class="match-badge badge-upcoming">⏳ YAKLAŞAN</span>
                             <div class="recent-teams">
-                                <span>Galatasaray</span>
-                                <span class="recent-score">v</span>
                                 <span>Fenerbahçe</span>
+                                <span class="recent-score">v</span>
+                                <span>Rakip</span>
                             </div>
-                            <div style="font-size: 0.85em; color: #ccc;">Trendyol Süper Lig • Deplasman</div>
+                            <div style="font-size: 0.85em; color: #ccc;">Yükleniyor...</div>
                         </div>
-
                         <div class="matchday-missing-box">
                             <div class="matchday-missing-title">
-                                <span>🚨 Maç Günü Eksikleri (Derbi)</span>
-                                <span style="color:#f1c40f;">2 Eksik</span>
+                                <span>🚨 Maç Günü Eksikleri</span>
+                                <span style="color:#ff6b6b;">0 Eksik</span>
                             </div>
                             <div class="matchday-missing-item">
                                 <div class="missing-player-info">
-                                    <span class="missing-player-name">Jayden Oosterwolde</span>
-                                    <span class="missing-player-stats">9 Maç • 1 Gol • 0 Asist</span>
+                                    <span class="missing-player-name">-</span>
+                                    <span class="missing-player-stats">-</span>
                                 </div>
-                                <span class="status-tag tag-injured">🚑 Sakat</span>
-                            </div>
-                            <div class="matchday-missing-item">
-                                <div class="missing-player-info">
-                                    <span class="missing-player-name">Serdar Aziz</span>
-                                    <span class="missing-player-stats">2 Maç • 0 Gol • 0 Asist</span>
-                                </div>
-                                <span class="status-tag tag-injured">🚑 Eksik</span>
-                            </div>
-                            <div class="matchday-missing-item">
-                                <div class="missing-player-info">
-                                    <span class="missing-player-name">Alexander Djiku</span>
-                                    <span class="missing-player-stats">Cezası Bitti</span>
-                                </div>
-                                <span class="status-tag" style="background:rgba(46,204,113,0.2); color:#2ecc71; border:1px solid #2ecc71;">✔ Kadroda</span>
                             </div>
                         </div>
                     </div>
@@ -227,117 +186,121 @@
                 </div>
             </div>
 
-            <!-- TAKIM GOL/ASİST VE GENEL RAPOR -->
-            <div class="team-overview-grid page-section" id="takimIstatistikBolumu">
-                <div class="team-box">
-                    <h3>⚽ Fenerbahçe Takım Kadrosu (Maç • Gol • Asist)</h3>
-                    <table class="player-stats-table">
-                        <thead>
-                            <tr>
-                                <th>Oyuncu</th>
-                                <th>Mevki</th>
-                                <th>Maç</th>
-                                <th>Gol</th>
-                                <th>Asist</th>
-                                <th>Durum</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Edin Džeko</strong></td>
-                                <td style="color:#bbb;">Santrafor</td>
-                                <td><span class="stat-badge stat-match">12</span></td>
-                                <td><span class="stat-badge stat-goal">9</span></td>
-                                <td><span class="stat-badge stat-assist">3</span></td>
-                                <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Dušan Tadić</strong></td>
-                                <td style="color:#bbb;">Kanat</td>
-                                <td><span class="stat-badge stat-match">12</span></td>
-                                <td><span class="stat-badge stat-goal">5</span></td>
-                                <td><span class="stat-badge stat-assist">7</span></td>
-                                <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Sebastian Szymański</strong></td>
-                                <td style="color:#bbb;">On Numara</td>
-                                <td><span class="stat-badge stat-match">12</span></td>
-                                <td><span class="stat-badge stat-goal">4</span></td>
-                                <td><span class="stat-badge stat-assist">5</span></td>
-                                <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Youssef En-Nesyri</strong></td>
-                                <td style="color:#bbb;">Santrafor</td>
-                                <td><span class="stat-badge stat-match">11</span></td>
-                                <td><span class="stat-badge stat-goal">5</span></td>
-                                <td><span class="stat-badge stat-assist">1</span></td>
-                                <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Fred</strong></td>
-                                <td style="color:#bbb;">Orta Saha</td>
-                                <td><span class="stat-badge stat-match">9</span></td>
-                                <td><span class="stat-badge stat-goal">3</span></td>
-                                <td><span class="stat-badge stat-assist">3</span></td>
-                                <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
-                            </tr>
-                            <tr>
-                                <td><strong>İrfan Can Kahveci</strong></td>
-                                <td style="color:#bbb;">Sağ Kanat</td>
-                                <td><span class="stat-badge stat-match">10</span></td>
-                                <td><span class="stat-badge stat-goal">2</span></td>
-                                <td><span class="stat-badge stat-assist">3</span></td>
-                                <td style="color:#ff6b6b; font-weight:bold;">🚑 Sakat</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Alexander Djiku</strong></td>
-                                <td style="color:#bbb;">Stoper</td>
-                                <td><span class="stat-badge stat-match">10</span></td>
-                                <td><span class="stat-badge stat-goal">0</span></td>
-                                <td><span class="stat-badge stat-assist">1</span></td>
-                                <td style="color:#f1c40f; font-weight:bold;">🟨 Cezalı</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        </section>
+        <!-- ✅ Yakın Maçlar burada biter -->
 
-                <div class="team-box">
-                    <h3>🚑 Takım Sakatlık & Ceza Raporu</h3>
-                    <div class="injury-report-list">
-                        <div class="injury-report-card">
-                            <div>
-                                <div style="font-weight:bold; font-size:1em;">Jayden Oosterwolde (Sol Bek)</div>
-                                <div style="font-size:0.84em; color:#ccc; margin-top:4px;">9 Maç • 1 Gol • 0 Asist</div>
-                                <div style="font-size:0.8em; color:#ff9999; margin-top:3px;">Ön Çapraz Bağ • Dönüş: Mart 2027</div>
-                            </div>
-                            <span class="status-tag tag-injured">🚑 Sakat</span>
+        <!-- 2. BÖLÜM: TAKIM KADROSU / SAKATLIK RAPORU -->
+        <div class="team-overview-grid page-section" id="takimIstatistikBolumu">
+            <div class="team-box">
+                <h3>⚽ Fenerbahçe Takım Kadrosu (Maç • Gol • Asist)</h3>
+                <div class="team-scroll"></div>
+                <table class="player-stats-table">
+                    <thead>
+                        <tr>
+                            <th>Oyuncu</th>
+                            <th>Mevki</th>
+                            <th>Maç</th>
+                            <th>Gol</th>
+                            <th>Asist</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Edin Džeko</strong></td>
+                            <td style="color:#bbb;">Santrafor</td>
+                            <td><span class="stat-badge stat-match">12</span></td>
+                            <td><span class="stat-badge stat-goal">9</span></td>
+                            <td><span class="stat-badge stat-assist">3</span></td>
+                            <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dušan Tadić</strong></td>
+                            <td style="color:#bbb;">Kanat</td>
+                            <td><span class="stat-badge stat-match">12</span></td>
+                            <td><span class="stat-badge stat-goal">5</span></td>
+                            <td><span class="stat-badge stat-assist">7</span></td>
+                            <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sebastian Szymański</strong></td>
+                            <td style="color:#bbb;">On Numara</td>
+                            <td><span class="stat-badge stat-match">12</span></td>
+                            <td><span class="stat-badge stat-goal">4</span></td>
+                            <td><span class="stat-badge stat-assist">5</span></td>
+                            <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Youssef En-Nesyri</strong></td>
+                            <td style="color:#bbb;">Santrafor</td>
+                            <td><span class="stat-badge stat-match">11</span></td>
+                            <td><span class="stat-badge stat-goal">5</span></td>
+                            <td><span class="stat-badge stat-assist">1</span></td>
+                            <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fred</strong></td>
+                            <td style="color:#bbb;">Orta Saha</td>
+                            <td><span class="stat-badge stat-match">9</span></td>
+                            <td><span class="stat-badge stat-goal">3</span></td>
+                            <td><span class="stat-badge stat-assist">3</span></td>
+                            <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
+                        </tr>
+                        <tr>
+                            <td><strong>İrfan Can Kahveci</strong></td>
+                            <td style="color:#bbb;">Sağ Kanat</td>
+                            <td><span class="stat-badge stat-match">10</span></td>
+                            <td><span class="stat-badge stat-goal">2</span></td>
+                            <td><span class="stat-badge stat-assist">3</span></td>
+                            <td style="color:#ff6b6b; font-weight:bold;">🚑 Sakat</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Alexander Djiku</strong></td>
+                            <td style="color:#bbb;">Stoper</td>
+                            <td><span class="stat-badge stat-match">10</span></td>
+                            <td><span class="stat-badge stat-goal">0</span></td>
+                            <td><span class="stat-badge stat-assist">1</span></td>
+                            <td style="color:#f1c40f; font-weight:bold;">🟨 Cezalı</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="team-box">
+                <h3>🚑 Takım Sakatlık & Ceza Raporu</h3>
+                <div class="injury-report-list">
+                    <div class="injury-report-card">
+                        <div class="injury-report-list team-scroll"></div>
+                        <div>
+                            <div style="font-weight:bold; font-size:1em;">Jayden Oosterwolde (Sol Bek)</div>
+                            <div style="font-size:0.84em; color:#ccc; margin-top:4px;">9 Maç • 1 Gol • 0 Asist</div>
+                            <div style="font-size:0.8em; color:#ff9999; margin-top:3px;">Ön Çapraz Bağ • Dönüş: Mart 2027</div>
                         </div>
-                        <div class="injury-report-card">
-                            <div>
-                                <div style="font-weight:bold; font-size:1em;">İrfan Can Kahveci (Kanat)</div>
-                                <div style="font-size:0.84em; color:#ccc; margin-top:4px;">10 Maç • 2 Gol • 3 Asist</div>
-                                <div style="font-size:0.8em; color:#ff9999; margin-top:3px;">Arka Adale • Dönüş: 2 Hafta</div>
-                            </div>
-                            <span class="status-tag tag-injured">🚑 Sakat</span>
+                        <span class="status-tag tag-injured">🚑 Sakat</span>
+                    </div>
+                    <div class="injury-report-card">
+                        <div>
+                            <div style="font-weight:bold; font-size:1em;">İrfan Can Kahveci (Kanat)</div>
+                            <div style="font-size:0.84em; color:#ccc; margin-top:4px;">10 Maç • 2 Gol • 3 Asist</div>
+                            <div style="font-size:0.8em; color:#ff9999; margin-top:3px;">Arka Adale • Dönüş: 2 Hafta</div>
                         </div>
-                        <div class="injury-report-card suspended-card">
-                            <div>
-                                <div style="font-weight:bold; font-size:1em;">Alexander Djiku (Stoper)</div>
-                                <div style="font-size:0.84em; color:#ccc; margin-top:4px;">10 Maç • 0 Gol • 1 Asist</div>
-                                <div style="font-size:0.8em; color:#f1c40f; margin-top:3px;">4 Sarı Kart Sınırı</div>
-                            </div>
-                            <span class="status-tag tag-suspended">🟨 Cezalı</span>
+                        <span class="status-tag tag-injured">🚑 Sakat</span>
+                    </div>
+                    <div class="injury-report-card suspended-card">
+                        <div>
+                            <div style="font-weight:bold; font-size:1em;">Alexander Djiku (Stoper)</div>
+                            <div style="font-size:0.84em; color:#ccc; margin-top:4px;">10 Maç • 0 Gol • 1 Asist</div>
+                            <div style="font-size:0.8em; color:#f1c40f; margin-top:3px;">4 Sarı Kart Sınırı</div>
                         </div>
+                        <span class="status-tag tag-suspended">🟨 Cezalı</span>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-       <!-- 2. BÖLÜM: PUAN DURUMLARI (TÜM TAKIMLAR + SCROLL) -->
+        <!-- 3. BÖLÜM: PUAN DURUMLARI (TÜM TAKIMLAR + SCROLL) -->
         <section class="page-section standings-split-section" id="puanlar">
-            
+
             <!-- Sol Yarı: Trendyol Süper Lig (Tüm Takımlar) -->
             <div class="standings-box">
                 <h2>🏆 Trendyol Süper Lig Puan Durumu</h2>
@@ -371,7 +334,7 @@
                 </div>
             </div>
 
-            <!-- Sağ Yarı: UEFA Şampiyonlar Ligi / Avrupa (Genişletilmiş Lig Usulü Puan Durumu) -->
+            <!-- Sağ Yarı: UEFA Şampiyonlar Ligi / Avrupa -->
             <div class="standings-box">
                 <h2>⭐ UEFA Şampiyonlar Ligi / Avrupa Puan Durumu</h2>
                 <div class="table-scroll-container">
@@ -421,11 +384,11 @@
 
         </section>
 
-      <!-- 3. BÖLÜM: FİKSTÜR -->
+        <!-- 4. BÖLÜM: FİKSTÜR -->
         <section class="page-section fixtures-full-section" id="fikstur">
             <h2 style="color: var(--primary-color); margin-top: 0; text-transform: uppercase; font-size: 1.4em;">🗓️ Fenerbahçe Sezon Fikstürü (2026/2027)</h2>
             <p style="font-size: 0.9em; color: #aaa; margin-bottom: 15px;">Tüm saatler Türkiye Saati (TSİ) olarak gösterilmektedir.</p>
-            
+
             <div class="fixtures-grid">
                 <div class="fixture-item"><div class="fixture-date">20/10 Sal</div><div class="fixture-teams">Fenerbahçe - Alanyaspor</div><div class="fixture-time">19:45</div></div>
                 <div class="fixture-item"><div class="fixture-date">26/10 Pzt</div><div class="fixture-teams">Fenerbahçe - Slavia Prag</div><div class="fixture-time">21:30</div></div>
@@ -466,9 +429,10 @@
     </div>
 
     <!-- Harici JS Dosyaları -->
-      <script src="js/background.js"></script>
+    <script src="js/background.js"></script>
     <script src="js/matchEngine.js"></script>
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/tabs.js"></script>
 </body>
 </html>

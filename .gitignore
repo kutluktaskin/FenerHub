@@ -12,3 +12,12 @@
 *_raw.json
 fenerbahce.db-*
 fenerbahce.db.*
+# Veritabanı ve API önbellekleri (sync.py yeniden üretir)
+*.db
+backend/pages_fb/
+*_cache.json
+backend/pages/
+backend/pages_fb/
+probe_*
+standings_super_lig.json
+standings_uefa.json
