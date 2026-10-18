@@ -30,6 +30,9 @@ def serialize_match(m: models.Match, with_absences: bool = False) -> dict:
         "away_score": m.away_score,
         "status": m.status,
         "minute": m.minute,
+                "status_code": m.status_code,
+        "period_start": m.period_start,
+        "period_initial": m.period_initial,
     }
     if with_absences:
         data["absences"] = [serialize_absence(a) for a in m.absences]
@@ -66,8 +69,11 @@ def upcoming_matches(limit: int = 3, db: Session = Depends(get_db)):
         match_query(db)
         .filter(models.Match.status.in_(["live", "scheduled"]))
         .filter(models.Match.match_date.is_not(None))
-        # canlı maç her zaman en başta
-        .order_by(models.Match.status != "live", models.Match.match_date)
+        .order_by(
+            models.Match.status != "live",
+            models.Match.match_date,
+            models.Match.kickoff_time,
+        )
         .limit(limit)
     )
     return [serialize_match(m, with_absences=True) for m in q.all()]

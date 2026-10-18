@@ -1,7 +1,14 @@
-frames/
-*.mp4
-venv/
-__pycache__/
-*.db
+# Ortam ve Gizli Dosyalar
 .env
-.vscode/
+**/venv/
+**/.venv/
+**/__pycache__/
+
+# Medya ve Frame'ler
+*.mp4
+**/frames/
+
+# Veritabanı Geçici Dosyaları ve Ham JSON'lar
+*_raw.json
+fenerbahce.db-*
+fenerbahce.db.*

@@ -40,7 +40,9 @@ class Match(Base):
     home_team = relationship("Team", foreign_keys=[home_team_id])
     away_team = relationship("Team", foreign_keys=[away_team_id])
     absences = relationship("Absence", back_populates="match")
-
+    status_code = Column(Integer)
+    period_start = Column(Integer)
+    period_initial = Column(Integer)
 
 class PlayerStat(Base):
     __tablename__ = "player_stats"

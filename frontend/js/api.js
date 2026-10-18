@@ -7,6 +7,12 @@ async function apiGet(path) {
 }
 
 function renderStandings(tbodyEl, rows) {
+    if (!rows || rows.length === 0) {
+        tbodyEl.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:18px; opacity:0.7;">
+            Puan durumu yakında eklenecek
+        </td></tr>`;
+        return;
+    }
     tbodyEl.innerHTML = rows.map(r => {
         const gd = r.goal_difference > 0 ? `+${r.goal_difference}` : r.goal_difference;
         return `<tr class="${r.is_fenerbahce ? "fb-row" : ""}">
@@ -100,12 +106,47 @@ const ABSENCE_TAG = {
     suspension: { cls: "tag-suspended", text: "🟨 Cezalı" },
 };
 const DAYS_TR = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
+const MATCH_KEYS = ["alanya", "slavia", "gs"];
+const COMPETITION_LABEL = {
+    super_lig: "Trendyol Süper Lig",
+    uefa: "UEFA Şampiyonlar Ligi",
+};
+const DERBY_RIVALS = ["Galatasaray", "Beşiktaş JK", "Trabzonspor"];
 
-function badgeText(m) {
+const pad2 = n => String(n).padStart(2, "0");
+
+function localISODate(d) {
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function rivalOf(m) {
+    return m.home === "Fenerbahçe" ? m.away : m.home;
+}
+
+function liveMinute(m) {
+    if (m.status_code === 31) return "Devre Arası";
+    if (!m.period_start || (m.status_code !== 6 && m.status_code !== 7)) return null;
+    const secs = Math.floor(Date.now() / 1000) - m.period_start + (m.period_initial || 0);
+    const min = Math.floor(secs / 60) + 1;
+    const cap = m.status_code === 6 ? 45 : 90;
+    return min > cap ? `${cap}+${min - cap}'` : `${min}'`;
+}
+
+function badgeInfo(m) {
     const d = new Date(m.match_date + "T00:00:00");
-    const date = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")} ${DAYS_TR[d.getDay()]}`;
-    const time = m.kickoff_time ? ` ${m.kickoff_time}` : "";
-    return `${date}${time}`;
+    const when = `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)} ${DAYS_TR[d.getDay()]}` +
+        (m.kickoff_time ? ` ${m.kickoff_time}` : "");
+    if (m.status === "live") {
+               const mn = liveMinute(m);
+        return { cls: "badge-live", text: `🔴 CANLI${mn ? " • " + mn : ""} • ${when}` };
+    }
+    if (m.match_date === localISODate(new Date())) {
+        return { cls: "badge-upcoming", text: `⏳ BUGÜN • ${when}` };
+    }
+    if (DERBY_RIVALS.includes(rivalOf(m))) {
+        return { cls: "badge-upcoming", text: `🔥 DERBİ • ${when}` };
+    }
+    return { cls: "badge-upcoming", text: `⏳ YAKLAŞAN • ${when}` };
 }
 
 function renderAbsenceItem(a) {
@@ -129,43 +170,47 @@ function renderAbsenceItem(a) {
 }
 
 function updateMatchCard(card, m) {
+    const b = badgeInfo(m);
     const badge = card.querySelector(".match-badge");
-    if (badge && m.match_date) {
-        const live = m.status === "live";
-        badge.textContent = `${live ? "🔴 CANLI" : "⏳ YAKLAŞAN"} • ${badgeText(m)}`;
-        badge.className = `match-badge ${live ? "badge-live" : "badge-upcoming"}`;
+    if (badge) {
+        badge.textContent = b.text;
+        badge.className = `match-badge ${b.cls}`;
     }
 
-    const score = card.querySelector(".recent-score");
-    if (score) {
-        score.textContent = m.home_score === null ? "v" : `${m.home_score} - ${m.away_score}`;
+    const teams = card.querySelectorAll(".recent-teams span");
+    if (teams.length >= 3) {
+        teams[0].textContent = m.home;
+        teams[2].textContent = m.away;
+        teams[1].textContent = m.home_score === null ? "v" : `${m.home_score} - ${m.away_score}`;
+    }
+
+    const meta = card.querySelector(".card-top-center > div:last-child");
+    if (meta) {
+    const place = m.home === "Fenerbahçe" ? "Chobani Stadium" : "Deplasman";
+        meta.textContent = `${COMPETITION_LABEL[m.competition] ?? ""} • ${place}`;
     }
 
     const box = card.querySelector(".matchday-missing-box");
     if (box) {
-        const countEl = box.querySelector(".matchday-missing-title span:last-child");
-        if (countEl) countEl.textContent = `${m.absence_count} Eksik`;
+        const items = m.absences || [];
+        box.style.display = items.length ? "" : "none";
+        const titleSpans = box.querySelectorAll(".matchday-missing-title span");
+        if (titleSpans[0]) titleSpans[0].textContent = `🚨 Maç Günü Eksikleri (${rivalOf(m)})`;
+        if (titleSpans[1]) titleSpans[1].textContent = `${m.absence_count} Eksik`;
         box.querySelectorAll(".matchday-missing-item").forEach(el => el.remove());
-        box.insertAdjacentHTML("beforeend", m.absences.map(renderAbsenceItem).join(""));
+        box.insertAdjacentHTML("beforeend", items.map(renderAbsenceItem).join(""));
     }
 }
 
-async function loadUpcomingMatches() {
-   const MATCH_KEYS = ["alanya", "slavia", "gs"];
-const COMPETITION_LABEL = {
-    super_lig: "Trendyol Süper Lig",
-    uefa: "UEFA Avrupa Kupası",
-};
-
 function syncMatchMeta(m, key) {
-    // main.js içindeki matchMeta'nın üzerine API verisini yazar
+    // main.js içindeki matchMeta'nın üzerine API verisini yazar (simülasyon için)
     if (typeof matchMeta === "undefined") return;
     const live = m.status === "live";
     matchMeta[key] = {
         home: m.home.toUpperCase(),
         away: m.away.toUpperCase(),
         score: m.home_score === null ? "v" : `${m.home_score} - ${m.away_score}`,
-        minute: live ? m.minute : (matchMeta[key]?.minute ?? "Ön İzleme"),
+        minute: live ? (liveMinute(m) ?? "Canlı") : "Ön İzleme",
         league: COMPETITION_LABEL[m.competition] ?? matchMeta[key]?.league,
     };
 }
@@ -175,8 +220,11 @@ async function loadUpcomingMatches() {
     if (!cards.length) return;
     try {
         const matches = await apiGet("/matches/upcoming");
-        matches.forEach((m, i) => {
-            if (cards[i]) updateMatchCard(cards[i], m);
+        cards.forEach((card, i) => {
+            const m = matches[i];
+            card.style.display = m ? "" : "none";
+            if (!m) return;
+            updateMatchCard(card, m);
             if (MATCH_KEYS[i]) syncMatchMeta(m, MATCH_KEYS[i]);
         });
         console.log("Yakın maçlar API'den yüklendi");
@@ -184,8 +232,6 @@ async function loadUpcomingMatches() {
         console.warn("Maç API'sine ulaşılamadı, statik kartlar gösteriliyor:", err);
     }
 }
-}
-
 // ---------- Fikstür ----------
 function fixtureDate(m) {
     if (!m.match_date) return "Sezon Sonu";
@@ -221,4 +267,6 @@ document.addEventListener("DOMContentLoaded", () => {
     loadAbsences();
     loadUpcomingMatches();
     loadFixtures();
+    setInterval(loadUpcomingMatches, 60 * 1000);   // kartlar dakikada bir
+    setInterval(loadFixtures, 5 * 60 * 1000);      // fikstür 5 dakikada bir
 });
