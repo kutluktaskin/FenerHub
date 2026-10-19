@@ -79,6 +79,14 @@
     }, { passive: true, capture: true });
   }
 
+  // ---- Ekran dışındaki sürekli animasyonları duraklat (data-pause-offscreen) ----
+  if ("IntersectionObserver" in window) {
+    const pauseIO = new IntersectionObserver(entries => {
+      entries.forEach(e => e.target.classList.toggle("is-paused", !e.isIntersecting));
+    });
+    document.querySelectorAll("[data-pause-offscreen]").forEach(el => pauseIO.observe(el));
+  }
+
   // ---- Görünüm geçişi ----
   function transition(update) {
     if (!document.startViewTransition || !motionOK()) { update(); return; }

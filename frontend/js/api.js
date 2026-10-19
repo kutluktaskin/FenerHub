@@ -240,6 +240,7 @@ async function loadSquad() {
         squadState.players = await apiGet("/api/squad");
         renderSquad();
         renderReadiness(squadState.players);
+        renderSquadSummary(squadState.players);
         console.log("Kadro API'den yüklendi");
     } catch (err) {
         console.warn("Kadro API'sine ulaşılamadı:", err);
@@ -372,15 +373,44 @@ function badgeInfo(m) {
 }
 
 // Gün / saat / dakika geri sayımı (sadece hero kartta)
-function countdownHTML(m) {
+function countdownParts(m) {
     const k = kickoffDate(m);
     const diff = k ? k - Date.now() : 0;
-    if (diff <= 0) return `<div class="mc-count is-soon">Maç başlıyor</div>`;
+    if (diff <= 0) return null;
     const s = Math.floor(diff / 1000);
-    const parts = [[Math.floor(s / 86400), "gün"], [Math.floor((s % 86400) / 3600), "saat"], [Math.floor((s % 3600) / 60), "dk"]];
+    return [[Math.floor(s / 86400), "gün"], [Math.floor((s % 86400) / 3600), "saat"],
+            [Math.floor((s % 3600) / 60), "dk"], [s % 60, "sn"]];
+}
+const digitSpans = str => [...str].map(d => `<span class="dg">${d}</span>`).join("");
+
+function countdownHTML(m) {
+    const parts = countdownParts(m);
+    if (!parts) return `<div class="mc-count is-soon">Maç başlıyor</div>`;
     return `<div class="mc-count" role="timer" aria-label="Maça kalan süre">` +
-        parts.map(([v, u]) => `<span class="mc-unit"><b>${pad2(v)}</b><i>${u}</i></span>`).join('<span class="mc-sep" aria-hidden="true">:</span>') +
+        parts.map(([v, u]) => `<span class="mc-unit"><b data-v="${pad2(v)}">${digitSpans(pad2(v))}</b><i>${u}</i></span>`)
+            .join('<span class="mc-sep" aria-hidden="true">:</span>') +
         `</div>`;
+}
+
+// Sadece değişen haneyi yeniler; yeni hane CSS ile yukarıdan kayarak gelir (transform + opacity)
+function tickCountdown(count, m) {
+    const parts = countdownParts(m);
+    const units = count.querySelectorAll(".mc-unit b");
+    if (!parts || units.length !== parts.length) { count.outerHTML = countdownHTML(m); return; }
+    units.forEach((b, i) => {
+        const next = pad2(parts[i][0]);
+        const old = b.dataset.v || "";
+        if (old === next) return;
+        b.dataset.v = next;
+        if (old.length !== next.length) { b.innerHTML = digitSpans(next); return; }
+        [...next].forEach((d, j) => {
+            if (old[j] === d) return;
+            const span = document.createElement("span");
+            span.className = "dg is-new";
+            span.textContent = d;
+            b.children[j].replaceWith(span);
+        });
+    });
 }
 
 function renderAbsenceItem(a) {
@@ -483,9 +513,46 @@ function tickHeroCard() {
         return;
     }
     const count = card.querySelector(".mc-count");
-    if (!count) return;
-    const html = countdownHTML(m);
-    if (count.outerHTML !== html) count.outerHTML = html;
+    if (count) tickCountdown(count, m);
+}
+
+// ---------- Bento: son form ve kadro özeti ----------
+const POINTS = { win: 3, draw: 1, loss: 0 };
+
+function renderForm(list) {
+    const body = document.getElementById("formBody");
+    if (!body) return;
+    const played = list.filter(m => m.status === "finished" && m.home_score !== null && m.home_score !== undefined);
+    const last = played.slice(-5);
+    if (!last.length) { body.innerHTML = `<p class="empty-note">Henüz oynanmış maç yok.</p>`; return; }
+    const pts = last.reduce((sum, m) => sum + POINTS[resultOf(m)], 0);
+    body.innerHTML = `
+        <ol class="form-row" aria-label="Son ${last.length} maç, eskiden yeniye">
+            ${last.map(m => {
+                const res = resultOf(m), rival = rivalOf(m);
+                const code = (TEAM_BADGE[rival] || [monogram(rival)])[0];
+                const where = m.home === "Fenerbahçe" ? "İç saha" : "Deplasman";
+                return `<li class="form-pip ${res}" title="${esc(`${m.home} ${m.home_score}-${m.away_score} ${m.away} · ${where}`)}">
+                    <b>${RESULT[res].letter}</b><span>${esc(code)}</span>
+                </li>`;
+            }).join("")}
+        </ol>
+        <p class="bento-stat"><b data-count="${pts}">${pts}</b><span>puan · son ${last.length} maç</span></p>`;
+    if (window.fx) fx.observeCounts(body);
+}
+
+function renderSquadSummary(players) {
+    const body = document.getElementById("squadSummaryBody");
+    if (!body || !players.length) return;
+    const ready = players.filter(p => p.status !== "injured" && p.status !== "suspended").length;
+    const pct = Math.round(ready / players.length * 100);
+    const top = key => [...players].sort((a, b) => b[key] - a[key] || a.name.localeCompare(b.name, "tr"))[0];
+    const scorer = top("goals"), assister = top("assists");
+    body.innerHTML = `
+        <div class="bento-stat"><b data-count="${pct}" data-prefix="%">%${pct}</b><span>hazır</span></div>
+        <div class="bento-stat"><b data-count="${scorer.goals}">${scorer.goals}</b><span>gol · ${esc(scorer.name)}</span></div>
+        <div class="bento-stat"><b data-count="${assister.assists}">${assister.assists}</b><span>asist · ${esc(assister.name)}</span></div>`;
+    if (window.fx) fx.observeCounts(body);
 }
 
 function syncMatchMeta(m, key) {
@@ -661,6 +728,8 @@ function renderFixtures(container, matches) {
         <h3 class="fx-month-title">${monthTitle(key)}<span>${ms.length} maç</span></h3>
         <div class="fx-list">${ms.map(m => fixtureCard(m, m === next)).join("")}</div>
     </section>`).join("");
+
+    renderForm(list);
 
     // Sezon özeti: oynanan maçların G/B/M dağılımı
     const played = list.filter(m => m.status === "finished" && m.home_score !== null);

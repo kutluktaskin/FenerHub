@@ -90,6 +90,7 @@
         radial-gradient(ellipse at 50% -10%, color-mix(in srgb, var(--c-navy-500) 45%, transparent), transparent 60%),
         radial-gradient(ellipse at center, transparent 35%, color-mix(in srgb, var(--c-navy-950) 88%, transparent) 100%);
     --g-skel: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.12) 37%, rgba(255, 255, 255, 0.05) 63%);
+    --c-beam: color-mix(in srgb, var(--c-accent) 15%, transparent);   /* stat ışığı huzmesi */
     --c-pitch-1: #164225;
     --c-pitch-2: #0a2313;
     --c-pitch-line: rgba(255, 255, 255, 0.45);
@@ -351,7 +352,7 @@ table { font-variant-numeric: tabular-nums; }
 
 /* Ortak kart yüzeyi: lacivert gradient, üst kenarda ince sarı çizgi, köşede sarı ışıma.
    Hover'da kenarlık sarıya döner ve hafif sarı ışıma çıkar. */
-.recent-match-card, .team-box, .standings-box, .fixtures-full-section, .match-card {
+.recent-match-card, .bento-card, .team-box, .standings-box, .fixtures-full-section, .match-card {
     position: relative;
     isolation: isolate;       /* başlık dokusu (z-index:-1) kartın içinde kalsın */
     background: var(--g-card);
@@ -360,7 +361,7 @@ table { font-variant-numeric: tabular-nums; }
     box-shadow: inset 0 2px 0 var(--c-accent-line), var(--sh-2);
     transition: border-color var(--t), box-shadow var(--t), transform var(--t) var(--ease);
 }
-.recent-match-card:hover, .team-box:hover, .standings-box:hover, .fixtures-full-section:hover, .match-card:hover {
+.recent-match-card:hover, .bento-card:hover, .team-box:hover, .standings-box:hover, .fixtures-full-section:hover, .match-card:hover {
     border-color: var(--c-accent-line);
     box-shadow: inset 0 2px 0 var(--c-accent), var(--sh-2), var(--sh-glow);
 }
@@ -755,20 +756,42 @@ table { font-variant-numeric: tabular-nums; }
 /* ---------- 07 YAKIN MAÇLAR ---------- */
 .hero-matches-section { display: flex; flex-direction: column; }
 
-/* Sıradaki maç solda büyük, diğer ikisi sağda üst üste */
+/* Bento ızgarası: sıradaki maç büyük, yanında iki maç; altta dar "son form" ve geniş "kadro özeti".
+   Düzen ekran genişliğine değil bölümün kendi genişliğine bakar (12. Adam paneli açıkken de doğru). */
+.hero-matches-section { container: matches / inline-size; }
 .recent-matches-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
-    gap: var(--s-5);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "hero" "m2" "m3" "form" "squad";
+    gap: var(--s-4);
 }
-.recent-match-card.is-hero { grid-row: span 2; }
+#card-alanya { grid-area: hero; }
+#card-slavia { grid-area: m2; }
+#card-gs { grid-area: m3; }
+.bento-form { grid-area: form; }
+.bento-squad { grid-area: squad; }
 
-@media (max-width: 1100px) {
-    .recent-matches-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .recent-match-card.is-hero { grid-column: 1 / -1; grid-row: auto; }
+@container matches (min-width: 640px) {
+    .recent-matches-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas: "hero hero" "m2 m3" "form squad";
+        gap: var(--s-5);
+    }
 }
-@media (max-width: 640px) {
-    .recent-matches-grid { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); }
+@container matches (min-width: 1040px) {
+    .recent-matches-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 0.75fr) minmax(0, 1fr);
+        grid-template-areas: "hero hero m2" "hero hero m3" "form squad squad";
+    }
+}
+/* Container query desteklemeyen tarayıcı: aynı düzen ekran genişliğiyle */
+@supports not (container-type: inline-size) {
+    @media (min-width: 700px) {
+        .recent-matches-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "hero hero" "m2 m3" "form squad"; gap: var(--s-5); }
+    }
+    @media (min-width: 1100px) {
+        .recent-matches-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 0.75fr) minmax(0, 1fr); grid-template-areas: "hero hero m2" "hero hero m3" "form squad squad"; }
+    }
 }
 
 .recent-match-card {
@@ -780,17 +803,47 @@ table { font-variant-numeric: tabular-nums; }
 .recent-match-card:hover { transform: translateY(-3px); }
 .recent-match-card.active-card { border-color: var(--c-accent-line); }
 .recent-match-card .open-sim-btn { margin-top: auto; }
+.recent-match-card:not(.is-hero) { container-type: inline-size; }
+@container (width < 300px) {
+    .mc-row .mc-name { font-size: 1.1rem; }
+    .mc-meta { font-size: var(--fs-xs); }
+}
 
 .recent-match-card.is-hero {
     gap: var(--s-5);
     padding: var(--s-6);
     border-color: var(--c-line-strong);
-    /* Hero: forma çizgileri + üstten lacivert ışık + kart gradienti */
+    /* Gece maçı: lacivertten siyaha derin zemin, yukarıdan iki stat ışığı huzmesi ve ışık havuzu */
     background:
-        var(--tx-stripes),
-        radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--c-navy-500) 55%, transparent), transparent 65%),
-        var(--g-card);
+        conic-gradient(from 163deg at 20% -14%, transparent 0deg, var(--c-beam) 6deg, transparent 13deg),
+        conic-gradient(from 184deg at 80% -14%, transparent 0deg, var(--c-beam) 6deg, transparent 13deg),
+        radial-gradient(60% 38% at 50% 0%, color-mix(in srgb, var(--c-accent) 14%, transparent), transparent 75%),
+        linear-gradient(180deg, var(--c-navy-700) 0%, var(--c-navy-900) 55%, var(--c-navy-950) 100%);
 }
+/* Hero kenarında yavaşça dönen sarı ışık (@property ile açı animasyonu).
+   @property desteklenmezse ışık sabit durur. Ekran dışındayken fx.js duraklatır. */
+@property --hero-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+.recent-match-card.is-hero::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: conic-gradient(from var(--hero-angle), transparent 0% 64%, var(--c-accent) 76%, var(--c-accent-bright) 80%, transparent 92%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+    .recent-match-card.is-hero::after { animation: hero-border 9s linear infinite; }
+    .recent-match-card.is-hero.is-paused::after { animation-play-state: paused; }
+}
+@keyframes hero-border { to { --hero-angle: 360deg; } }
 
 /* Canlı maç: kırmızı çerçeve ve hafif ışık */
 .recent-match-card.is-live {
@@ -873,8 +926,21 @@ table { font-variant-numeric: tabular-nums; }
 
 .mc-count { display: flex; align-items: flex-start; gap: var(--s-2); }
 .mc-count.is-soon { font-family: var(--f-display); font-size: var(--fs-xl); font-weight: 700; color: var(--c-accent); }
-.mc-unit { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
-.mc-unit b { font-family: var(--f-display); font-size: 3.25rem; font-weight: 600; line-height: 1; color: var(--c-accent); }
+.mc-unit { display: flex; flex-direction: column; align-items: center; min-width: 56px; }
+.mc-unit b {
+    display: inline-flex;
+    font-family: var(--f-display);
+    font-size: 3.4rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--c-accent);
+    text-shadow: 0 0 28px var(--c-accent-glow);
+}
+.dg { display: inline-block; }
+@media (prefers-reduced-motion: no-preference) {
+    .dg.is-new { animation: digit-in 0.42s var(--ease); }
+}
+@keyframes digit-in { from { transform: translateY(-65%); opacity: 0; } }
 .mc-unit i { margin-top: 6px; font-size: var(--fs-xs); font-style: normal; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-text-3); }
 .mc-sep { font-family: var(--f-display); font-size: 2.6rem; line-height: 1.15; color: var(--c-accent-line); }
 .mc-state { display: flex; align-items: center; gap: var(--s-2); color: var(--c-text-2); font-size: var(--fs-sm); font-weight: 500; }
@@ -967,6 +1033,57 @@ table { font-variant-numeric: tabular-nums; }
 
 .open-sim-btn { width: 100%; }
 
+/* Bento kutuları: son form ve kadro özeti */
+.bento-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+    padding: var(--s-5);
+    container-type: inline-size;
+}
+.bento-title {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    font-size: var(--fs-md);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-text-2);
+}
+.bento-title .ico { color: var(--c-accent); }
+.bento-body { display: flex; flex-direction: column; gap: var(--s-3); }
+
+.form-row { display: flex; gap: var(--s-2); margin: 0; padding: 0; list-style: none; }
+.form-pip { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
+.form-pip b {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    max-width: 52px;
+    aspect-ratio: 1;
+    border-radius: var(--r-md);
+    font-family: var(--f-display);
+    font-size: 1.35rem;
+    color: var(--c-accent-ink);
+}
+.form-pip.win b { background: var(--c-win); }
+.form-pip.draw b { background: var(--c-draw); }
+.form-pip.loss b { background: var(--c-loss); }
+.form-pip:last-child b { box-shadow: 0 0 0 2px var(--c-navy-900), 0 0 0 4px var(--c-accent); }   /* en son maç */
+.form-pip span { color: var(--c-text-3); font-size: var(--fs-xs); font-weight: 600; }
+
+.bento-stat { display: flex; align-items: baseline; gap: var(--s-2); min-width: 0; }
+.bento-stat b { font-family: var(--f-display); font-size: 2.6rem; font-weight: 700; line-height: 1; color: var(--c-accent); }
+.bento-stat span { min-width: 0; color: var(--c-text-2); font-size: var(--fs-sm); overflow-wrap: anywhere; }
+.bento-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-4); }
+.bento-squad .bento-stats { flex: 1; align-content: center; }
+.bento-stats .bento-stat { flex-direction: column; align-items: flex-start; gap: 4px; }
+@container (width < 420px) {
+    .bento-stats { grid-template-columns: minmax(0, 1fr); gap: var(--s-2); }
+    .bento-stats .bento-stat { flex-direction: row; align-items: baseline; }
+    .bento-stat b { font-size: 2rem; }
+}
+
 /* Yüklenirken */
 .recent-match-card.is-loading { min-height: 220px; }
 .recent-match-card.is-hero.is-loading { min-height: 380px; }
@@ -979,9 +1096,10 @@ table { font-variant-numeric: tabular-nums; }
     .recent-match-card.is-hero { padding: var(--s-5) var(--s-4); }
     .mc-board { gap: var(--s-2); }
     .crest-lg { --size: 56px; }
-    .mc-unit { min-width: 34px; }
-    .mc-unit b { font-size: 2rem; }
-    .mc-sep { font-size: 1.6rem; }
+    .mc-unit { min-width: 30px; }
+    .mc-unit b { font-size: 1.75rem; }
+    .mc-sep { font-size: 1.4rem; }
+    .mc-count { gap: 4px; }
     .mc-score { font-size: 2.75rem; }
     .mc-skel-crest { width: 56px; height: 56px; }
 }

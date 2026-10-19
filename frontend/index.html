@@ -62,7 +62,7 @@
 
             <!-- Kartlar api.js'te (renderMatchCard) veriden çizilir; id'ler simülasyon için sabit -->
             <div class="recent-matches-grid">
-                <article class="recent-match-card is-hero is-loading" id="card-alanya" aria-busy="true">
+                <article class="recent-match-card is-hero is-loading" id="card-alanya" aria-busy="true" data-pause-offscreen>
                     <div class="mc-top"><span class="skel skel-w30"></span></div>
                     <div class="mc-board"><span class="skel mc-skel-crest"></span><span class="skel mc-skel-mid"></span><span class="skel mc-skel-crest"></span></div>
                     <span class="skel skel-w40 mc-skel-line"></span>
@@ -76,6 +76,15 @@
                     <div class="mc-top"><span class="skel skel-w40"></span></div>
                     <span class="skel skel-w80"></span>
                     <span class="skel skel-w60"></span>
+                </article>
+                <!-- Bento kutuları: api.js (renderForm, renderSquadSummary) doldurur -->
+                <article class="bento-card bento-form" aria-labelledby="formTitle">
+                    <h2 class="bento-title" id="formTitle"><svg class="ico" aria-hidden="true"><use href="#i-chart"/></svg>Son form</h2>
+                    <div id="formBody" class="bento-body"><span class="skel skel-w80"></span><span class="skel skel-w40"></span></div>
+                </article>
+                <article class="bento-card bento-squad" aria-labelledby="squadSumTitle">
+                    <h2 class="bento-title" id="squadSumTitle"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg>Kadro özeti</h2>
+                    <div id="squadSummaryBody" class="bento-body bento-stats"><span class="skel skel-w80"></span><span class="skel skel-w40"></span></div>
                 </article>
             </div>
 
