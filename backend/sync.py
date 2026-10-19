@@ -16,7 +16,8 @@ from datetime import datetime, timezone, timedelta
 import requests
 from dotenv import load_dotenv
 
-from app.database import Base, SessionLocal, engine
+from app.database import SessionLocal
+from app.migrate import run_migrations
 from app import models
 
 load_dotenv()
@@ -437,7 +438,7 @@ def sync_player_stats(db, team, stats):
 
 
 def main():
-    Base.metadata.create_all(bind=engine)
+    run_migrations()
     events = fetch_events()
     squad = fetch_squad()
     stats = fetch_player_stats(squad)

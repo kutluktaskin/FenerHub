@@ -1,12 +1,13 @@
-
 import asyncio
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import models
-from .database import engine, Base
+from .database import IS_SQLITE, db_label
+from .migrate import run_migrations
 from .forum import forum_router
 from .net import diagnose
 from .routers import standings, squad, matches, absences
@@ -15,7 +16,13 @@ from .auto_sync import sync_loop
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    # Şema Alembic ile yönetilir (app/migrate.py); veri silinmez
+    run_migrations()
+    print("Veritabanı:", db_label(), flush=True)
+    if os.environ.get("RENDER") and IS_SQLITE:
+        # Render'ın diski kalıcı değil: SQLite her deploy'da sıfırlanır
+        print("UYARI: Render'da DATABASE_URL tanımlı değil, geçici SQLite kullanılıyor! "
+              "Environment'a Neon adresini ekleyin.", flush=True)
 
     task = asyncio.create_task(sync_loop())
 
