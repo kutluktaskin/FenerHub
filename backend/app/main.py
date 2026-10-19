@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from .database import engine, Base
 from .forum import forum_router
+from .net import diagnose
 from .routers import standings, squad, matches, absences
 from .auto_sync import sync_loop
 
@@ -45,6 +46,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def ip_diagnostics(request, call_next):
+    # GEÇİCİ (Aşama 1): Render proxy zincirini öğrenmek için ilk 30 isteğin başlık yapısını
+    # maskeli loglar (tam IP yazılmaz). fix/client-ip ile birlikte kaldırılacak.
+    diagnose(request)
+    return await call_next(request)
 
 
 app.include_router(standings.router)
