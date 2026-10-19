@@ -1,4 +1,4 @@
-const API_BASE = "https://fenerhub.onrender.com"; 
+const API_BASE = "https://fenerhub.onrender.com"; //
 
 async function apiGet(path) {
     const res = await fetch(`${API_BASE}${path}`);
@@ -26,16 +26,19 @@ function renderStandings(tbodyEl, rows) {
 async function loadStandings() {
     const tables = document.querySelectorAll("#puanlar .standings-table tbody");
     const [superLig, uefa] = tables;
+
     try {
         const [sl, eu] = await Promise.all([
-            apiGet("/standings/super_lig"),
-            apiGet("/standings/uefa"),
+            apiGet("/api/standings/super_lig"),
+            apiGet("/api/standings/uefa"),
         ]);
-        renderStandings(superLig, sl);
-        renderStandings(uefa, eu);
+
+        if (superLig) renderStandings(superLig, sl);
+        if (uefa) renderStandings(uefa, eu);
+
         console.log("Puan durumu API'den yüklendi");
     } catch (err) {
-        console.warn("API'ye ulaşılamadı, statik tablo gösteriliyor:", err);
+        console.error("Puan durumu yüklenemedi:", err);
     }
 }
 
@@ -63,7 +66,7 @@ async function loadSquad() {
     const tbody = document.querySelector(".player-stats-table tbody");
     if (!tbody) return;
     try {
-        const players = await apiGet("/squad");
+        const players = await apiGet("/api/squad");
         renderSquad(tbody, players);
         console.log("Kadro API'den yüklendi");
     } catch (err) {
@@ -93,7 +96,7 @@ async function loadAbsences() {
     const container = document.querySelector(".injury-report-list");
     if (!container) return;
     try {
-        renderAbsences(container, await apiGet("/absences"));
+        renderAbsences(container, await apiGet("/api/absences"));
         console.log("Sakatlık raporu API'den yüklendi");
     } catch (err) {
         console.warn("Sakatlık API'sine ulaşılamadı, statik içerik gösteriliyor:", err);
@@ -271,14 +274,14 @@ async function loadUpcomingMatches() {
     const cards = document.querySelectorAll(".recent-match-card");
     if (!cards.length) return;
     try {
-        const matches = await apiGet("/matches/upcoming");
+        const matches = await apiGet("/api/matches/upcoming");
 
         const prev = navMatch;
         const next = matches[0] || null;
         // Canlı maç bitti: final skoru çekip 10 dk göster
         if (prev && prev.status === "live" && (!next || next.id !== prev.id)) {
             try {
-                const fin = await apiGet(`/matches/${prev.id}`);
+                const fin = await apiGet(`/api/matches/${prev.id}`);
                 finishedMatch = { m: fin, until: Date.now() + 10 * 60 * 1000 };
             } catch (e) { /* final skoru alınamazsa geçilir */ }
         }
@@ -341,7 +344,7 @@ async function loadFixtures() {
     const container = document.querySelector(".fixtures-grid");
     if (!container) return;
     try {
-        renderFixtures(container, await apiGet("/matches"));
+        renderFixtures(container, await apiGet("/api/matches"));
         console.log("Fikstür API'den yüklendi");
     } catch (err) {
         console.warn("Fikstür API'sine ulaşılamadı, statik içerik gösteriliyor:", err);
