@@ -1,3 +1,8 @@
 # Keşif/deneme scriptleri ve çıktıları (API anahtarıyla çalışır, repoya girmez)
 scripts/probe_*
 scripts/*.out.json
+
+# Gizli bilgiler (API anahtarı, veritabanı adresi): asla repoya girmez
+.env
+.env.*
+!.env.example
