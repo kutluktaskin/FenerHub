@@ -2,6 +2,15 @@ const IS_LOCAL = ["127.0.0.1", "localhost"].includes(location.hostname);
 // Yollar zaten "/api/..." ile başlıyor; buraya "/api" ekleme (çift /api/api olur).
 const API_BASE = IS_LOCAL ? "http://127.0.0.1:8000" : "https://fenerhub.onrender.com";
 
+// Yükleme başarısız olursa iskeletin yerine kısa bir not koyar (önceki veri varsa dokunmaz)
+function showLoadError(container, colspan) {
+    if (!container || !container.querySelector(".skel")) return;
+    const msg = `${icon("info")}Veri şu an alınamadı, birazdan tekrar denenecek.`;
+    container.innerHTML = colspan
+        ? `<tr class="empty-row"><td colspan="${colspan}">${msg}</td></tr>`
+        : `<p class="empty-note">${msg}</p>`;
+}
+
 async function apiGet(path) {
     const res = await fetch(`${API_BASE}${path}`);
     if (!res.ok) throw new Error(`API hatası: ${res.status}`);
@@ -10,15 +19,13 @@ async function apiGet(path) {
 
 function renderStandings(tbodyEl, rows) {
     if (!rows || rows.length === 0) {
-        tbodyEl.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:18px; opacity:0.7;">
-            Puan durumu yakında eklenecek
-        </td></tr>`;
+        tbodyEl.innerHTML = `<tr class="empty-row"><td colspan="8">${icon("info")}Puan durumu henüz yayımlanmadı.</td></tr>`;
         return;
     }
     tbodyEl.innerHTML = rows.map(r => {
         const gd = r.goal_difference > 0 ? `+${r.goal_difference}` : r.goal_difference;
         return `<tr class="${r.is_fenerbahce ? "fb-row" : ""}">
-            <td>${r.position}</td><td>${r.team}</td><td>${r.played}</td>
+            <td>${r.position}</td><td>${esc(r.team)}</td><td>${r.played}</td>
             <td>${r.won}</td><td>${r.drawn}</td><td>${r.lost}</td>
             <td>${gd}</td><td>${r.points}</td>
         </tr>`;
@@ -41,25 +48,26 @@ async function loadStandings() {
         console.log("Puan durumu API'den yüklendi");
     } catch (err) {
         console.error("Puan durumu yüklenemedi:", err);
+        tables.forEach(t => showLoadError(t, 8));
     }
 }
 
 const STATUS_VIEW = {
-    available: { text: "✔ Hazır",   color: "#2ecc71" },
-    injured:   { text: "🚑 Sakat",  color: "#ff6b6b" },
-    suspended: { text: "🟨 Cezalı", color: "#f1c40f" },
+    available: { text: "Hazır",  ic: "check",  cls: "st-ok" },
+    injured:   { text: "Sakat",  ic: "injury", cls: "st-injured" },
+    suspended: { text: "Cezalı", ic: "card",   cls: "st-suspended" },
 };
 
 function renderSquad(tbodyEl, players) {
     tbodyEl.innerHTML = players.map(p => {
         const s = STATUS_VIEW[p.status] || STATUS_VIEW.available;
         return `<tr>
-            <td><strong>${p.name}</strong></td>
-            <td style="color:#bbb;">${p.position ?? "-"}</td>
+            <td><strong>${esc(p.name)}</strong></td>
+            <td class="muted">${esc(p.position ?? "-")}</td>
             <td><span class="stat-badge stat-match">${p.appearances}</span></td>
             <td><span class="stat-badge stat-goal">${p.goals}</span></td>
             <td><span class="stat-badge stat-assist">${p.assists}</span></td>
-            <td style="color:${s.color}; font-weight:bold;">${s.text}</td>
+            <td><span class="status ${s.cls}">${icon(s.ic)}${s.text}</span></td>
         </tr>`;
     }).join("");
 }
@@ -72,7 +80,8 @@ async function loadSquad() {
         renderSquad(tbody, players);
         console.log("Kadro API'den yüklendi");
     } catch (err) {
-        console.warn("Kadro API'sine ulaşılamadı, statik tablo gösteriliyor:", err);
+        console.warn("Kadro API'sine ulaşılamadı:", err);
+        showLoadError(tbody, 6);
     }
 }
 
@@ -85,13 +94,13 @@ function renderAbsences(container, rows) {
         const pos = a.position ? ` (${a.position})` : "";
         return `<div class="injury-report-card ${suspended ? "suspended-card" : ""}">
             <div>
-                <div style="font-weight:bold; font-size:1em;">${a.player}${pos}</div>
-                <div style="font-size:0.84em; color:#ccc; margin-top:4px;">${a.appearances} Maç • ${a.goals} Gol • ${a.assists} Asist</div>
-                <div style="font-size:0.8em; color:${suspended ? "#f1c40f" : "#ff9999"}; margin-top:3px;">${detail}</div>
+                <div class="ir-name">${esc(a.player + pos)}</div>
+                <div class="ir-stats">${a.appearances} Maç • ${a.goals} Gol • ${a.assists} Asist</div>
+                <div class="ir-detail">${esc(detail)}</div>
             </div>
-            <span class="status-tag ${suspended ? "tag-suspended" : "tag-injured"}">${suspended ? "🟨 Cezalı" : "🚑 Sakat"}</span>
+            <span class="status-tag ${suspended ? "tag-suspended" : "tag-injured"}">${suspended ? icon("card") + "Cezalı" : icon("injury") + "Sakat"}</span>
         </div>`;
-    }).join("");
+    }).join("") || `<p class="empty-note">${icon("check-circle")}Sakat ya da cezalı oyuncu yok.</p>`;
 }
 
 async function loadAbsences() {
@@ -101,14 +110,15 @@ async function loadAbsences() {
         renderAbsences(container, await apiGet("/api/absences"));
         console.log("Sakatlık raporu API'den yüklendi");
     } catch (err) {
-        console.warn("Sakatlık API'sine ulaşılamadı, statik içerik gösteriliyor:", err);
+        console.warn("Sakatlık API'sine ulaşılamadı:", err);
+        showLoadError(container);
     }
 }
 
 // ---------- Yakın Maç Kartları ----------
 const ABSENCE_TAG = {
-    injury:     { cls: "tag-injured",   text: "🚑 Sakat" },
-    suspension: { cls: "tag-suspended", text: "🟨 Cezalı" },
+    injury:     { cls: "tag-injured",   ic: "injury", text: "Sakat" },
+    suspension: { cls: "tag-suspended", ic: "card",   text: "Cezalı" },
 };
 const DAYS_TR = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
 const MATCH_KEYS = ["alanya", "slavia", "gs"];
@@ -143,34 +153,34 @@ function badgeInfo(m) {
         (m.kickoff_time ? ` ${m.kickoff_time}` : "");
     if (m.status === "live") {
         const mn = liveMinute(m);
-        return { cls: "badge-live", text: `🔴 CANLI${mn ? " • " + mn : ""} • ${when}` };
+        return { cls: "badge-live", ic: "radio", text: `CANLI${mn ? " • " + mn : ""} • ${when}` };
     }
     if (m.match_date === localISODate(new Date())) {
-        return { cls: "badge-upcoming", text: `⏳ BUGÜN • ${when}` };
+        return { cls: "badge-upcoming", ic: "clock", text: `BUGÜN • ${when}` };
     }
     if (DERBY_RIVALS.includes(rivalOf(m))) {
-        return { cls: "badge-upcoming", text: `🔥 DERBİ • ${when}` };
+        return { cls: "badge-derby", ic: "flame", text: `DERBİ • ${when}` };
     }
-    return { cls: "badge-upcoming", text: `⏳ YAKLAŞAN • ${when}` };
+    return { cls: "badge-upcoming", ic: "calendar", text: `YAKLAŞAN • ${when}` };
 }
 
 function renderAbsenceItem(a) {
     if (a.type === "returned") {
         return `<div class="matchday-missing-item">
             <div class="missing-player-info">
-                <span class="missing-player-name">${a.player}</span>
-                <span class="missing-player-stats">${a.reason ?? ""}</span>
+                <span class="missing-player-name">${esc(a.player)}</span>
+                <span class="missing-player-stats">${esc(a.reason ?? "")}</span>
             </div>
-            <span class="status-tag" style="background:rgba(46,204,113,0.2); color:#2ecc71; border:1px solid #2ecc71;">✔ Kadroda</span>
+            <span class="status-tag tag-ok">${icon("check")}Kadroda</span>
         </div>`;
     }
     const tag = ABSENCE_TAG[a.type] || ABSENCE_TAG.injury;
     return `<div class="matchday-missing-item">
         <div class="missing-player-info">
-            <span class="missing-player-name">${a.player}</span>
-            <span class="missing-player-stats">${a.reason ?? ""}</span>
+            <span class="missing-player-name">${esc(a.player)}</span>
+            <span class="missing-player-stats">${esc(a.reason ?? "")}</span>
         </div>
-        <span class="status-tag ${tag.cls}">${tag.text}</span>
+        <span class="status-tag ${tag.cls}">${icon(tag.ic)}${tag.text}</span>
     </div>`;
 }
 
@@ -178,7 +188,7 @@ function updateMatchCard(card, m) {
     const b = badgeInfo(m);
     const badge = card.querySelector(".match-badge");
     if (badge) {
-        badge.textContent = b.text;
+        badge.innerHTML = icon(b.ic) + esc(b.text);
         badge.className = `match-badge ${b.cls}`;
     }
 
@@ -200,8 +210,8 @@ function updateMatchCard(card, m) {
         const items = m.absences || [];
         box.style.display = items.length ? "" : "none";
         const titleSpans = box.querySelectorAll(".matchday-missing-title span");
-        if (titleSpans[0]) titleSpans[0].textContent = `🚨 Maç Günü Eksikleri (${rivalOf(m)})`;
-        if (titleSpans[1]) titleSpans[1].textContent = `${m.absence_count} Eksik`;
+        if (titleSpans[0]) titleSpans[0].textContent = `Maç günü eksikleri (${rivalOf(m)})`;
+        if (titleSpans[1]) titleSpans[1].textContent = `${m.absence_count} eksik`;
         box.querySelectorAll(".matchday-missing-item").forEach(el => el.remove());
         box.insertAdjacentHTML("beforeend", items.map(renderAbsenceItem).join(""));
     }
@@ -235,8 +245,8 @@ function renderNavNext() {
         const f = finishedMatch.m;
         el.style.display = "";
         el.classList.add("is-live");
-        el.innerHTML = `<span class="nn-label">✅ MS</span>
-            <span class="nn-live">${f.home} ${f.home_score ?? 0} - ${f.away_score ?? 0} ${f.away}</span>`;
+        el.innerHTML = `<span class="nn-label">${icon("flag")}MS</span>
+            <span class="nn-live">${esc(f.home)} ${f.home_score ?? 0} - ${f.away_score ?? 0} ${esc(f.away)}</span>`;
         return;
     }
 
@@ -246,8 +256,8 @@ function renderNavNext() {
     if (m.status === "live") {
         const mn = liveMinute(m);
         el.classList.add("is-live");
-        el.innerHTML = `<span class="nn-label">🔴 CANLI${mn ? " " + mn : ""}</span>
-            <span class="nn-live">${m.home} ${m.home_score ?? 0} - ${m.away_score ?? 0} ${m.away}</span>`;
+        el.innerHTML = `<span class="nn-label">${icon("radio")}CANLI${mn ? " " + mn : ""}</span>
+            <span class="nn-live">${esc(m.home)} ${m.home_score ?? 0} - ${m.away_score ?? 0} ${esc(m.away)}</span>`;
         return;
     }
     el.classList.remove("is-live");
@@ -255,7 +265,7 @@ function renderNavNext() {
     const time = (m.kickoff_time || "00:00").slice(0, 5);
     const diff = new Date(`${m.match_date}T${time}:00+03:00`) - new Date();
     if (diff <= 0) {
-        el.innerHTML = `<span class="nn-label">${rivalOf(m)}</span><span class="nn-live">Maç başlıyor</span>`;
+        el.innerHTML = `<span class="nn-label">${esc(rivalOf(m))}</span><span class="nn-live">Maç başlıyor</span>`;
         return;
     }
 
@@ -266,7 +276,7 @@ function renderNavNext() {
         [Math.floor((s % 3600) / 60), "dk"],
         [s % 60, "sn"],
     ];
-    el.innerHTML = `<span class="nn-label">${rivalOf(m)}</span>` +
+    el.innerHTML = `<span class="nn-label">${esc(rivalOf(m))}</span>` +
         parts.map(([v, u]) =>
             `<span class="nn-box"><b>${String(v).padStart(2, "0")}</b><i>${u}</i></span>`
         ).join("");
@@ -323,7 +333,7 @@ function renderFixtures(container, matches) {
 
         if (live) {
             cls += " is-live";
-            bottom = `<div class="fixture-score live">🔴 CANLI ${m.home_score} - ${m.away_score}</div>`;
+            bottom = `<div class="fixture-score live">${icon("radio")}CANLI ${m.home_score} - ${m.away_score}</div>`;
         } else if (done) {
             const fbHome = m.home === "Fenerbahçe";
             const fb = fbHome ? m.home_score : m.away_score;
@@ -336,7 +346,7 @@ function renderFixtures(container, matches) {
 
         return `<div class="${cls}">
             <div class="fixture-date">${fixtureDate(m)}</div>
-            <div class="fixture-teams">${m.home} - ${m.away}</div>
+            <div class="fixture-teams">${esc(m.home)} - ${esc(m.away)}</div>
             ${bottom}
         </div>`;
     }).join("");
@@ -349,7 +359,8 @@ async function loadFixtures() {
         renderFixtures(container, await apiGet("/api/matches"));
         console.log("Fikstür API'den yüklendi");
     } catch (err) {
-        console.warn("Fikstür API'sine ulaşılamadı, statik içerik gösteriliyor:", err);
+        console.warn("Fikstür API'sine ulaşılamadı:", err);
+        showLoadError(container);
     }
 }
 

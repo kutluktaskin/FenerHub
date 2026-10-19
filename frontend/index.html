@@ -7,34 +7,39 @@
     <!-- GSAP Kütüphaneleri -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <!-- Harici CSS Dosyası -->
+    <!-- Fontlar: başlık Barlow Condensed, metin Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <script src="js/ui.js"></script>
+    <a class="skip-link" href="#yakindakiMaclar">İçeriğe geç</a>
 
     <div id="preloader">
         <div class="spinner"></div>
-        <h2 style="letter-spacing: 3px;">MAÇ MERKEZİ YÜKLENİYOR...</h2>
+        <p class="preloader-text">Maç merkezi yükleniyor</p>
     </div>
 
     <!-- SABİT ÜST MENÜ -->
     <nav class="navbar">
-        <a onclick="scrollToSection('yakindakiMaclar')" class="logo fh-logo" aria-label="FENERHUB">
+        <a href="#yakindakiMaclar" onclick="event.preventDefault(); scrollToSection('yakindakiMaclar')" class="logo fh-logo" aria-label="FenerHub ana sayfa">
             <div class="live-pulse"></div>
             <span class="fh-word"><span style="--i:0">F</span><span style="--i:1">E</span><span style="--i:2">N</span><span style="--i:3">E</span><span style="--i:4">R</span></span><span class="fh-badge">HUB</span>
         </a>
-        <div class="nav-links">
-            <button style="--d:0" onclick="scrollToSection('yakindakiMaclar')">Yakın Maçlar</button>
-            <button style="--d:1" onclick="scrollToSection('takimIstatistikBolumu')">Takım Kadrosu</button>
-            <button style="--d:2" onclick="openSimulation('alanya')">Canlı Simülasyon</button>
-            <button style="--d:3" onclick="scrollToSection('puanlar')">Puan Durumu</button>
-            <button style="--d:4" onclick="scrollToSection('fikstur')">Fikstür</button>
-            <button style="--d:5" onclick="toggleForum()">12. Adam</button>
+        <div class="nav-links" id="navLinks">
+            <button type="button" style="--d:0" onclick="scrollToSection('yakindakiMaclar')">Yakın Maçlar</button>
+            <button type="button" style="--d:1" onclick="scrollToSection('takimIstatistikBolumu')">Takım Kadrosu</button>
+            <button type="button" style="--d:2" onclick="openSimulation('alanya')">Canlı Simülasyon</button>
+            <button type="button" style="--d:3" onclick="scrollToSection('puanlar')">Puan Durumu</button>
+            <button type="button" style="--d:4" onclick="scrollToSection('fikstur')">Fikstür</button>
+            <button type="button" style="--d:5" onclick="toggleForum()">12. Adam</button>
         </div>
         <div class="nav-right">
             <img src="img/fenerbahce-logo.png" alt="Fenerbahçe" class="fb-crest" onerror="this.style.display='none'">
-            <div class="nav-next" id="navNext" onclick="scrollToSection('yakindakiMaclar')" style="display:none;"></div>
+            <button type="button" class="nav-next" id="navNext" onclick="scrollToSection('yakindakiMaclar')" style="display:none;" aria-label="Sıradaki maça git"></button>
         </div>
     </nav>
 
@@ -61,18 +66,18 @@
                 <div class="recent-match-card active-card" id="card-alanya">
                     <div>
                         <div class="card-top-center">
-                            <span class="match-badge badge-upcoming">⏳ YAKLAŞAN</span>
+                            <span class="match-badge badge-upcoming">Yükleniyor</span>
                             <div class="recent-teams">
                                 <span>Fenerbahçe</span>
                                 <span class="recent-score">v</span>
                                 <span>Rakip</span>
                             </div>
-                            <div style="font-size: 0.85em; color: #ccc;">Yükleniyor...</div>
+                            <div class="card-meta">Yükleniyor...</div>
                         </div>
                         <div class="matchday-missing-box">
                             <div class="matchday-missing-title">
-                                <span>🚨 Maç Günü Eksikleri</span>
-                                <span style="color:#ff6b6b;">0 Eksik</span>
+                                <span>Maç günü eksikleri</span>
+                                <span>0 eksik</span>
                             </div>
                             <div class="matchday-missing-item">
                                 <div class="missing-player-info">
@@ -82,24 +87,24 @@
                             </div>
                         </div>
                     </div>
-                    <button class="open-sim-btn" onclick="openSimulation('alanya')">⚡ Canlı 2D Simülasyonu Aç</button>
+                    <button type="button" class="open-sim-btn" onclick="openSimulation('alanya')"><svg class="ico" aria-hidden="true"><use href="#i-zap"/></svg>Canlı 2D simülasyonu aç</button>
                 </div>
 
                 <div class="recent-match-card" id="card-slavia">
                     <div>
                         <div class="card-top-center">
-                            <span class="match-badge badge-upcoming">⏳ YAKLAŞAN</span>
+                            <span class="match-badge badge-upcoming">Yükleniyor</span>
                             <div class="recent-teams">
                                 <span>Fenerbahçe</span>
                                 <span class="recent-score">v</span>
                                 <span>Rakip</span>
                             </div>
-                            <div style="font-size: 0.85em; color: #ccc;">Yükleniyor...</div>
+                            <div class="card-meta">Yükleniyor...</div>
                         </div>
                         <div class="matchday-missing-box">
                             <div class="matchday-missing-title">
-                                <span>🚨 Maç Günü Eksikleri</span>
-                                <span style="color:#ff6b6b;">0 Eksik</span>
+                                <span>Maç günü eksikleri</span>
+                                <span>0 eksik</span>
                             </div>
                             <div class="matchday-missing-item">
                                 <div class="missing-player-info">
@@ -109,24 +114,24 @@
                             </div>
                         </div>
                     </div>
-                    <button class="open-sim-btn" onclick="openSimulation('slavia')">⚡ Taktik Simülasyonunu Aç</button>
+                    <button type="button" class="open-sim-btn" onclick="openSimulation('slavia')"><svg class="ico" aria-hidden="true"><use href="#i-zap"/></svg>Taktik simülasyonunu aç</button>
                 </div>
 
                 <div class="recent-match-card" id="card-gs">
                     <div>
                         <div class="card-top-center">
-                            <span class="match-badge badge-upcoming">⏳ YAKLAŞAN</span>
+                            <span class="match-badge badge-upcoming">Yükleniyor</span>
                             <div class="recent-teams">
                                 <span>Fenerbahçe</span>
                                 <span class="recent-score">v</span>
                                 <span>Rakip</span>
                             </div>
-                            <div style="font-size: 0.85em; color: #ccc;">Yükleniyor...</div>
+                            <div class="card-meta">Yükleniyor...</div>
                         </div>
                         <div class="matchday-missing-box">
                             <div class="matchday-missing-title">
-                                <span>🚨 Maç Günü Eksikleri</span>
-                                <span style="color:#ff6b6b;">0 Eksik</span>
+                                <span>Maç günü eksikleri</span>
+                                <span>0 eksik</span>
                             </div>
                             <div class="matchday-missing-item">
                                 <div class="missing-player-info">
@@ -136,7 +141,7 @@
                             </div>
                         </div>
                     </div>
-                    <button class="open-sim-btn" onclick="openSimulation('gs')">⚡ Derbi Simülasyonunu Aç</button>
+                    <button type="button" class="open-sim-btn" onclick="openSimulation('gs')"><svg class="ico" aria-hidden="true"><use href="#i-zap"/></svg>Derbi simülasyonunu aç</button>
                 </div>
 
             </div>
@@ -146,11 +151,11 @@
                 <div class="match-card" id="simulasyon">
                     <div class="match-card-top">
                         <div class="match-tabs">
-                            <button class="tab-btn active" id="btn-pitchTab" onclick="switchTab('pitchTab')">⚽ Akıllı Canlı 2D Simülasyon</button>
-                            <button class="tab-btn" id="btn-statsTab" onclick="switchTab('statsTab')">📊 Anlık Maç İstatistikleri</button>
-                            <button class="tab-btn" id="btn-lineupTab" onclick="switchTab('lineupTab')">👥 İlk 11</button>
+                            <button type="button" class="tab-btn active" id="btn-pitchTab" onclick="switchTab('pitchTab')"><svg class="ico" aria-hidden="true"><use href="#i-ball"/></svg>2D simülasyon</button>
+                            <button type="button" class="tab-btn" id="btn-statsTab" onclick="switchTab('statsTab')"><svg class="ico" aria-hidden="true"><use href="#i-chart"/></svg>İstatistikler</button>
+                            <button type="button" class="tab-btn" id="btn-lineupTab" onclick="switchTab('lineupTab')"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg>İlk 11</button>
                         </div>
-                        <button class="close-sim-btn" onclick="closeSimulation()">✖ Simülasyonu Kapat</button>
+                        <button type="button" class="close-sim-btn" onclick="closeSimulation()"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg>Kapat</button>
                     </div>
 
                     <div class="simulation-header">
@@ -162,24 +167,24 @@
                     <div id="pitchTab" class="tab-content active-content">
                         <canvas id="matchPitch" class="match-pitch"></canvas>
                         <div class="timeline-bar">
-                            <span style="color: #ff3333; font-weight: bold;" id="matchMinute">🔴 89'</span>
-                            <span id="matchStatusText">⚡ Fenerbahçe rakip yarı sahada pas trafiğiyle boşluk arıyor...</span>
-                            <span style="color: var(--primary-color);" id="simLeagueName">Trendyol Süper Lig</span>
+                            <span class="sim-minute" id="matchMinute">89'</span>
+                            <span id="matchStatusText">Simülasyon hazırlanıyor...</span>
+                            <span class="sim-league" id="simLeagueName">Trendyol Süper Lig</span>
                         </div>
                     </div>
 
-                                                          <div id="statsTab" class="tab-content">
+                    <div id="statsTab" class="tab-content">
                         <div class="info-panel">
-                            <h3 style="color:var(--primary-color); margin-top:0;">📊 Karşılaşma İstatistikleri</h3>
+                            <h3 class="panel-title"><svg class="ico" aria-hidden="true"><use href="#i-chart"/></svg>Karşılaşma istatistikleri</h3>
                             <div id="statsBody"></div>
                         </div>
                     </div>
 
                     <div id="lineupTab" class="tab-content">
                         <div class="info-panel">
-                            <h3 style="color:var(--primary-color); margin-top:0;">👥 Maç İlk 11'leri</h3>
+                            <h3 class="panel-title"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg>İlk 11'ler</h3>
                             <div id="lineupBody">
-                                <p style="color:#aaa;">İlk 11 henüz açıklanmadı. Genelde maçtan 30-60 dk önce gelir.</p>
+                                <p class="muted">İlk 11 henüz açıklanmadı. Genelde maçtan 30-60 dk önce gelir.</p>
                             </div>
                         </div>
                     </div>
@@ -188,13 +193,11 @@
             </div> <!-- simulasyonWrapper -->
 
         </section>
-        <!-- ✅ Yakın Maçlar burada biter -->
 
         <!-- 2. BÖLÜM: TAKIM KADROSU / SAKATLIK RAPORU -->
         <div class="team-overview-grid page-section" id="takimIstatistikBolumu">
             <div class="team-box">
-                <h3>⚽ Fenerbahçe Takım Kadrosu (Maç • Gol • Asist)</h3>
-                <div class="team-scroll"></div>
+                <h3 class="box-title"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg>Takım kadrosu <small>Maç · Gol · Asist</small></h3>
                 <table class="player-stats-table">
                     <thead>
                         <tr>
@@ -207,94 +210,24 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><strong>Edin Džeko</strong></td>
-                            <td style="color:#bbb;">Santrafor</td>
-                            <td><span class="stat-badge stat-match">12</span></td>
-                            <td><span class="stat-badge stat-goal">9</span></td>
-                            <td><span class="stat-badge stat-assist">3</span></td>
-                            <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Dušan Tadić</strong></td>
-                            <td style="color:#bbb;">Kanat</td>
-                            <td><span class="stat-badge stat-match">12</span></td>
-                            <td><span class="stat-badge stat-goal">5</span></td>
-                            <td><span class="stat-badge stat-assist">7</span></td>
-                            <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Sebastian Szymański</strong></td>
-                            <td style="color:#bbb;">On Numara</td>
-                            <td><span class="stat-badge stat-match">12</span></td>
-                            <td><span class="stat-badge stat-goal">4</span></td>
-                            <td><span class="stat-badge stat-assist">5</span></td>
-                            <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Youssef En-Nesyri</strong></td>
-                            <td style="color:#bbb;">Santrafor</td>
-                            <td><span class="stat-badge stat-match">11</span></td>
-                            <td><span class="stat-badge stat-goal">5</span></td>
-                            <td><span class="stat-badge stat-assist">1</span></td>
-                            <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Fred</strong></td>
-                            <td style="color:#bbb;">Orta Saha</td>
-                            <td><span class="stat-badge stat-match">9</span></td>
-                            <td><span class="stat-badge stat-goal">3</span></td>
-                            <td><span class="stat-badge stat-assist">3</span></td>
-                            <td style="color:#2ecc71; font-weight:bold;">✔ Hazır</td>
-                        </tr>
-                        <tr>
-                            <td><strong>İrfan Can Kahveci</strong></td>
-                            <td style="color:#bbb;">Sağ Kanat</td>
-                            <td><span class="stat-badge stat-match">10</span></td>
-                            <td><span class="stat-badge stat-goal">2</span></td>
-                            <td><span class="stat-badge stat-assist">3</span></td>
-                            <td style="color:#ff6b6b; font-weight:bold;">🚑 Sakat</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Alexander Djiku</strong></td>
-                            <td style="color:#bbb;">Stoper</td>
-                            <td><span class="stat-badge stat-match">10</span></td>
-                            <td><span class="stat-badge stat-goal">0</span></td>
-                            <td><span class="stat-badge stat-assist">1</span></td>
-                            <td style="color:#f1c40f; font-weight:bold;">🟨 Cezalı</td>
-                        </tr>
+                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
                     </tbody>
                 </table>
             </div>
 
             <div class="team-box">
-                <h3>🚑 Takım Sakatlık & Ceza Raporu</h3>
+                <h3 class="box-title"><svg class="ico" aria-hidden="true"><use href="#i-injury"/></svg>Sakatlık ve ceza raporu</h3>
                 <div class="injury-report-list">
-                    <div class="injury-report-card">
-                        <div class="injury-report-list team-scroll"></div>
-                        <div>
-                            <div style="font-weight:bold; font-size:1em;">Jayden Oosterwolde (Sol Bek)</div>
-                            <div style="font-size:0.84em; color:#ccc; margin-top:4px;">9 Maç • 1 Gol • 0 Asist</div>
-                            <div style="font-size:0.8em; color:#ff9999; margin-top:3px;">Ön Çapraz Bağ • Dönüş: Mart 2027</div>
-                        </div>
-                        <span class="status-tag tag-injured">🚑 Sakat</span>
-                    </div>
-                    <div class="injury-report-card">
-                        <div>
-                            <div style="font-weight:bold; font-size:1em;">İrfan Can Kahveci (Kanat)</div>
-                            <div style="font-size:0.84em; color:#ccc; margin-top:4px;">10 Maç • 2 Gol • 3 Asist</div>
-                            <div style="font-size:0.8em; color:#ff9999; margin-top:3px;">Arka Adale • Dönüş: 2 Hafta</div>
-                        </div>
-                        <span class="status-tag tag-injured">🚑 Sakat</span>
-                    </div>
-                    <div class="injury-report-card suspended-card">
-                        <div>
-                            <div style="font-weight:bold; font-size:1em;">Alexander Djiku (Stoper)</div>
-                            <div style="font-size:0.84em; color:#ccc; margin-top:4px;">10 Maç • 0 Gol • 1 Asist</div>
-                            <div style="font-size:0.8em; color:#f1c40f; margin-top:3px;">4 Sarı Kart Sınırı</div>
-                        </div>
-                        <span class="status-tag tag-suspended">🟨 Cezalı</span>
-                    </div>
+                    <div class="injury-report-card skel-card"><span class="skel skel-w60"></span><span class="skel skel-w40"></span></div>
+                    <div class="injury-report-card skel-card"><span class="skel skel-w60"></span><span class="skel skel-w40"></span></div>
+                    <div class="injury-report-card skel-card"><span class="skel skel-w60"></span><span class="skel skel-w40"></span></div>
                 </div>
             </div>
         </div>
@@ -304,32 +237,23 @@
 
             <!-- Sol Yarı: Trendyol Süper Lig (Tüm Takımlar) -->
             <div class="standings-box">
-                <h2>🏆 Trendyol Süper Lig Puan Durumu</h2>
+                <h2 class="box-title"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg>Trendyol Süper Lig</h2>
                 <div class="table-scroll-container">
                     <table class="standings-table">
                         <thead>
                             <tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>1</td><td>Galatasaray</td><td>7</td><td>5</td><td>1</td><td>1</td><td>+11</td><td>16</td></tr>
-                            <tr><td>2</td><td>Beşiktaş</td><td>7</td><td>4</td><td>3</td><td>0</td><td>+9</td><td>15</td></tr>
-                            <tr><td>3</td><td>Amed SK</td><td>7</td><td>4</td><td>2</td><td>1</td><td>+6</td><td>14</td></tr>
-                            <tr class="fb-row"><td>4</td><td>Fenerbahçe</td><td>7</td><td>4</td><td>1</td><td>2</td><td>+10</td><td>13</td></tr>
-                            <tr><td>5</td><td>Trabzonspor</td><td>7</td><td>4</td><td>1</td><td>2</td><td>+5</td><td>13</td></tr>
-                            <tr><td>6</td><td>Kocaelispor</td><td>7</td><td>3</td><td>3</td><td>1</td><td>+4</td><td>12</td></tr>
-                            <tr><td>7</td><td>Göztepe</td><td>7</td><td>3</td><td>2</td><td>2</td><td>+2</td><td>11</td></tr>
-                            <tr><td>8</td><td>Başakşehir</td><td>7</td><td>3</td><td>1</td><td>3</td><td>0</td><td>10</td></tr>
-                            <tr><td>9</td><td>Samsunspor</td><td>7</td><td>3</td><td>1</td><td>3</td><td>-1</td><td>10</td></tr>
-                            <tr><td>10</td><td>Kasımpaşa</td><td>7</td><td>2</td><td>3</td><td>2</td><td>-1</td><td>9</td></tr>
-                            <tr><td>11</td><td>Gaziantep FK</td><td>7</td><td>2</td><td>2</td><td>3</td><td>-2</td><td>8</td></tr>
-                            <tr><td>12</td><td>Konyaspor</td><td>7</td><td>2</td><td>2</td><td>3</td><td>-3</td><td>8</td></tr>
-                            <tr><td>13</td><td>Rizespor</td><td>7</td><td>2</td><td>1</td><td>4</td><td>-4</td><td>7</td></tr>
-                            <tr><td>14</td><td>Alanyaspor</td><td>7</td><td>1</td><td>3</td><td>3</td><td>-3</td><td>6</td></tr>
-                            <tr><td>15</td><td>Antalyaspor</td><td>7</td><td>1</td><td>3</td><td>3</td><td>-5</td><td>6</td></tr>
-                            <tr><td>16</td><td>Hatayspor</td><td>7</td><td>1</td><td>2</td><td>4</td><td>-6</td><td>5</td></tr>
-                            <tr><td>17</td><td>Adana Demirspor</td><td>7</td><td>1</td><td>1</td><td>5</td><td>-8</td><td>4</td></tr>
-                            <tr><td>18</td><td>Bodrum FK</td><td>7</td><td>1</td><td>1</td><td>5</td><td>-9</td><td>4</td></tr>
-                            <tr><td>19</td><td>Eyüpspor</td><td>7</td><td>0</td><td>3</td><td>4</td><td>-5</td><td>3</td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -337,47 +261,23 @@
 
             <!-- Sağ Yarı: UEFA Şampiyonlar Ligi / Avrupa -->
             <div class="standings-box">
-                <h2>⭐ UEFA Şampiyonlar Ligi / Avrupa Puan Durumu</h2>
+                <h2 class="box-title"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg>UEFA Şampiyonlar Ligi</h2>
                 <div class="table-scroll-container">
                     <table class="standings-table">
                         <thead>
                             <tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>1</td><td>Barcelona</td><td>2</td><td>2</td><td>0</td><td>0</td><td>+6</td><td>6</td></tr>
-                            <tr><td>2</td><td>Arsenal</td><td>2</td><td>2</td><td>0</td><td>0</td><td>+4</td><td>6</td></tr>
-                            <tr><td>3</td><td>Liverpool</td><td>2</td><td>2</td><td>0</td><td>0</td><td>+4</td><td>6</td></tr>
-                            <tr><td>4</td><td>Bayern München</td><td>2</td><td>1</td><td>1</td><td>0</td><td>+5</td><td>4</td></tr>
-                            <tr><td>5</td><td>Real Madrid</td><td>2</td><td>1</td><td>1</td><td>0</td><td>+2</td><td>4</td></tr>
-                            <tr><td>6</td><td>Inter</td><td>2</td><td>1</td><td>1</td><td>0</td><td>+2</td><td>4</td></tr>
-                            <tr><td>7</td><td>Bayer Leverkusen</td><td>2</td><td>1</td><td>1</td><td>0</td><td>+1</td><td>4</td></tr>
-                            <tr><td>8</td><td>Borussia Dortmund</td><td>2</td><td>1</td><td>0</td><td>1</td><td>+3</td><td>3</td></tr>
-                            <tr><td>9</td><td>Manchester City</td><td>2</td><td>1</td><td>0</td><td>1</td><td>+2</td><td>3</td></tr>
-                            <tr><td>10</td><td>Paris Saint-Germain</td><td>2</td><td>1</td><td>0</td><td>1</td><td>+1</td><td>3</td></tr>
-                            <tr><td>11</td><td>Juventus</td><td>2</td><td>1</td><td>0</td><td>1</td><td>0</td><td>3</td></tr>
-                            <tr><td>12</td><td>Atlético Madrid</td><td>2</td><td>1</td><td>0</td><td>1</td><td>-1</td><td>3</td></tr>
-                            <tr><td>13</td><td>Milan</td><td>2</td><td>1</td><td>0</td><td>1</td><td>-1</td><td>3</td></tr>
-                            <tr><td>14</td><td>Sporting CP</td><td>2</td><td>1</td><td>0</td><td>1</td><td>-2</td><td>3</td></tr>
-                            <tr><td>15</td><td>Villarreal</td><td>2</td><td>1</td><td>0</td><td>1</td><td>-2</td><td>3</td></tr>
-                            <tr><td>16</td><td>PSV Eindhoven</td><td>2</td><td>0</td><td>2</td><td>0</td><td>0</td><td>2</td></tr>
-                            <tr><td>17</td><td>Monaco</td><td>2</td><td>0</td><td>2</td><td>0</td><td>0</td><td>2</td></tr>
-                            <tr><td>18</td><td>Stuttgart</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-1</td><td>1</td></tr>
-                            <tr><td>19</td><td>Bologna</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-1</td><td>1</td></tr>
-                            <tr><td>20</td><td>Shakhtar Donetsk</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-2</td><td>1</td></tr>
-                            <tr><td>21</td><td>Club Brugge</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-2</td><td>1</td></tr>
-                            <tr><td>22</td><td>Celtic</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-3</td><td>1</td></tr>
-                            <tr><td>23</td><td>Sparta Praha</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-3</td><td>1</td></tr>
-                            <tr class="fb-row"><td>24</td><td>Fenerbahçe</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
-                            <tr><td>25</td><td>Slavia Prag</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-2</td><td>1</td></tr>
-                            <tr><td>26</td><td>Young Boys</td><td>2</td><td>0</td><td>1</td><td>1</td><td>-3</td><td>1</td></tr>
-                            <tr><td>27</td><td>Red Bull Salzburg</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-3</td><td>0</td></tr>
-                            <tr><td>28</td><td>LASK Linz</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-4</td><td>0</td></tr>
-                            <tr><td>29</td><td>Sturm Graz</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-4</td><td>0</td></tr>
-                            <tr><td>30</td><td>Brest</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-5</td><td>0</td></tr>
-                            <tr><td>31</td><td>Girona</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-5</td><td>0</td></tr>
-                            <tr><td>32</td><td>Red Star Belgrade</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-5</td><td>0</td></tr>
-                            <tr><td>33</td><td>Slovan Bratislava</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-6</td><td>0</td></tr>
-                            <tr><td>34</td><td>Galatasaray</td><td>2</td><td>0</td><td>0</td><td>2</td><td>-5</td><td>0</td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -387,50 +287,31 @@
 
         <!-- 4. BÖLÜM: FİKSTÜR -->
         <section class="page-section fixtures-full-section" id="fikstur">
-            <h2 style="color: var(--primary-color); margin-top: 0; text-transform: uppercase; font-size: 1.4em;">🗓️ Fenerbahçe Sezon Fikstürü (2026/2027)</h2>
-            <p style="font-size: 0.9em; color: #aaa; margin-bottom: 15px;">Tüm saatler Türkiye Saati (TSİ) olarak gösterilmektedir.</p>
+            <h2 class="box-title"><svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg>Sezon fikstürü <small>2026/27</small></h2>
+            <p class="muted">Tüm saatler Türkiye saatidir (TSİ).</p>
         
             <div class="fixtures-grid">
-                <div class="fixture-item"><div class="fixture-date">20/10 Sal</div><div class="fixture-teams">Fenerbahçe - Alanyaspor</div><div class="fixture-time">19:45</div></div>
-                <div class="fixture-item"><div class="fixture-date">26/10 Pzt</div><div class="fixture-teams">Fenerbahçe - Slavia Prag</div><div class="fixture-time">21:30</div></div>
-                <div class="fixture-item"><div class="fixture-date">31/10</div><div class="fixture-teams">Galatasaray - Fenerbahçe</div><div class="fixture-time">19:00</div></div>
-                <div class="fixture-item"><div class="fixture-date">4/11</div><div class="fixture-teams">Fenerbahçe - Göztepe</div><div class="fixture-time">20:45</div></div>
-                <div class="fixture-item"><div class="fixture-date">8/11</div><div class="fixture-teams">Fenerbahçe - Liverpool</div><div class="fixture-time">16:00</div></div>
-                <div class="fixture-item"><div class="fixture-date">21/11</div><div class="fixture-teams">Çorum - Fenerbahçe</div><div class="fixture-time">19:00</div></div>
-                <div class="fixture-item"><div class="fixture-date">25/11</div><div class="fixture-teams">Kocaelispor - Fenerbahçe</div><div class="fixture-time">23:00</div></div>
-                <div class="fixture-item"><div class="fixture-date">29/11</div><div class="fixture-teams">Şahtar Donetsk - Fenerbahçe</div><div class="fixture-time">19:00</div></div>
-                <div class="fixture-item"><div class="fixture-date">5/12</div><div class="fixture-teams">Fenerbahçe - Erzurumspor</div><div class="fixture-time">19:00</div></div>
-                <div class="fixture-item"><div class="fixture-date">9/12</div><div class="fixture-teams">Başakşehir - Fenerbahçe</div><div class="fixture-time">23:00</div></div>
-                <div class="fixture-item"><div class="fixture-date">13/12</div><div class="fixture-teams">LASK Linz - Fenerbahçe</div><div class="fixture-time">19:00</div></div>
-                <div class="fixture-item"><div class="fixture-date">20/12</div><div class="fixture-teams">Fenerbahçe - Trabzonspor</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">17.01.27</div><div class="fixture-teams">Kasımpaşa - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">20.01.27</div><div class="fixture-teams">Fenerbahçe - Amed</div><div class="fixture-time">20:45</div></div>
-                <div class="fixture-item"><div class="fixture-date">24.01.27</div><div class="fixture-teams">Fenerbahçe - Villarreal</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">27.01.27</div><div class="fixture-teams">Fenerbahçe - Gençlerbirliği</div><div class="fixture-time">23:00</div></div>
-                <div class="fixture-item"><div class="fixture-date">31.01.27</div><div class="fixture-teams">Atletico Madrid - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">07.02.27</div><div class="fixture-teams">Konyaspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">14.02.27</div><div class="fixture-teams">Fenerbahçe - Samsunspor</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">21.02.27</div><div class="fixture-teams">Beşiktaş - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">28.02.27</div><div class="fixture-teams">Fenerbahçe - Gaziantep FK</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">07.03.27</div><div class="fixture-teams">Eyüpspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">14.03.27</div><div class="fixture-teams">Fenerbahçe - Rizespor</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">21.03.27</div><div class="fixture-teams">Alanyaspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">04.04.27</div><div class="fixture-teams">Fenerbahçe - Galatasaray</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">11.04.27</div><div class="fixture-teams">Göztepe - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">18.04.27</div><div class="fixture-teams">Fenerbahçe - Çorum</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">25.04.27</div><div class="fixture-teams">Fenerbahçe - Kocaelispor</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">02.05.27</div><div class="fixture-teams">Erzurumspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">09.05.27</div><div class="fixture-teams">Fenerbahçe - Başakşehir</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">16.05.27</div><div class="fixture-teams">Trabzonspor - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">23.05.27</div><div class="fixture-teams">Fenerbahçe - Kasımpaşa</div><div class="fixture-time">Henüz belirlenmedi</div></div>
-                <div class="fixture-item"><div class="fixture-date">Sezon Sonu</div><div class="fixture-teams">Amed - Fenerbahçe</div><div class="fixture-time">Henüz belirlenmedi</div></div>
+                <div class="fixture-item skel-card"><span class="skel skel-w40"></span><span class="skel skel-w80"></span><span class="skel skel-w30"></span></div>
+                <div class="fixture-item skel-card"><span class="skel skel-w40"></span><span class="skel skel-w80"></span><span class="skel skel-w30"></span></div>
+                <div class="fixture-item skel-card"><span class="skel skel-w40"></span><span class="skel skel-w80"></span><span class="skel skel-w30"></span></div>
+                <div class="fixture-item skel-card"><span class="skel skel-w40"></span><span class="skel skel-w80"></span><span class="skel skel-w30"></span></div>
+                <div class="fixture-item skel-card"><span class="skel skel-w40"></span><span class="skel skel-w80"></span><span class="skel skel-w30"></span></div>
+                <div class="fixture-item skel-card"><span class="skel skel-w40"></span><span class="skel skel-w80"></span><span class="skel skel-w30"></span></div>
+                <div class="fixture-item skel-card"><span class="skel skel-w40"></span><span class="skel skel-w80"></span><span class="skel skel-w30"></span></div>
+                <div class="fixture-item skel-card"><span class="skel skel-w40"></span><span class="skel skel-w80"></span><span class="skel skel-w30"></span></div>
             </div>
         </section>
+
+        <footer class="site-footer">
+            <div class="footer-brand">FENER<span>HUB</span></div>
+            <p>Maç, kadro ve puan verileri SportsAPI Pro üzerinden otomatik alınır; canlı skorlar birkaç dakika gecikebilir.</p>
+            <p>Taraftar projesidir, Fenerbahçe SK ile resmi bir bağı yoktur. · <span id="footerYear">2026</span></p>
+        </footer>
 
     </div>
 
     <aside class="fchat" id="fchat">
-    <button class="fchat-tab" onclick="toggleForum()">12. Adam</button>
+    <button type="button" class="fchat-tab" onclick="toggleForum()"><svg class="ico" aria-hidden="true"><use href="#i-message"/></svg>12. Adam</button>
 
     <div class="fchat-panel" role="dialog" aria-labelledby="fchatTitle">
         <div class="fchat-head">
@@ -439,23 +320,23 @@
                 <span class="fchat-sub">Tribünün sesi</span>
                 <span class="fchat-online"><i class="live-pulse"></i><b id="forumOnline">0</b> çevrimiçi</span>
             </div>
-            <button class="fchat-close" onclick="toggleForum()" aria-label="Kapat">✕</button>
+            <button type="button" class="fchat-close" onclick="toggleForum()" aria-label="Paneli kapat"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button>
         </div>
 
         <div class="fchat-rooms" id="forumRooms"></div>
 
         <div class="fchat-feed-wrap">
             <div class="fchat-feed" id="forumFeed"></div>
-            <button class="fchat-new" id="forumNew" hidden>↓ Yeni mesajlar</button>
+            <button type="button" class="fchat-new" id="forumNew" hidden><svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg>Yeni mesajlar</button>
         </div>
 
         <div class="fchat-error" id="forumError"></div>
 
         <div class="fchat-compose">
-            <input id="forumNick" maxlength="20" placeholder="Takma adın">
+            <input id="forumNick" maxlength="20" placeholder="Takma adın" aria-label="Takma ad" autocomplete="nickname">
             <div class="fchat-row">
-                <textarea id="forumText" maxlength="500" rows="1" placeholder="Mesaj yaz..."></textarea>
-                <button id="forumSend" aria-label="Gönder">➤</button>
+                <textarea id="forumText" maxlength="500" rows="1" placeholder="Mesaj yaz..." aria-label="Mesaj"></textarea>
+                <button type="button" id="forumSend" aria-label="Gönder"><svg class="ico" aria-hidden="true"><use href="#i-send"/></svg></button>
             </div>
         </div>
     </div>

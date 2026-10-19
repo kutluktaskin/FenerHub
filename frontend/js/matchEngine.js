@@ -41,7 +41,19 @@ function setText(id, t) {
     const el = document.getElementById(id);
     if (el) el.innerText = t;
 }
-function setStatus(t) { setText('matchStatusText', t); }
+// t: düz metin ya da { ic: ikon adı, text }
+function setStatus(t) {
+    const el = document.getElementById('matchStatusText');
+    if (!el) return;
+    const { ic, text } = typeof t === 'string' ? { text: t } : t;
+    el.innerHTML = (ic ? icon(ic) : '') + esc(text);
+}
+function setMinute(ic, text, live) {
+    const el = document.getElementById('matchMinute');
+    if (!el) return;
+    el.innerHTML = icon(ic) + esc(text);
+    el.classList.toggle('is-live', !!live);
+}
 
 function pickCarrier(state) {
     const idx = (team, roles) => players
@@ -64,20 +76,20 @@ function pickState() {
 }
 
 function idleCaption() {
-    if (simMode === 'finished') return '🏁 Maç bitti.';
+    if (simMode === 'finished') return { ic: 'flag', text: 'Maç bitti.' };
     if (feed.fbForm && feed.rivForm) {
-        return `⏳ Maç başlamadı • Diziliş: Fenerbahçe ${feed.fbForm} • ${feed.rivName} ${feed.rivForm}`;
+        return { ic: 'clock', text: `Maç başlamadı • Diziliş: Fenerbahçe ${feed.fbForm} • ${feed.rivName} ${feed.rivForm}` };
     }
-    return '⏳ Maç başlamadı • İlk 11 genelde maçtan 30-60 dk önce açıklanır.';
+    return { ic: 'clock', text: 'Maç başlamadı • İlk 11 genelde maçtan 30-60 dk önce açıklanır.' };
 }
 
 function captionFor(state) {
     if (state === 'idle') return idleCaption();
     const poss = feed.hasStats ? ` • Topla oynama: FB %${Math.round(feed.fbPoss * 100)}` : '';
-    const base = state === 'attack_fb' ? '⚡ Fenerbahçe rakip yarı sahada baskı kuruyor'
-        : state === 'attack_rival' ? '⚠️ Rakip takım atakta, savunmamız yerleşiyor'
-        : '⚔️ Oyun orta sahada';
-    return base + poss;
+    const [ic, base] = state === 'attack_fb' ? ['zap', 'Fenerbahçe rakip yarı sahada baskı kuruyor']
+        : state === 'attack_rival' ? ['alert', 'Rakip takım atakta, savunmamız yerleşiyor']
+        : ['swords', 'Oyun orta sahada'];
+    return { ic, text: base + poss };
 }
 
 function jitter() {
@@ -136,7 +148,7 @@ async function simPoll() {
     simMode = m.status === 'live' ? 'live' : (m.status === 'finished' ? 'finished' : 'scheduled');
     applyStats(d.statistics);
     applyLineups(d.lineups);
-        renderLineupTab(d.lineups, m);
+    renderLineupTab(d.lineups, m);
     renderStatsTab(d.statistics, m);
     applyIncidents(d.incidents, m);
     applyScoreboard(m, d.incidents);
@@ -146,21 +158,19 @@ function applyScoreboard(m, incidents) {
     setText('simHomeTeam', m.home.toUpperCase());
     setText('simAwayTeam', m.away.toUpperCase());
     setText('simScore', m.home_score === null ? 'v' : `${m.home_score} - ${m.away_score}`);
-    let label;
     if (m.status === 'live') {
         const latest = incidents && incidents[0];
         if (latest && latest.incidentType === 'period' && latest.text === 'HT') {
-            label = '⏸ Devre Arası';
+            setMinute('pause', 'Devre arası', true);
         } else {
             const mn = (typeof liveMinute === 'function') ? liveMinute(m) : null;
-            label = '🔴 ' + (mn || 'Canlı');
+            setMinute('radio', mn || 'Canlı', true);
         }
     } else if (m.status === 'finished') {
-        label = '🏁 Maç Bitti';
+        setMinute('flag', 'Maç bitti');
     } else {
-        label = '⏳ Başlamadı';
+        setMinute('clock', 'Başlamadı');
     }
-    setText('matchMinute', label);
 }
 
 function applyStats(groups) {
@@ -204,18 +214,20 @@ function describeIncident(i, m) {
     const t = incTime(i);
     switch (i.incidentType) {
         case 'goal':
-            return `⚽ GOL! ${t}${who} (${team}) • ${i.homeScore}-${i.awayScore}`;
+            return { ic: 'ball', text: `GOL! ${t}${who} (${team}) • ${i.homeScore}-${i.awayScore}` };
         case 'card':
-            return `${i.incidentClass === 'yellow' ? '🟨 Sarı kart' : '🟥 Kırmızı kart'} ${t}${who} (${team})`;
+            return { ic: 'card', text: `${i.incidentClass === 'yellow' ? 'Sarı kart' : 'Kırmızı kart'} ${t}${who} (${team})` };
         case 'substitution':
-            return `🔄 ${t} ${team} oyuncu değişikliği`;
+            return { ic: 'swap', text: `${t} ${team} oyuncu değişikliği` };
         case 'varDecision':
-            return `📺 ${t} VAR incelemesi${who ? ' •' + who : ''}`;
+            return { ic: 'tv', text: `${t} VAR incelemesi${who ? ' •' + who : ''}` };
         case 'inGamePenalty':
-            return i.incidentClass === 'missed' ? `❌ ${t} Penaltı kaçtı •${who}` : `🎯 ${t} Penaltı •${who}`;
+            return i.incidentClass === 'missed'
+                ? { ic: 'x-circle', text: `${t} Penaltı kaçtı •${who}` }
+                : { ic: 'target', text: `${t} Penaltı •${who}` };
         case 'period':
-            if (i.text === 'HT') return `⏸ Devre arası (${i.homeScore}-${i.awayScore})`;
-            if (i.text === 'FT') return `🏁 Maç sona erdi (${i.homeScore}-${i.awayScore})`;
+            if (i.text === 'HT') return { ic: 'pause', text: `Devre arası (${i.homeScore}-${i.awayScore})` };
+            if (i.text === 'FT') return { ic: 'flag', text: `Maç sona erdi (${i.homeScore}-${i.awayScore})` };
             return null;
         default:
             return null;
@@ -229,9 +241,9 @@ function incKey(i, counts) {
 }
 
 function onNewEvent(i, m) {
-    const text = describeIncident(i, m);
-    if (!text) return;
-    setStatus(text);
+    const ev = describeIncident(i, m);
+    if (!ev) return;
+    setStatus(ev);
     holdUntil = Date.now() + 9000;
     if (i.incidentType === 'goal') {
         matchState = (i.isHome === feed.fbIsHome) ? 'attack_fb' : 'attack_rival';
@@ -247,7 +259,7 @@ function applyIncidents(list, m) {
         feed.seen = new Set(keyed.map(k => k[0]));
         const last = keyed.map(k => describeIncident(k[1], m)).find(Boolean);
         if (last) {
-            setStatus('Son olay: ' + last);
+            setStatus({ ic: last.ic, text: 'Son olay: ' + last.text });
             holdUntil = Date.now() + 6000;
         }
         return;
@@ -348,36 +360,30 @@ function loop() {
 loop();
 
 // ---------- İlk 11 ve istatistik sekmeleri ----------
-function esc(s) {
-    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-
 function renderLineupTab(l, m) {
     const el = document.getElementById('lineupBody');
     if (!el) return;
     if (!l) {
-        el.innerHTML = '<p style="color:#aaa;">İlk 11 henüz açıklanmadı. Genelde maçtan 30-60 dk önce gelir.</p>';
+        el.innerHTML = '<p class="muted">İlk 11 henüz açıklanmadı. Genelde maçtan 30-60 dk önce gelir.</p>';
         return;
     }
-    const row = (p, fb) => `<div style="display:flex; gap:10px; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.07);">
-        <span style="width:28px; font-weight:bold; color:${fb ? '#fcd116' : '#ccc'};">${esc(p.number ?? '-')}</span>
-        <span style="flex:1; ${fb ? 'font-weight:bold;' : ''}">${esc(p.name)}</span>
-        <span style="color:#999;">${esc(p.position ?? '')}</span>
+    const row = p => `<div class="lu-row">
+        <span class="lu-num">${esc(p.number ?? '-')}</span>
+        <span class="lu-name">${esc(p.name)}</span>
+        <span class="lu-pos">${esc(p.position ?? '')}</span>
     </div>`;
     const col = (name, side, fb) => {
         const players = (side && side.players) || [];
         const starters = players.filter(p => !p.substitute);
         const subs = players.filter(p => p.substitute);
-        return `<div style="flex:1; min-width:240px; padding:12px; border-radius:10px; border:1px solid ${fb ? '#fcd116' : 'rgba(255,255,255,0.15)'};">
-            <div style="font-weight:bold; color:${fb ? '#fcd116' : '#fff'}; margin-bottom:8px;">
-                ${esc(name)} <span style="color:#aaa; font-weight:normal;">• ${esc((side && side.formation) || '-')}</span>
-            </div>
-            ${starters.map(p => row(p, fb)).join('')}
-            <div style="margin:10px 0 4px; color:#aaa; font-size:0.85em;">Yedekler</div>
-            ${subs.map(p => row(p, fb)).join('')}
+        return `<div class="lu-col${fb ? ' is-fb' : ''}">
+            <div class="lu-head">${esc(name)} <span>${esc((side && side.formation) || '-')}</span></div>
+            ${starters.map(row).join('')}
+            <div class="lu-subs">Yedekler</div>
+            ${subs.map(row).join('')}
         </div>`;
     };
-    el.innerHTML = `<div style="display:flex; gap:14px; flex-wrap:wrap;">
+    el.innerHTML = `<div class="lu-grid">
         ${col(m.home, l.home, m.home === 'Fenerbahçe')}
         ${col(m.away, l.away, m.away === 'Fenerbahçe')}
     </div>`;
@@ -387,7 +393,7 @@ function renderStatsTab(groups, m) {
     const el = document.getElementById('statsBody');
     if (!el) return;
     if (!groups) {
-        el.innerHTML = '<p style="color:#aaa;">Maç başladığında istatistikler burada görünür.</p>';
+        el.innerHTML = '<p class="muted">Maç başladığında istatistikler burada görünür.</p>';
         return;
     }
     const items = {};
@@ -421,5 +427,5 @@ function renderStatsTab(groups, m) {
             <div class="stats-label"><span>${esc(fbTxt)}</span><span>${label}</span><span>${esc(rvTxt)}</span></div>
             <div class="stats-bar-bg"><div class="stats-bar-fb" style="width:${pct}%;"></div></div>
         </div>`;
-    }).join('') + `<p style="color:#888; font-size:0.8em; margin-top:10px;">Sol: Fenerbahçe • Sağ: ${esc(fbHome ? m.away : m.home)}</p>`;
+    }).join('') + `<p class="muted small">Sol: Fenerbahçe • Sağ: ${esc(fbHome ? m.away : m.home)}</p>`;
 }

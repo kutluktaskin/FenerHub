@@ -67,15 +67,18 @@ window.toggleForum = function () {
     feed.append(n);
   }
 
-  function mkBtn(cls, text, title, onclick) {
+  // html: sadece sabit ikon + sayı (kullanıcı metni buraya girmez)
+  function mkBtn(cls, html, title, onclick) {
     const b = document.createElement("button");
     b.type = "button";
     b.className = cls;
-    b.textContent = text;
-    if (title) b.title = title;
+    b.innerHTML = html;
+    if (title) { b.title = title; b.setAttribute("aria-label", title); }
     b.onclick = onclick;
     return b;
   }
+
+  const reactLabel = (type, count) => `${icon(type === "fire" ? "flame" : "heart")}<span>${Number(count) || 0}</span>`;
 
   function postEl(p) {
     const isMine = p.mine || mine.has(p.id);
@@ -140,19 +143,19 @@ window.toggleForum = function () {
       
       // Backend sadece fire ve heart tepkilerini kabul ediyor
       [
-        ["fire", `🔥 ${p.fire || 0}`, "Ateş Ver"],
-        ["heart", `💛 ${p.heart || 0}`, "Beğen"]
-      ].forEach(([type, label, title]) => {
-        const b = mkBtn("fc2-react", label, title, () => react(p.id, type));
+        ["fire", p.fire, "Ateş ver"],
+        ["heart", p.heart, "Beğen"]
+      ].forEach(([type, count, title]) => {
+        const b = mkBtn("fc2-react", reactLabel(type, count), title, () => react(p.id, type));
         b.dataset.type = type;
         acts.append(b);
       });
 
-      acts.append(mkBtn("fc2-act", "💬", "Yanıtla", () => setReply(p)));
-      
+      acts.append(mkBtn("fc2-act", icon("reply"), "Yanıtla", () => setReply(p)));
+
       // Backend başkasının mesajını silmeye izin vermez (403)
       if (isMine) {
-        acts.append(mkBtn("fc2-act fc2-del", "🗑", "Sil", (e) => removePost(p.id, e)));
+        acts.append(mkBtn("fc2-act fc2-del", icon("trash"), "Sil", (e) => removePost(p.id, e)));
       }
       main.append(acts);
     }
@@ -192,7 +195,7 @@ window.toggleForum = function () {
     const s = document.createElement("span");
     s.textContent = p.body.slice(0, 70);
     t.append(b, s);
-    const x = mkBtn("fc2-reply-x", "✕", "İptal", clearReply);
+    const x = mkBtn("fc2-reply-x", icon("x"), "Yanıtı iptal et", clearReply);
     replyBar.append(t, x);
     replyBar.hidden = false;
     $("forumText").focus();
@@ -299,8 +302,8 @@ window.toggleForum = function () {
         if (el) {
           const f = el.querySelector('[data-type="fire"]');
           const h = el.querySelector('[data-type="heart"]');
-          if (f) f.textContent = `🔥 ${m.fire || 0}`;
-          if (h) h.textContent = `💛 ${m.heart || 0}`;
+          if (f) f.innerHTML = reactLabel("fire", m.fire);
+          if (h) h.innerHTML = reactLabel("heart", m.heart);
         }
       }
     };

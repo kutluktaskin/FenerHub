@@ -1,3 +1,6 @@
+const footerYear = document.getElementById("footerYear");
+if (footerYear) footerYear.textContent = new Date().getFullYear();
+
 function scrollToSection(id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -23,7 +26,7 @@ function openSimulation(matchKey) {
     document.getElementById("simHomeTeam").innerText = data.home;
     document.getElementById("simAwayTeam").innerText = data.away;
     document.getElementById("simScore").innerText = data.score;
-    document.getElementById("matchMinute").innerText = "🔴 " + data.minute;
+    document.getElementById("matchMinute").innerHTML = icon("radio") + esc(data.minute);
     document.getElementById("simLeagueName").innerText = data.league;
 
     wrapper.classList.add("open");
