@@ -8,6 +8,7 @@ from . import models
 from .database import engine, Base
 from .routers import standings, squad, matches, absences
 from .auto_sync import sync_loop
+from .forum import router as forum_router 
 
 Base.metadata.create_all(bind=engine)
 
@@ -41,7 +42,7 @@ app.include_router(standings.router)
 app.include_router(squad.router)
 app.include_router(matches.router)
 app.include_router(absences.router)
-
+app.include_router(forum_router)
 
 @app.get("/api/health")
 def health():

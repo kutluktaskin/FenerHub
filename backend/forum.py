@@ -5,7 +5,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Requ
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from datetime import datetime, timedelta, timezone
-
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, Request
+router = APIRouter()
 DB = Path(__file__).parent / "forum.db"
 ROOMS = {"genel", "transfer"}
 TR = timezone(timedelta(hours=3))
