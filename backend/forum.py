@@ -176,8 +176,11 @@ async def react(pid: int, r: ReactIn):
 
 @app.websocket("/ws/forum")
 async def ws_forum(ws: WebSocket):
+    # Bağlantıyı dış kaynaklardan gelen isteklere (Vercel'e) izin vererek kabul et
+    await ws.accept()
     await hub.add(ws)
     try:
-        while True: await ws.receive_text()
+        while True: 
+            await ws.receive_text()
     except WebSocketDisconnect:
         await hub.drop(ws)
