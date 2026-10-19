@@ -130,6 +130,8 @@ h1, h2, h3 {
 
 p { margin: 0; }
 
+[hidden] { display: none !important; }
+
 button, input, textarea, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
 
@@ -625,68 +627,167 @@ table { font-variant-numeric: tabular-nums; }
 /* ---------- 07 YAKIN MAÇLAR ---------- */
 .hero-matches-section { display: flex; flex-direction: column; }
 
+/* Sıradaki maç solda büyük, diğer ikisi sağda üst üste */
 .recent-matches-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
     gap: var(--s-5);
 }
+.recent-match-card.is-hero { grid-row: span 2; }
+
 @media (max-width: 1100px) {
     .recent-matches-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .recent-match-card.is-hero { grid-column: 1 / -1; grid-row: auto; }
 }
-@media (max-width: 700px) {
-    .recent-matches-grid { grid-template-columns: 1fr; }
+@media (max-width: 640px) {
+    .recent-matches-grid { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); }
 }
 
 .recent-match-card {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     gap: var(--s-4);
     padding: var(--s-5);
     transition: border-color var(--t), transform var(--t) var(--ease), box-shadow var(--t);
 }
 .recent-match-card:hover { border-color: var(--c-line-strong); transform: translateY(-2px); box-shadow: var(--sh-3); }
 .recent-match-card.active-card { border-color: var(--c-accent-line); }
+.recent-match-card .open-sim-btn { margin-top: auto; }
 
-.card-top-center {
+.recent-match-card.is-hero {
+    gap: var(--s-5);
+    padding: var(--s-6);
+    border-color: var(--c-line-strong);
+    background:
+        radial-gradient(120% 70% at 50% 0%, rgba(27, 58, 122, 0.6), transparent 65%),
+        var(--c-surface);
+}
+
+/* Canlı maç: kırmızı çerçeve ve hafif ışık */
+.recent-match-card.is-live {
+    border-color: rgba(255, 77, 94, 0.55);
+    box-shadow: var(--sh-2), 0 0 40px rgba(255, 77, 94, 0.14);
+}
+
+/* Rozetler */
+.mc-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.comp-badge, .match-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+.comp-badge { border: 1px solid var(--c-line-strong); color: var(--c-text-2); }
+.comp-badge .ico { color: var(--c-text-3); }
+.badge-upcoming { background: var(--c-navy-soft); color: var(--c-navy-tint); }
+.badge-today { background: var(--c-navy-soft); color: #c7d8ff; }
+.badge-derby { background: var(--c-accent-soft); color: var(--c-accent); }
+.badge-live { background: var(--c-live-soft); color: var(--c-live); }
+
+/* Armalar: Fenerbahçe logosu, rakipler kısaltmalı rozet */
+.crest {
+    --size: 40px;
+    display: block;
+    flex-shrink: 0;
+    width: var(--size);
+    height: var(--size);
+    object-fit: contain;
+}
+.crest-lg { --size: 88px; }
+.crest-sm { --size: 30px; }
+.crest-mono {
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--crest-bg);
+    color: var(--crest-fg);
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.16), var(--sh-1);
+    font-family: var(--f-display);
+    font-size: calc(var(--size) * 0.36);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+}
+.crest-mono.is-long { font-size: calc(var(--size) * 0.27); }
+
+/* Hero skor tahtası */
+.mc-board {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--s-4);
+}
+/* Hero iki satır yüksekliğinde: boşluk skor tahtasının çevresine dağılır */
+.is-hero .mc-board { flex: 1; padding: var(--s-4) 0; }
+.mc-team {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: var(--s-3);
+    min-width: 0;
     text-align: center;
 }
-.card-meta { color: var(--c-text-3); font-size: var(--fs-sm); }
-
-.match-badge {
-    padding: 4px 10px;
-    border-radius: var(--r-pill);
-    font-size: var(--fs-xs);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-}
-.badge-upcoming { background: var(--c-navy-soft); color: var(--c-navy-tint); }
-.badge-derby { background: var(--c-accent-soft); color: var(--c-accent); }
-.badge-live { background: var(--c-live-soft); color: var(--c-live); }
-
-.recent-teams {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--s-3);
+.mc-name {
     font-family: var(--f-display);
-    font-size: 1.5rem;
+    font-size: clamp(0.95rem, 3.6vw, 1.75rem);
     font-weight: 700;
-    line-height: 1.1;
+    line-height: 1.05;
+    text-transform: uppercase;
+    overflow-wrap: break-word;
 }
-.recent-score {
-    min-width: 44px;
-    padding: 4px 10px;
-    border-radius: var(--r-md);
-    background: rgba(0, 0, 0, 0.35);
-    color: var(--c-text-2);
+.mc-mid { display: flex; flex-direction: column; align-items: center; gap: var(--s-2); }
+
+.mc-count { display: flex; align-items: flex-start; gap: var(--s-2); }
+.mc-count.is-soon { font-family: var(--f-display); font-size: var(--fs-xl); font-weight: 700; color: var(--c-accent); }
+.mc-unit { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
+.mc-unit b { font-family: var(--f-display); font-size: 3.25rem; font-weight: 600; line-height: 1; }
+.mc-unit i { margin-top: 6px; font-size: var(--fs-xs); font-style: normal; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-text-3); }
+.mc-sep { font-family: var(--f-display); font-size: 2.6rem; line-height: 1.15; color: var(--c-text-3); }
+.mc-state { display: flex; align-items: center; gap: var(--s-2); color: var(--c-text-2); font-size: var(--fs-sm); font-weight: 500; }
+.mc-live-min { color: var(--c-live); font-weight: 700; }
+
+.mc-score { display: flex; align-items: center; gap: var(--s-3); font-family: var(--f-display); font-size: 4.25rem; font-weight: 700; line-height: 1; }
+.mc-score span { font-size: 0.55em; color: var(--c-text-3); }
+.mc-score.is-live b { color: var(--c-accent); }
+
+.mc-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    color: var(--c-text-3);
+    font-size: var(--fs-sm);
+}
+.is-hero .mc-meta { justify-content: center; }
+
+/* Küçük kart: iki satırlı takım listesi */
+.mc-rows { display: flex; flex-direction: column; gap: var(--s-2); }
+.mc-row { display: flex; align-items: center; gap: var(--s-3); }
+.mc-row .mc-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 1.3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.mc-row-score {
+    min-width: 34px;
+    padding: 2px 8px;
+    border-radius: var(--r-sm);
+    background: rgba(0, 0, 0, 0.3);
+    font-family: var(--f-display);
+    font-size: 1.4rem;
     text-align: center;
 }
+.mc-row-score.is-live { color: var(--c-accent); }
 
+/* Maç günü eksikleri */
 .matchday-missing-box {
     padding: var(--s-3) var(--s-4);
     border: 1px solid var(--c-line);
@@ -698,7 +799,6 @@ table { font-variant-numeric: tabular-nums; }
     justify-content: space-between;
     gap: var(--s-3);
     padding-bottom: var(--s-2);
-    margin-bottom: var(--s-1);
     border-bottom: 1px solid var(--c-line);
     color: var(--c-text-3);
     font-size: var(--fs-xs);
@@ -719,8 +819,43 @@ table { font-variant-numeric: tabular-nums; }
 .missing-player-info { display: flex; flex-direction: column; min-width: 0; }
 .missing-player-name { font-weight: 600; }
 .missing-player-stats { color: var(--c-text-3); font-size: var(--fs-xs); }
+/* Küçük kartta tek satırlık eksik özeti */
+.mc-absent {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    color: var(--c-text-3);
+    font-size: var(--fs-sm);
+}
+.mc-absent .ico { color: var(--c-injury); }
+.mc-absent b { color: var(--c-text-2); font-weight: 600; white-space: nowrap; }
+.mc-absent span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.mc-full { display: inline-flex; align-items: center; gap: 6px; color: var(--c-text-3); font-size: var(--fs-sm); }
+.mc-full .ico { color: var(--c-win); }
+.is-hero .mc-full { align-self: center; }
 
 .open-sim-btn { width: 100%; }
+
+/* Yüklenirken */
+.recent-match-card.is-loading { min-height: 220px; }
+.recent-match-card.is-hero.is-loading { min-height: 380px; }
+.is-loading .mc-board { grid-template-columns: auto 1fr auto; justify-items: center; padding: var(--s-6) 0; }
+.mc-skel-crest { width: 88px; height: 88px; border-radius: 50%; }
+.mc-skel-mid { width: min(200px, 100%); height: 52px; }
+.mc-skel-line { align-self: center; }
+
+@media (max-width: 640px) {
+    .recent-match-card.is-hero { padding: var(--s-5) var(--s-4); }
+    .mc-board { gap: var(--s-2); }
+    .crest-lg { --size: 56px; }
+    .mc-unit { min-width: 34px; }
+    .mc-unit b { font-size: 2rem; }
+    .mc-sep { font-size: 1.6rem; }
+    .mc-score { font-size: 2.75rem; }
+    .mc-skel-crest { width: 56px; height: 56px; }
+}
 
 /* ---------- 08 SİMÜLASYON ---------- */
 #simulasyonWrapper {

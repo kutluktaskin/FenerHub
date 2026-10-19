@@ -121,12 +121,27 @@ const ABSENCE_TAG = {
     suspension: { cls: "tag-suspended", ic: "card",   text: "Cezalı" },
 };
 const DAYS_TR = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
+const DAYS_LONG_TR = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+const MONTHS_TR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 const MATCH_KEYS = ["alanya", "slavia", "gs"];
 const COMPETITION_LABEL = {
     super_lig: "Trendyol Süper Lig",
     uefa: "UEFA Şampiyonlar Ligi",
 };
+const COMPETITION_SHORT = { super_lig: "Süper Lig", uefa: "Şampiyonlar Ligi" };
 const DERBY_RIVALS = ["Galatasaray", "Beşiktaş JK", "Trabzonspor"];
+const HOME_STADIUM = "Chobani Stadyumu";   // API stat bilgisi vermiyor; deplasmanda "Deplasman" yazılır
+
+// API logo vermiyor: rakipler kısaltma + kulüp renkleriyle rozet olarak çizilir
+const TEAM_BADGE = {
+    "Galatasaray":   ["GS",  "#a90432", "#fdb912"],
+    "Beşiktaş JK":   ["BJK", "#161616", "#ffffff"],
+    "Trabzonspor":   ["TS",  "#6c1d45", "#7cc3ed"],
+    "Başakşehir FK": ["İBFK", "#16285b", "#f47920"],
+    "Göztepe":       ["GÖZ", "#c8102e", "#ffd100"],
+    "Slavia Prag":   ["SLA", "#c8102e", "#ffffff"],
+};
+const NAME_SUFFIXES = new Set(["FK", "SK", "JK", "FC", "AŞ", "A.Ş.", "SC", "CF", "AFC", "KF"]);
 
 const pad2 = n => String(n).padStart(2, "0");
 
@@ -138,6 +153,21 @@ function rivalOf(m) {
     return m.home === "Fenerbahçe" ? m.away : m.home;
 }
 
+function monogram(name) {
+    const up = t => t.toLocaleUpperCase("tr");
+    const words = name.split(/\s+/).filter(w => w && !NAME_SUFFIXES.has(up(w)));
+    if (words.length >= 2) return up(words[0][0] + words[1][0]);
+    return up((words[0] || name).slice(0, 3));
+}
+
+function crest(name, size = "") {
+    if (name === "Fenerbahçe") {
+        return `<img class="crest ${size}" src="img/fenerbahce-logo.png" alt="" loading="lazy">`;
+    }
+    const [code, bg, fg] = TEAM_BADGE[name] || [monogram(name), "#1d2b4a", "#dbe3f4"];
+    return `<span class="crest crest-mono ${size}${code.length > 2 ? " is-long" : ""}" style="--crest-bg:${bg};--crest-fg:${fg}" aria-hidden="true">${esc(code)}</span>`;
+}
+
 function liveMinute(m) {
     if (m.status_code === 31) return "Devre Arası";
     if (!m.period_start || (m.status_code !== 6 && m.status_code !== 7)) return null;
@@ -147,21 +177,47 @@ function liveMinute(m) {
     return min > cap ? `${cap}+${min - cap}'` : `${min}'`;
 }
 
-function badgeInfo(m) {
+function kickoffDate(m) {
+    if (!m.match_date) return null;
+    return new Date(`${m.match_date}T${(m.kickoff_time || "00:00").slice(0, 5)}:00+03:00`);
+}
+
+function longDate(m) {
+    if (!m.match_date) return "Tarih belli değil";
     const d = new Date(m.match_date + "T00:00:00");
-    const when = `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)} ${DAYS_TR[d.getDay()]}` +
-        (m.kickoff_time ? ` ${m.kickoff_time}` : "");
+    return `${DAYS_LONG_TR[d.getDay()]}, ${d.getDate()} ${MONTHS_TR[d.getMonth()]}` + (m.kickoff_time ? ` · ${m.kickoff_time}` : "");
+}
+
+function shortDate(m) {
+    if (!m.match_date) return "Tarih belli değil";
+    const d = new Date(m.match_date + "T00:00:00");
+    return `${DAYS_TR[d.getDay()]} ${d.getDate()} ${MONTHS_TR[d.getMonth()]}` + (m.kickoff_time ? ` · ${m.kickoff_time}` : "");
+}
+
+function badgeInfo(m) {
     if (m.status === "live") {
         const mn = liveMinute(m);
-        return { cls: "badge-live", ic: "radio", text: `CANLI${mn ? " • " + mn : ""} • ${when}` };
+        return { cls: "badge-live", ic: "radio", text: `Canlı${mn ? " · " + mn : ""}`, special: true };
     }
     if (m.match_date === localISODate(new Date())) {
-        return { cls: "badge-upcoming", ic: "clock", text: `BUGÜN • ${when}` };
+        return { cls: "badge-today", ic: "clock", text: "Bugün", special: true };
     }
     if (DERBY_RIVALS.includes(rivalOf(m))) {
-        return { cls: "badge-derby", ic: "flame", text: `DERBİ • ${when}` };
+        return { cls: "badge-derby", ic: "flame", text: "Derbi", special: true };
     }
-    return { cls: "badge-upcoming", ic: "calendar", text: `YAKLAŞAN • ${when}` };
+    return { cls: "badge-upcoming", ic: "calendar", text: "Sıradaki maç", special: false };
+}
+
+// Gün / saat / dakika geri sayımı (sadece hero kartta)
+function countdownHTML(m) {
+    const k = kickoffDate(m);
+    const diff = k ? k - Date.now() : 0;
+    if (diff <= 0) return `<div class="mc-count is-soon">Maç başlıyor</div>`;
+    const s = Math.floor(diff / 1000);
+    const parts = [[Math.floor(s / 86400), "gün"], [Math.floor((s % 86400) / 3600), "saat"], [Math.floor((s % 3600) / 60), "dk"]];
+    return `<div class="mc-count" role="timer" aria-label="Maça kalan süre">` +
+        parts.map(([v, u]) => `<span class="mc-unit"><b>${pad2(v)}</b><i>${u}</i></span>`).join('<span class="mc-sep" aria-hidden="true">:</span>') +
+        `</div>`;
 }
 
 function renderAbsenceItem(a) {
@@ -184,37 +240,89 @@ function renderAbsenceItem(a) {
     </div>`;
 }
 
-function updateMatchCard(card, m) {
-    const b = badgeInfo(m);
-    const badge = card.querySelector(".match-badge");
-    if (badge) {
-        badge.innerHTML = icon(b.ic) + esc(b.text);
-        badge.className = `match-badge ${b.cls}`;
+// Maç günü eksikleri; yoksa sade bir "Tam kadro" notu.
+// compact: küçük kartlarda tek satırlık özet (tam liste title'da)
+function absencesHTML(m, compact) {
+    const items = m.absences || [];
+    const missing = items.filter(a => a.type !== "returned");
+    if (!missing.length && (compact || !items.length)) {
+        return `<p class="mc-full">${icon("check-circle")}Tam kadro</p>`;
+    }
+    if (compact) {
+        const names = missing.map(a => a.player);
+        const shown = names.slice(0, 2).join(", ") + (names.length > 2 ? ` +${names.length - 2}` : "");
+        const all = missing.map(a => `${a.player}${a.reason ? " (" + a.reason + ")" : ""}`).join(", ");
+        return `<p class="mc-absent" title="${esc(all)}">${icon("injury")}<b>${missing.length} eksik</b><span>${esc(shown)}</span></p>`;
+    }
+    return `<div class="matchday-missing-box">
+        <div class="matchday-missing-title"><span>Maç günü eksikleri</span><span>${m.absence_count ?? missing.length}</span></div>
+        ${items.map(renderAbsenceItem).join("")}
+    </div>`;
+}
+
+function renderMatchCard(card, m, key) {
+    const hero = card.classList.contains("is-hero");
+    const live = m.status === "live";
+    const hasScore = m.home_score !== null && m.home_score !== undefined;
+    const fbHome = m.home === "Fenerbahçe";
+    const st = badgeInfo(m);
+    const label = live ? "Canlı simülasyonu izle" : "2D simülasyonu aç";
+
+    card.classList.remove("is-loading");
+    card.removeAttribute("aria-busy");
+    card.classList.toggle("is-live", live);
+    card.setAttribute("aria-label", `${m.home} - ${m.away}, ${COMPETITION_LABEL[m.competition] ?? ""}`);
+
+    const top = `<div class="mc-top">
+        <span class="comp-badge">${icon(m.competition === "uefa" ? "star" : "trophy")}${esc(COMPETITION_SHORT[m.competition] ?? "")}</span>
+        ${hero || st.special ? `<span class="match-badge ${st.cls}">${icon(st.ic)}${esc(st.text)}</span>` : ""}
+    </div>`;
+
+    if (hero) {
+        let mid;
+        if (live || (m.status === "finished" && hasScore)) {
+            mid = `<div class="mc-score${live ? " is-live" : ""}"><b>${m.home_score ?? 0}</b><span>-</span><b>${m.away_score ?? 0}</b></div>
+                <div class="mc-state">${live ? `<span class="live-pulse"></span><span class="mc-live-min">${esc(liveMinute(m) ?? "Canlı")}</span>` : "Maç sonu"}</div>`;
+        } else {
+            mid = countdownHTML(m) + `<div class="mc-state">${esc(longDate(m))}</div>`;
+        }
+        card.innerHTML = top + `
+            <div class="mc-board">
+                <div class="mc-team">${crest(m.home, "crest-lg")}<span class="mc-name">${esc(m.home)}</span></div>
+                <div class="mc-mid">${mid}</div>
+                <div class="mc-team">${crest(m.away, "crest-lg")}<span class="mc-name">${esc(m.away)}</span></div>
+            </div>
+            <p class="mc-meta">${icon(fbHome ? "home" : "plane")}${fbHome ? HOME_STADIUM : "Deplasman"}</p>
+            ${absencesHTML(m)}
+            <button type="button" class="btn btn-primary open-sim-btn" onclick="openSimulation('${key}')">${icon("zap")}${label}</button>`;
+        return;
     }
 
-    const teams = card.querySelectorAll(".recent-teams span");
-    if (teams.length >= 3) {
-        teams[0].textContent = m.home;
-        teams[2].textContent = m.away;
-        teams[1].textContent = m.home_score === null ? "v" : `${m.home_score} - ${m.away_score}`;
-    }
+    const row = (team, score) => `<div class="mc-row${team === "Fenerbahçe" ? " is-fb" : ""}">
+        ${crest(team, "crest-sm")}<span class="mc-name">${esc(team)}</span>
+        ${hasScore ? `<b class="mc-row-score${live ? " is-live" : ""}">${score}</b>` : ""}
+    </div>`;
+    card.innerHTML = top + `
+        <div class="mc-rows">${row(m.home, m.home_score)}${row(m.away, m.away_score)}</div>
+        <p class="mc-meta">${icon("calendar")}${esc(shortDate(m))}<span aria-hidden="true">·</span>${fbHome ? "İç saha" : "Deplasman"}</p>
+        ${absencesHTML(m, true)}
+        <button type="button" class="btn open-sim-btn" onclick="openSimulation('${key}')">${icon("zap")}${label}</button>`;
+}
 
-    const meta = card.querySelector(".card-top-center > div:last-child");
-    if (meta) {
-        const place = m.home === "Fenerbahçe" ? "Chobani Stadium" : "Deplasman";
-        meta.textContent = `${COMPETITION_LABEL[m.competition] ?? ""} • ${place}`;
+// Hero karttaki sayaç ve canlı dakika her saniye güncellenir (tüm kart yeniden çizilmez)
+function tickHeroCard() {
+    const card = document.querySelector(".recent-match-card.is-hero");
+    const m = navMatch;
+    if (!card || !m) return;
+    if (m.status === "live") {
+        const el = card.querySelector(".mc-live-min");
+        if (el) el.textContent = liveMinute(m) ?? "Canlı";
+        return;
     }
-
-    const box = card.querySelector(".matchday-missing-box");
-    if (box) {
-        const items = m.absences || [];
-        box.style.display = items.length ? "" : "none";
-        const titleSpans = box.querySelectorAll(".matchday-missing-title span");
-        if (titleSpans[0]) titleSpans[0].textContent = `Maç günü eksikleri (${rivalOf(m)})`;
-        if (titleSpans[1]) titleSpans[1].textContent = `${m.absence_count} eksik`;
-        box.querySelectorAll(".matchday-missing-item").forEach(el => el.remove());
-        box.insertAdjacentHTML("beforeend", items.map(renderAbsenceItem).join(""));
-    }
+    const count = card.querySelector(".mc-count");
+    if (!count) return;
+    const html = countdownHTML(m);
+    if (count.outerHTML !== html) count.outerHTML = html;
 }
 
 function syncMatchMeta(m, key) {
@@ -302,14 +410,16 @@ async function loadUpcomingMatches() {
 
         cards.forEach((card, i) => {
             const m = matches[i];
-            card.style.display = m ? "" : "none";
+            card.hidden = !m;
             if (!m) return;
-            updateMatchCard(card, m);
+            renderMatchCard(card, m, MATCH_KEYS[i]);
             if (MATCH_KEYS[i]) syncMatchMeta(m, MATCH_KEYS[i]);
         });
         console.log("Yakın maçlar API'den yüklendi");
     } catch (err) {
-        console.warn("Maç API'sine ulaşılamadı, statik kartlar gösteriliyor:", err);
+        console.warn("Maç API'sine ulaşılamadı:", err);
+        const hero = document.querySelector(".recent-match-card.is-hero.is-loading");
+        if (hero) hero.innerHTML = `<p class="empty-note">${icon("info")}Maç bilgisi şu an alınamadı, birazdan tekrar denenecek.</p>`;
     }
 }
 
@@ -365,7 +475,7 @@ async function loadFixtures() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    setInterval(renderNavNext, 1000);
+    setInterval(() => { renderNavNext(); tickHeroCard(); }, 1000);
     loadStandings();
     loadSquad();
     loadAbsences();

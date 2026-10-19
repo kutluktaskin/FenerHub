@@ -56,95 +56,28 @@
         <section class="page-section hero-matches-section" id="yakindakiMaclar">
 
             <div class="hero-head">
-                <div class="hero-eyebrow"><span class="live-pulse"></span>Canlı Maç Merkezi • 2026/27 Sezonu</div>
+                <div class="hero-eyebrow"><span class="live-pulse"></span>Canlı maç merkezi · 2026/27</div>
                 <h1 class="hero-heading">Yakın Maçlar</h1>
-                <p class="hero-sub">Maç günü sakat ve cezalı eksikleri her kartta ayrı gösterilir</p>
-                <div class="hero-divider"><span></span></div>
+                <p class="hero-sub">Sıradaki üç maç, geri sayım ve maç günü eksikleri.</p>
             </div>
 
+            <!-- Kartlar api.js'te (renderMatchCard) veriden çizilir; id'ler simülasyon için sabit -->
             <div class="recent-matches-grid">
-
-                <div class="recent-match-card active-card" id="card-alanya">
-                    <div>
-                        <div class="card-top-center">
-                            <span class="match-badge badge-upcoming">Yükleniyor</span>
-                            <div class="recent-teams">
-                                <span>Fenerbahçe</span>
-                                <span class="recent-score">v</span>
-                                <span>Rakip</span>
-                            </div>
-                            <div class="card-meta">Yükleniyor...</div>
-                        </div>
-                        <div class="matchday-missing-box">
-                            <div class="matchday-missing-title">
-                                <span>Maç günü eksikleri</span>
-                                <span>0 eksik</span>
-                            </div>
-                            <div class="matchday-missing-item">
-                                <div class="missing-player-info">
-                                    <span class="missing-player-name">-</span>
-                                    <span class="missing-player-stats">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" class="open-sim-btn" onclick="openSimulation('alanya')"><svg class="ico" aria-hidden="true"><use href="#i-zap"/></svg>Canlı 2D simülasyonu aç</button>
-                </div>
-
-                <div class="recent-match-card" id="card-slavia">
-                    <div>
-                        <div class="card-top-center">
-                            <span class="match-badge badge-upcoming">Yükleniyor</span>
-                            <div class="recent-teams">
-                                <span>Fenerbahçe</span>
-                                <span class="recent-score">v</span>
-                                <span>Rakip</span>
-                            </div>
-                            <div class="card-meta">Yükleniyor...</div>
-                        </div>
-                        <div class="matchday-missing-box">
-                            <div class="matchday-missing-title">
-                                <span>Maç günü eksikleri</span>
-                                <span>0 eksik</span>
-                            </div>
-                            <div class="matchday-missing-item">
-                                <div class="missing-player-info">
-                                    <span class="missing-player-name">-</span>
-                                    <span class="missing-player-stats">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" class="open-sim-btn" onclick="openSimulation('slavia')"><svg class="ico" aria-hidden="true"><use href="#i-zap"/></svg>Taktik simülasyonunu aç</button>
-                </div>
-
-                <div class="recent-match-card" id="card-gs">
-                    <div>
-                        <div class="card-top-center">
-                            <span class="match-badge badge-upcoming">Yükleniyor</span>
-                            <div class="recent-teams">
-                                <span>Fenerbahçe</span>
-                                <span class="recent-score">v</span>
-                                <span>Rakip</span>
-                            </div>
-                            <div class="card-meta">Yükleniyor...</div>
-                        </div>
-                        <div class="matchday-missing-box">
-                            <div class="matchday-missing-title">
-                                <span>Maç günü eksikleri</span>
-                                <span>0 eksik</span>
-                            </div>
-                            <div class="matchday-missing-item">
-                                <div class="missing-player-info">
-                                    <span class="missing-player-name">-</span>
-                                    <span class="missing-player-stats">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" class="open-sim-btn" onclick="openSimulation('gs')"><svg class="ico" aria-hidden="true"><use href="#i-zap"/></svg>Derbi simülasyonunu aç</button>
-                </div>
-
+                <article class="recent-match-card is-hero is-loading" id="card-alanya" aria-busy="true">
+                    <div class="mc-top"><span class="skel skel-w30"></span></div>
+                    <div class="mc-board"><span class="skel mc-skel-crest"></span><span class="skel mc-skel-mid"></span><span class="skel mc-skel-crest"></span></div>
+                    <span class="skel skel-w40 mc-skel-line"></span>
+                </article>
+                <article class="recent-match-card is-loading" id="card-slavia" aria-busy="true">
+                    <div class="mc-top"><span class="skel skel-w40"></span></div>
+                    <span class="skel skel-w80"></span>
+                    <span class="skel skel-w60"></span>
+                </article>
+                <article class="recent-match-card is-loading" id="card-gs" aria-busy="true">
+                    <div class="mc-top"><span class="skel skel-w40"></span></div>
+                    <span class="skel skel-w80"></span>
+                    <span class="skel skel-w60"></span>
+                </article>
             </div>
 
             <!-- SİMÜLASYON PANELİ -->
