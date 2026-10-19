@@ -1,0 +1,3 @@
+# Sadece geliştirme/test için (Render bunu kurmaz)
+-r requirements.txt
+pytest
