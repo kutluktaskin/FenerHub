@@ -1,7 +1,9 @@
-const API_BASE = "https://fenerhub.onrender.com";
+const API_BASE = "https://fenerhub.onrender.com/api"; // Sonuna /api ekledik
 
 async function apiGet(path) {
-    const res = await fetch(`${API_BASE}${path}`);
+    // Eğer path zaten /api ile başlıyorsa tekrar eklemesin
+    const fullPath = path.startsWith("/api") ? path : `/api${path}`;
+    const res = await fetch(`${API_BASE}${fullPath}`);
     if (!res.ok) throw new Error(`API hatası: ${res.status}`);
     return res.json();
 }
