@@ -372,7 +372,7 @@ table { font-variant-numeric: tabular-nums; }
     box-shadow: inset 0 2px 0 var(--c-accent), var(--sh-2), var(--sh-glow);
 }
 /* Bölüm başlıklarının arkasında forma çizgisi dokusu (aşağı doğru kaybolur) */
-.fx-head::before, .match-card-top::before {
+.match-card-top::before {
     content: "";
     position: absolute;
     left: 0;
@@ -1764,18 +1764,33 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .fx-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--c-text-3); font-size: var(--fs-sm); }
 .fx-summary:empty { display: none; }
 
-/* Liste kendi içinde kayar; ay başlıkları üstte yapışık kalır */
+/* Zaman çizelgesi: liste kendi içinde kayar; solda dikey hat, aylar hat üzerinde düğüm.
+   Kart içi düzen listenin genişliğine göre değişir (container query). */
 .fixtures-grid {
-    max-height: 640px;
+    --tl-x: 13px;            /* hattın konumu */
+    --tl-pad: 40px;          /* kartların hattan uzaklığı */
+    max-height: 660px;
     overflow-y: auto;
-    margin: 0 calc(var(--s-2) * -1);
-    padding: 0 var(--s-2) var(--s-2);
+    padding: 0 var(--s-2) var(--s-2) 0;
     border-radius: var(--r-md);
+    container: fixtures / inline-size;
 }
 .fixtures-grid:focus-visible { outline-offset: 4px; }
-.fixtures-grid > .skel-card { margin-bottom: var(--s-3); }
+.fixtures-grid > .skel-card { margin: 0 0 var(--s-3) var(--tl-pad); }
 
-.fx-month + .fx-month { margin-top: var(--s-2); }
+.fx-month { position: relative; padding: 0 0 var(--s-4) var(--tl-pad); }
+/* Dikey hat: ay boyunca devam eder, aylar birbirine bağlanır */
+.fx-month::before {
+    content: "";
+    position: absolute;
+    left: var(--tl-x);
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--c-line-strong);
+}
+/* :has(): tamamı oynanmış ayın hattı sarı */
+.fx-month:not(:has(.is-upcoming, .is-live))::before { background: var(--c-accent-line); }
 .fx-month-title {
     position: sticky;
     top: 0;
@@ -1783,16 +1798,31 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    margin: 0 calc(var(--s-2) * -1) var(--s-3);
-    padding: var(--s-2) var(--s-3);
-    border-radius: var(--r-md) var(--r-md) 0 0;
+    margin: 0 0 var(--s-3) calc(var(--tl-pad) * -1);
+    padding: var(--s-2) var(--s-3) var(--s-2) var(--tl-pad);
     background: var(--c-navy-900);
-    box-shadow: inset 0 -2px 0 var(--c-accent);
-    color: var(--c-accent);
+    box-shadow: inset 0 -2px 0 var(--c-line-strong);
+    color: var(--c-text);
     font-size: var(--fs-md);
     text-transform: uppercase;
     letter-spacing: 0.06em;
 }
+/* Ay düğümü: hat üzerinde halka */
+.fx-month-title::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--tl-x) - 6px);
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    margin-top: -7px;
+    border: 3px solid var(--c-accent);
+    border-radius: 50%;
+    background: var(--c-navy-900);
+}
+/* :has(): sıradaki maçın olduğu ay vurgulu */
+.fx-month:has(.is-next, .is-live) .fx-month-title { color: var(--c-accent); box-shadow: inset 0 -2px 0 var(--c-accent); }
+.fx-month:has(.is-next, .is-live) .fx-month-title::before { background: var(--c-accent); }
 .fx-month-title span {
     font-family: var(--f-body);
     font-size: var(--fs-xs);
@@ -1801,16 +1831,13 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     text-transform: none;
     color: var(--c-text-3);
 }
-.fx-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
-    gap: var(--s-3);
-}
+.fx-list { display: flex; flex-direction: column; gap: var(--s-2); }
 
-/* Maç kartı: tarih | rakip ve etiketler | sonuç */
+/* Maç kartı: tarih | rakip ve etiketler | sonuç; solunda hat üzerinde nokta */
 .fx-card {
+    position: relative;
     display: grid;
-    grid-template-columns: 48px minmax(0, 1fr) auto;
+    grid-template-columns: 52px minmax(0, 1fr) auto;
     align-items: center;
     gap: var(--s-3);
     padding: var(--s-3) var(--s-4);
@@ -1819,8 +1846,46 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     background: linear-gradient(160deg, var(--c-surface-2), var(--c-inset));
     transition: border-color var(--t), box-shadow var(--t), transform var(--t) var(--ease);
 }
-.fx-card:hover { border-color: var(--c-accent-line); box-shadow: 0 10px 28px var(--c-accent-glow); transform: translateY(-2px); }
-.fx-card.skel-card { display: flex; min-height: 76px; }
+.fx-card:hover { border-color: var(--c-accent-line); box-shadow: 0 10px 28px var(--c-accent-glow); transform: translateX(3px); }
+.fx-card.skel-card { display: flex; min-height: 64px; }
+.fx-card::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--tl-x) - var(--tl-pad) - 5px);
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: var(--dot, var(--c-navy-900));
+    box-shadow: 0 0 0 3px var(--c-navy-800), 0 0 0 4px var(--dot-ring, var(--c-text-3));
+}
+.fx-card.skel-card::before { display: none; }
+.fx-card.is-played { --dot: var(--res-color); --dot-ring: var(--res-color); }
+.fx-card.is-upcoming { --dot: var(--c-navy-900); --dot-ring: var(--c-text-3); }
+.fx-card.is-next { --dot: var(--c-accent); --dot-ring: var(--c-accent); }
+.fx-card.is-live { --dot: var(--c-live); --dot-ring: var(--c-live); }
+/* Sıradaki maç: nabız atan sarı nokta (transform + opacity) */
+.fx-card.is-next::after, .fx-card.is-live::after {
+    content: "";
+    position: absolute;
+    left: calc(var(--tl-x) - var(--tl-pad) - 5px);
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: var(--dot);
+    opacity: 0;
+    pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+    .fx-card.is-next::after, .fx-card.is-live::after { animation: dot-pulse 1.8s var(--ease) infinite; }
+}
+@keyframes dot-pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(3); opacity: 0; }
+}
 
 .fx-date {
     display: flex;
@@ -1839,6 +1904,11 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .fx-opp .crest-sm { --size: 24px; }
 .fx-tags { display: flex; flex-wrap: wrap; gap: 4px var(--s-3); color: var(--c-text-3); font-size: var(--fs-xs); }
 .fx-tags > span { display: inline-flex; align-items: center; gap: 4px; }
+/* Geniş listede etiketler rakibin yanına geçer */
+@container fixtures (min-width: 700px) {
+    .fx-body { flex-direction: row; align-items: center; justify-content: space-between; gap: var(--s-4); }
+    .fx-tags { flex-wrap: nowrap; }
+}
 
 .fx-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; text-align: right; }
 .fx-score { font-family: var(--f-display); font-size: 1.4rem; font-weight: 700; white-space: nowrap; }
@@ -1887,6 +1957,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 
 @media (max-width: 520px) {
     .fixtures-full-section { padding: var(--s-4); }
+    .fixtures-grid { --tl-pad: 32px; --tl-x: 10px; }
     .fx-card { grid-template-columns: 40px minmax(0, 1fr) auto; gap: var(--s-2); padding: var(--s-3); }
     .fx-date { padding-right: var(--s-2); }
     .fx-date b { font-size: 1.35rem; }
