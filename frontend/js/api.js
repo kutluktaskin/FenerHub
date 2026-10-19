@@ -551,42 +551,100 @@ async function loadUpcomingMatches() {
 }
 
 // ---------- Fikstür ----------
-function fixtureDate(m) {
-    if (!m.match_date) return "Sezon Sonu";
-    const d = new Date(m.match_date + "T00:00:00");
-    const dd = String(d.getDate()).padStart(2, "0");
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    return `${dd}/${mm} ${DAYS_TR[d.getDay()]}`;
+const RESULT = {
+    win:  { letter: "G", label: "Galibiyet" },
+    draw: { letter: "B", label: "Beraberlik" },
+    loss: { letter: "M", label: "Mağlubiyet" },
+};
+
+function resultOf(m) {
+    const fbHome = m.home === "Fenerbahçe";
+    const fb = fbHome ? m.home_score : m.away_score;
+    const opp = fbHome ? m.away_score : m.home_score;
+    return fb > opp ? "win" : fb < opp ? "loss" : "draw";
+}
+
+function fixtureCard(m, isNext) {
+    const hasScore = m.home_score !== null && m.home_score !== undefined;
+    const live = m.status === "live";
+    const done = m.status === "finished" && hasScore;
+    const fbHome = m.home === "Fenerbahçe";
+    const rival = rivalOf(m);
+    const d = m.match_date ? new Date(m.match_date + "T00:00:00") : null;
+
+    let cls = "fx-card", right;
+    if (live) {
+        cls += " is-live";
+        right = `<span class="fx-live"><span class="live-pulse"></span>${esc(liveMinute(m) ?? "Canlı")}</span>
+            <b class="fx-score">${m.home_score ?? 0} - ${m.away_score ?? 0}</b>`;
+    } else if (done) {
+        const res = resultOf(m);
+        cls += ` is-played ${res}`;
+        right = `<span class="res-badge ${res}" title="${RESULT[res].label}">${RESULT[res].letter}</span>
+            <b class="fx-score">${m.home_score} - ${m.away_score}</b>`;
+    } else {
+        cls += " is-upcoming" + (isNext ? " is-next" : "");
+        right = `<b class="fx-time">${esc(m.kickoff_time ?? "--:--")}</b>${isNext ? `<span class="fx-next">Sıradaki</span>` : ""}`;
+    }
+
+    const label = `${m.home} - ${m.away}, ${d ? longDate(m) : "tarih belli değil"}`;
+    return `<article class="${cls}" aria-label="${esc(label)}"${isNext ? ' aria-current="true"' : ""}>
+        <div class="fx-date">${d ? `<b>${d.getDate()}</b><span>${DAYS_TR[d.getDay()]}</span>` : "<b>–</b>"}</div>
+        <div class="fx-body">
+            <div class="fx-opp">${crest(rival, "crest-sm")}<span>${esc(rival)}</span></div>
+            <div class="fx-tags">
+                <span class="fx-comp">${icon(m.competition === "uefa" ? "star" : "trophy")}${esc(COMPETITION_SHORT[m.competition] ?? "")}</span>
+                <span class="fx-venue">${icon(fbHome ? "home" : "plane")}${fbHome ? "İç saha" : "Deplasman"}</span>
+            </div>
+        </div>
+        <div class="fx-right">${right}</div>
+    </article>`;
 }
 
 function renderFixtures(container, matches) {
-    container.innerHTML = matches.map(m => {
-        const hasScore = m.home_score !== null && m.home_score !== undefined;
-        const live = m.status === "live" && hasScore;
-        const done = m.status === "finished" && hasScore;
+    // Tarihe göre sırala; tarihi belli olmayanlar sona
+    const list = [...matches].sort((a, b) =>
+        (a.match_date || "9999").localeCompare(b.match_date || "9999") ||
+        (a.kickoff_time || "").localeCompare(b.kickoff_time || ""));
+    const next = list.find(m => m.status !== "finished");
 
-        let cls = "fixture-item";
-        let bottom = `<div class="fixture-time">${m.kickoff_time ?? "Henüz belirlenmedi"}</div>`;
+    // Aylara göre grupla
+    const groups = new Map();
+    list.forEach(m => {
+        const key = m.match_date ? m.match_date.slice(0, 7) : "tbd";
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(m);
+    });
+    const monthTitle = key => {
+        if (key === "tbd") return "Tarihi belli olmayanlar";
+        const [y, mo] = key.split("-").map(Number);
+        return `${MONTHS_TR[mo - 1]} ${y}`;
+    };
 
-        if (live) {
-            cls += " is-live";
-            bottom = `<div class="fixture-score live">${icon("radio")}CANLI ${m.home_score} - ${m.away_score}</div>`;
-        } else if (done) {
-            const fbHome = m.home === "Fenerbahçe";
-            const fb = fbHome ? m.home_score : m.away_score;
-            const opp = fbHome ? m.away_score : m.home_score;
-            const res = fb > opp ? "win" : fb < opp ? "loss" : "draw";
-            const label = { win: "Galibiyet", draw: "Beraberlik", loss: "Mağlubiyet" }[res];
-            cls += ` finished ${res}`;
-            bottom = `<div class="fixture-score ${res}">${m.home_score} - ${m.away_score} • ${label}</div>`;
-        }
+    container.innerHTML = [...groups].map(([key, ms]) => `<section class="fx-month" aria-label="${monthTitle(key)}">
+        <h3 class="fx-month-title">${monthTitle(key)}<span>${ms.length} maç</span></h3>
+        <div class="fx-list">${ms.map(m => fixtureCard(m, m === next)).join("")}</div>
+    </section>`).join("");
 
-        return `<div class="${cls}">
-            <div class="fixture-date">${fixtureDate(m)}</div>
-            <div class="fixture-teams">${esc(m.home)} - ${esc(m.away)}</div>
-            ${bottom}
-        </div>`;
-    }).join("");
+    // Sezon özeti: oynanan maçların G/B/M dağılımı
+    const played = list.filter(m => m.status === "finished" && m.home_score !== null);
+    const count = r => played.filter(m => resultOf(m) === r).length;
+    const summary = document.getElementById("fxSummary");
+    if (summary && played.length) {
+        summary.innerHTML = `${played.length} maç oynandı
+            <span class="res-badge win">${count("win")}G</span>
+            <span class="res-badge draw">${count("draw")}B</span>
+            <span class="res-badge loss">${count("loss")}M</span>`;
+    }
+
+    // İlk yüklemede liste sıradaki maça kayar (sayfa kaydırılmaz)
+    const nextCard = container.querySelector(".fx-card.is-next, .fx-card.is-live");
+    if (nextCard && !container.dataset.autoScrolled) {
+        container.dataset.autoScrolled = "1";
+        const header = nextCard.closest(".fx-month").querySelector(".fx-month-title");
+        container.scrollTop += nextCard.getBoundingClientRect().top - container.getBoundingClientRect().top
+            - header.offsetHeight - 12;
+    }
 }
 
 async function loadFixtures() {

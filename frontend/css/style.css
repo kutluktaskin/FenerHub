@@ -1302,46 +1302,133 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 }
 
 /* ---------- 11 FİKSTÜR ---------- */
-.fixtures-full-section { padding: var(--s-5); }
-.fixtures-full-section .muted { margin-top: var(--s-2); font-size: var(--fs-sm); }
+.fixtures-full-section { display: flex; flex-direction: column; gap: var(--s-4); padding: var(--s-5); }
+.fx-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3); }
+.fx-head .box-title { flex: 1; min-width: min(280px, 100%); }
+.fx-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--c-text-3); font-size: var(--fs-sm); }
+.fx-summary:empty { display: none; }
+
+/* Liste kendi içinde kayar; ay başlıkları üstte yapışık kalır */
 .fixtures-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
-    gap: var(--s-3);
-    margin-top: var(--s-5);
+    max-height: 640px;
+    overflow-y: auto;
+    margin: 0 calc(var(--s-2) * -1);
+    padding: 0 var(--s-2) var(--s-2);
+    border-radius: var(--r-md);
 }
-.fixture-item {
+.fixtures-grid:focus-visible { outline-offset: 4px; }
+.fixtures-grid > .skel-card { margin-bottom: var(--s-3); }
+
+.fx-month + .fx-month { margin-top: var(--s-2); }
+.fx-month-title {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: var(--s-3) 0 var(--s-2);
+    background: var(--c-surface-solid);
+    font-size: var(--fs-md);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.fx-month-title span {
+    font-family: var(--f-body);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--c-text-3);
+}
+.fx-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+    gap: var(--s-3);
+}
+
+/* Maç kartı: tarih | rakip ve etiketler | sonuç */
+.fx-card {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--s-3);
+    padding: var(--s-3) var(--s-4);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-lg);
+    background: rgba(255, 255, 255, 0.035);
+    transition: border-color var(--t), background var(--t), transform var(--t) var(--ease);
+}
+.fx-card:hover { border-color: var(--c-line-strong); background: rgba(255, 255, 255, 0.06); transform: translateY(-1px); }
+.fx-card.skel-card { display: flex; min-height: 76px; }
+
+.fx-date {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--s-1);
-    padding: var(--s-4);
-    border: 1px solid var(--c-line);
-    border-radius: var(--r-lg);
-    background: rgba(0, 0, 0, 0.2);
-    text-align: center;
-    transition: border-color var(--t), transform var(--t) var(--ease);
+    padding-right: var(--s-3);
+    border-right: 1px solid var(--c-line);
+    line-height: 1.1;
 }
-.fixture-item:hover { border-color: var(--c-line-strong); transform: translateY(-2px); }
-.fixture-item.skel-card { align-items: center; }
-.fixture-date { color: var(--c-text-3); font-size: var(--fs-xs); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
-.fixture-teams { font-weight: 600; }
-.fixture-time { color: var(--c-text-2); font-size: var(--fs-sm); }
+.fx-date b { font-family: var(--f-display); font-size: 1.6rem; font-weight: 700; }
+.fx-date span { color: var(--c-text-3); font-size: var(--fs-xs); font-weight: 600; text-transform: uppercase; }
 
-.fixture-score {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 2px 10px;
+.fx-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.fx-opp { display: flex; align-items: center; gap: var(--s-2); min-width: 0; font-weight: 600; }
+.fx-opp > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx-opp .crest-sm { --size: 24px; }
+.fx-tags { display: flex; flex-wrap: wrap; gap: 4px var(--s-3); color: var(--c-text-3); font-size: var(--fs-xs); }
+.fx-tags > span { display: inline-flex; align-items: center; gap: 4px; }
+
+.fx-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; text-align: right; }
+.fx-score { font-family: var(--f-display); font-size: 1.4rem; font-weight: 700; white-space: nowrap; }
+.fx-time { font-family: var(--f-display); font-size: 1.2rem; font-weight: 600; color: var(--c-text-2); }
+.fx-next {
+    padding: 1px 8px;
     border-radius: var(--r-pill);
-    font-size: var(--fs-sm);
+    background: var(--c-accent);
+    color: var(--c-accent-ink);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.fx-live { display: inline-flex; align-items: center; gap: 6px; color: var(--c-live); font-size: var(--fs-xs); font-weight: 700; }
+.fx-live .live-pulse { width: 7px; height: 7px; }
+
+/* G / B / M rozeti */
+.res-badge {
+    display: inline-grid;
+    place-items: center;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: var(--r-sm);
+    font-size: 11px;
     font-weight: 700;
 }
-.fixture-score.win { background: var(--c-win-soft); color: var(--c-win); }
-.fixture-score.draw { background: var(--c-draw-soft); color: var(--c-draw); }
-.fixture-score.loss { background: var(--c-loss-soft); color: var(--c-loss); }
-.fixture-score.live { background: var(--c-live-soft); color: var(--c-live); }
-.fixture-item.is-live { border-color: rgba(255, 77, 94, 0.55); }
+.res-badge.win { background: var(--c-win-soft); color: var(--c-win); }
+.res-badge.draw { background: var(--c-draw-soft); color: var(--c-draw); }
+.res-badge.loss { background: var(--c-loss-soft); color: var(--c-loss); }
+
+/* Oynanmış maç: sonucun rengi solda ince şerit */
+.fx-card.is-played { box-shadow: inset 3px 0 0 var(--res-color); }
+.fx-card.is-played.win { --res-color: var(--c-win); }
+.fx-card.is-played.draw { --res-color: var(--c-draw); }
+.fx-card.is-played.loss { --res-color: var(--c-loss); }
+
+/* Gelecek maçlar: zeminsiz, kesikli çerçeve; sıradaki maç vurgulu */
+.fx-card.is-upcoming { background: transparent; border-style: dashed; }
+.fx-card.is-upcoming:hover { border-style: solid; }
+.fx-card.is-next { border-style: solid; border-color: var(--c-accent-line); background: var(--c-accent-soft); }
+.fx-card.is-live { border-color: rgba(255, 77, 94, 0.55); background: var(--c-live-soft); }
+
+@media (max-width: 520px) {
+    .fixtures-full-section { padding: var(--s-4); }
+    .fx-card { grid-template-columns: 40px minmax(0, 1fr) auto; gap: var(--s-2); padding: var(--s-3); }
+    .fx-date { padding-right: var(--s-2); }
+    .fx-date b { font-size: 1.35rem; }
+}
 
 /* ---------- 12 12. ADAM PANELİ ---------- */
 .fchat { position: fixed; z-index: 99990; pointer-events: none; }
