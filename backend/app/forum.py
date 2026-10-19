@@ -1,20 +1,24 @@
 import hmac
 import re
-import sqlite3
 import time
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
+from sqlalchemy import select, update
+from sqlalchemy.orm import aliased
+from starlette.concurrency import run_in_threadpool
 
+from .database import SessionLocal
+from .models import ForumPost
 from .net import client_ip
 
 forum_router = APIRouter(tags=["forum"])
 
-# Eski yerinde (backend/forum.db) kalsın; mevcut mesajlar kaybolmasın.
-DB = Path(__file__).resolve().parent.parent / "forum.db"
+# Mesajlar ana veritabanındaki posts tablosunda (eskiden ayrı forum.db; aktarım:
+# scripts/migrate_to_postgres.py). Veritabanı işleri thread havuzunda çalışır ki
+# Neon'un gecikmesi forumun WebSocket'ini bekletmesin.
 ROOMS = {"genel", "transfer"}
 TR = timezone(timedelta(hours=3))
 
@@ -67,42 +71,27 @@ def prune_last_post(now: float) -> None:
             del last_post[key]
 
 
-def db():
-    connection = sqlite3.connect(DB)
-    connection.row_factory = sqlite3.Row
-    return connection
-
-
-with db() as connection:
-    connection.execute("""CREATE TABLE IF NOT EXISTS posts(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        room TEXT NOT NULL, nick TEXT NOT NULL, body TEXT NOT NULL,
-        fire INTEGER DEFAULT 0, heart INTEGER DEFAULT 0, ts INTEGER NOT NULL)""")
-    columns = {row[1] for row in connection.execute("PRAGMA table_info(posts)")}
-    if "owner" not in columns:
-        connection.execute("ALTER TABLE posts ADD COLUMN owner TEXT")
-    if "parent_id" not in columns:
-        connection.execute("ALTER TABLE posts ADD COLUMN parent_id INTEGER")
-    if "deleted" not in columns:
-        connection.execute("ALTER TABLE posts ADD COLUMN deleted INTEGER DEFAULT 0")
-
-
-SELECT_POST = """
-SELECT p.id, p.room, p.nick, p.body, p.fire, p.heart, p.ts,
-       p.parent_id, p.deleted, p.owner,
-       q.nick AS parent_nick, q.body AS parent_body, q.deleted AS parent_deleted
-FROM posts p LEFT JOIN posts q ON q.id = p.parent_id
-"""
+# Mesaj + yanıtlanan mesajın özeti (eski SELECT_POST sorgusunun karşılığı)
+Parent = aliased(ForumPost)
+SELECT_POST = (
+    select(ForumPost, Parent.nick, Parent.body, Parent.deleted)
+    .outerjoin(Parent, Parent.id == ForumPost.parent_id)
+)
 
 
 def row_to_post(row, owner: str = ""):
-    data = dict(row)
-    post_owner = data.pop("owner", None)  # Gizli sahiplik anahtarı API yanıtına konmaz.
-    data["mine"] = bool(
-        owner and post_owner and hmac.compare_digest(post_owner, owner)
-    )
-    data["deleted"] = bool(data.get("deleted"))
-    data["parent_deleted"] = bool(data.get("parent_deleted"))
+    """API cevabı eskisiyle aynı alanlar: id, room, nick, body, fire, heart, ts,
+    parent_id, deleted, parent_nick, parent_body, parent_deleted, mine."""
+    post, parent_nick, parent_body, parent_deleted = row
+    data = {
+        "id": post.id, "room": post.room, "nick": post.nick, "body": post.body,
+        "fire": post.fire, "heart": post.heart, "ts": post.ts,
+        "parent_id": post.parent_id, "deleted": bool(post.deleted),
+        "parent_nick": parent_nick, "parent_body": parent_body,
+        "parent_deleted": bool(parent_deleted),
+    }
+    # Gizli sahiplik anahtarı API yanıtına konmaz, sadece "mine" hesaplanır
+    data["mine"] = bool(owner and post.owner and hmac.compare_digest(post.owner, owner))
 
     if data["deleted"]:
         data["body"] = ""
@@ -187,11 +176,10 @@ def list_posts(room: str = "genel", limit: int = 60, owner: str = ""):
     if not valid_room(room):
         raise HTTPException(status_code=400, detail="Geçersiz oda")
     safe_limit = max(1, min(limit, 100))
-    with db() as connection:
-        rows = connection.execute(
-            SELECT_POST + " WHERE p.room=? ORDER BY p.id DESC LIMIT ?",
-            (room, safe_limit),
-        ).fetchall()
+    with SessionLocal() as session:
+        rows = session.execute(
+            SELECT_POST.where(ForumPost.room == room).order_by(ForumPost.id.desc()).limit(safe_limit)
+        ).all()
     return [row_to_post(row, owner) for row in rows]
 
 
@@ -213,46 +201,39 @@ async def create_post(post: PostIn, request: Request):
     if not body:
         raise HTTPException(status_code=400, detail="Boş mesaj")
 
-    with db() as connection:
-        if post.parent_id is not None:
-            parent = connection.execute(
-                "SELECT room, deleted FROM posts WHERE id=?", (post.parent_id,)
-            ).fetchone()
-            if not parent or parent["room"] != post.room or parent["deleted"]:
-                raise HTTPException(
-                    status_code=400, detail="Yanıtlanan mesaj bulunamadı."
-                )
+    def insert():
+        with SessionLocal() as session, session.begin():
+            if post.parent_id is not None:
+                parent = session.get(ForumPost, post.parent_id)
+                if not parent or parent.room != post.room or parent.deleted:
+                    raise HTTPException(status_code=400, detail="Yanıtlanan mesaj bulunamadı.")
+            new = ForumPost(room=post.room, nick=nick, body=body, ts=int(now),
+                            owner=post.owner, parent_id=post.parent_id)
+            session.add(new)
+            session.flush()
+            row = session.execute(SELECT_POST.where(ForumPost.id == new.id)).one()
+            # Sözlükler oturum kapanmadan üretilir (commit sonrası nesne okunamaz)
+            return row_to_post(row), row_to_post(row, post.owner)
 
-        cursor = connection.execute(
-            "INSERT INTO posts(room,nick,body,ts,owner,parent_id) VALUES(?,?,?,?,?,?)",
-            (post.room, nick, body, int(now), post.owner, post.parent_id),
-        )
-        row = connection.execute(
-            SELECT_POST + " WHERE p.id=?", (cursor.lastrowid,)
-        ).fetchone()
-
+    public, own = await run_in_threadpool(insert)
     last_post[ip] = now
-    await hub.broadcast({"type": "post", "post": row_to_post(row)})
-    return row_to_post(row, post.owner)
+    await hub.broadcast({"type": "post", "post": public})
+    return own
 
 
 @forum_router.post("/api/forum/posts/{pid}/delete")
 async def delete_post(pid: int, data: DelIn):
-    with db() as connection:
-        row = connection.execute(
-            "SELECT owner FROM posts WHERE id=?", (pid,)
-        ).fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail="Mesaj yok")
-        if not row["owner"] or not hmac.compare_digest(row["owner"], data.owner):
-            raise HTTPException(
-                status_code=403,
-                detail="Sadece kendi mesajını silebilirsin.",
-            )
-        connection.execute(
-            "UPDATE posts SET deleted=1, body='' WHERE id=?", (pid,)
-        )
+    def soft_delete():
+        with SessionLocal() as session, session.begin():
+            post = session.get(ForumPost, pid)
+            if not post:
+                raise HTTPException(status_code=404, detail="Mesaj yok")
+            if not post.owner or not hmac.compare_digest(post.owner, data.owner):
+                raise HTTPException(status_code=403, detail="Sadece kendi mesajını silebilirsin.")
+            post.deleted = True
+            post.body = ""
 
+    await run_in_threadpool(soft_delete)
     await hub.broadcast({"type": "delete", "id": pid})
     return {"ok": True}
 
@@ -263,20 +244,20 @@ async def react(pid: int, reaction: ReactIn):
     if not column:
         raise HTTPException(status_code=400, detail="Geçersiz tepki")
 
-    with db() as connection:
-        row = connection.execute(
-            "SELECT id FROM posts WHERE id=?", (pid,)
-        ).fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail="Mesaj yok")
-        connection.execute(
-            f"UPDATE posts SET {column}={column}+1 WHERE id=?", (pid,)
-        )
-        updated = connection.execute(
-            "SELECT id, fire, heart FROM posts WHERE id=?", (pid,)
-        ).fetchone()
+    def increment():
+        with SessionLocal() as session, session.begin():
+            # Tek UPDATE ile artır: aynı anda gelen tepkiler birbirini ezmez
+            col = getattr(ForumPost, column)
+            result = session.execute(
+                update(ForumPost).where(ForumPost.id == pid).values({column: col + 1})
+            )
+            if result.rowcount == 0:
+                raise HTTPException(status_code=404, detail="Mesaj yok")
+            post = session.get(ForumPost, pid)
+            session.refresh(post)
+            return {"id": post.id, "fire": post.fire, "heart": post.heart}
 
-    data = dict(updated)
+    data = await run_in_threadpool(increment)
     await hub.broadcast({"type": "react", **data})
     return data
 

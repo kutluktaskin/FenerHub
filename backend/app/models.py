@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Integer, String, Date, Time, ForeignKey, UniqueConstraint
+    Boolean, Column, Integer, String, Text, Date, Time, ForeignKey, Index, UniqueConstraint, false
 )
 from sqlalchemy.orm import relationship
 from .database import Base
@@ -85,3 +85,19 @@ class Standing(Base):
     goal_difference = Column(Integer, default=0)
     points = Column(Integer, default=0)
     team = relationship("Team")
+
+
+class ForumPost(Base):
+    """12. Adam forum mesajı (eskiden ayrı forum.db'deydi)."""
+    __tablename__ = "posts"
+    __table_args__ = (Index("ix_posts_room_id", "room", "id"),)
+    id = Column(Integer, primary_key=True)
+    room = Column(String(64), nullable=False)
+    nick = Column(String(40), nullable=False)
+    body = Column(Text, nullable=False)
+    fire = Column(Integer, nullable=False, default=0, server_default="0")
+    heart = Column(Integer, nullable=False, default=0, server_default="0")
+    ts = Column(Integer, nullable=False)                 # Unix zamanı (saniye)
+    owner = Column(String(64))                           # gizli sahiplik anahtarı, API'ye verilmez
+    parent_id = Column(Integer, ForeignKey("posts.id", ondelete="SET NULL"))
+    deleted = Column(Boolean, nullable=False, default=False, server_default=false())
