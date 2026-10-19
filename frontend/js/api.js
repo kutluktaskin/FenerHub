@@ -1,4 +1,6 @@
-const API_BASE = "https://fenerhub.onrender.com"; //
+const IS_LOCAL = ["127.0.0.1", "localhost"].includes(location.hostname);
+// Yollar zaten "/api/..." ile başlıyor; buraya "/api" ekleme (çift /api/api olur).
+const API_BASE = IS_LOCAL ? "http://127.0.0.1:8000" : "https://fenerhub.onrender.com";
 
 async function apiGet(path) {
     const res = await fetch(`${API_BASE}${path}`);

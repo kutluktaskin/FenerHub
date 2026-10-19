@@ -125,7 +125,7 @@ async function simPoll() {
     const f = feed;
     let d;
     try {
-        d = await apiGet(`/matches/${f.id}/detail`);
+        d = await apiGet(`/api/matches/${f.id}/detail`);
     } catch (e) {
         return;
     }

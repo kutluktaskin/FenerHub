@@ -13,8 +13,8 @@ window.toggleForum = function () {
 };
 
 (() => {
-  const API = "https://fenerhub.onrender.com";
-  const WS_URL = "wss://fenerhub.onrender.com/ws/forum";
+  const API = API_BASE; // api.js'de tanımlı (önce yüklenir)
+  const WS_URL = API_BASE.replace(/^http/, "ws") + "/ws/forum";
   const ROOMS = [
     { key: "genel", label: "Genel" },
     { key: "mac", label: "Gelecek Maç" },
