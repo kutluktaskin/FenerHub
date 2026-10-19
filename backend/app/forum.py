@@ -1,3 +1,66 @@
+import hmac
+import re
+import sqlite3
+import time
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel, Field
+
+forum_router = APIRouter(tags=["forum"])
+
+# Eski yerinde (backend/forum.db) kalsın; mevcut mesajlar kaybolmasın.
+DB = Path(__file__).resolve().parent.parent / "forum.db"
+ROOMS = {"genel", "transfer"}
+TR = timezone(timedelta(hours=3))
+
+# Maçları kronolojik sırayla ekle. Saatler Türkiye saatiyle (+03:00).
+FIXTURES = [
+    {"id": "slavia-1020", "home": "Fenerbahçe", "away": "Slavia Prag",
+     "comp": "UEFA Şampiyonlar Ligi", "kickoff": "2026-10-20T19:45:00+03:00"},
+    {"id": "gs-1026", "home": "Galatasaray", "away": "Fenerbahçe",
+     "comp": "Trendyol Süper Lig", "kickoff": "2026-10-26T21:30:00+03:00"},
+    {"id": "goztepe-1031", "home": "Fenerbahçe", "away": "Göztepe",
+     "comp": "Trendyol Süper Lig", "kickoff": "2026-10-31T19:00:00+03:00"},
+]
+
+MATCH_LENGTH = timedelta(hours=2)   # maç süresi (yaklaşık)
+KEEP_OPEN = timedelta(hours=24)     # maç bittikten sonra oda açık kalma süresi
+
+
+def current_match():
+    """Maç bitişinden (başlangıç + 2 saat) 24 saat geçmeyen ilk maç."""
+    now = datetime.now(TR)
+    for match in FIXTURES:
+        kickoff = datetime.fromisoformat(match["kickoff"])
+        if now < kickoff + MATCH_LENGTH + KEEP_OPEN:
+            return match
+    return None
+
+
+def valid_room(room: str) -> bool:
+    return room in ROOMS or room in {"mac-" + m["id"] for m in FIXTURES}
+
+
+BAD = ["küfür1", "küfür2"]          # kendi yasaklı kelimelerini ekle
+last_post = {}                      # ip -> son mesaj zamanı
+
+
+def db():
+    connection = sqlite3.connect(DB)
+    connection.row_factory = sqlite3.Row
+    return connection
+
+
+with db() as connection:
+    connection.execute("""CREATE TABLE IF NOT EXISTS posts(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        room TEXT NOT NULL, nick TEXT NOT NULL, body TEXT NOT NULL,
+        fire INTEGER DEFAULT 0, heart INTEGER DEFAULT 0, ts INTEGER NOT NULL)""")
+    columns = {row[1] for row in connection.execute("PRAGMA table_info(posts)")}
+    if "owner" not in columns:
         connection.execute("ALTER TABLE posts ADD COLUMN owner TEXT")
     if "parent_id" not in columns:
         connection.execute("ALTER TABLE posts ADD COLUMN parent_id INTEGER")
@@ -190,3 +253,22 @@ async def react(pid: int, reaction: ReactIn):
             f"UPDATE posts SET {column}={column}+1 WHERE id=?", (pid,)
         )
         updated = connection.execute(
+            "SELECT id, fire, heart FROM posts WHERE id=?", (pid,)
+        ).fetchone()
+
+    data = dict(updated)
+    await hub.broadcast({"type": "react", **data})
+    return data
+
+
+@forum_router.websocket("/ws/forum")
+async def ws_forum(websocket: WebSocket):
+    # hub.add bağlantıyı kabul eder; burada ikinci kez accept çağrılmamalı.
+    await hub.add(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        pass
+    finally:
+        await hub.drop(websocket)
