@@ -1,61 +1,78 @@
-"""Arka plan senkronizasyonu. main.py backend açılırken başlatır.
-Maçlar, puan durumu, kadro ve oyuncu istatistikleri kendiliğinden güncellenir.
-Maç saatlerinde sık, diğer zamanlarda seyrek istek atar."""
 import asyncio
 import json
 import os
 import time
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import sync  # backend/sync.py
 from . import models
 from .database import SessionLocal
 
-FAST = 180                 # maç penceresinde 3 dk
-SLOW = 3600                # normalde en fazla 1 saat
-ROSTER_EVERY = 6 * 3600    # kadro + oyuncu istatistikleri 6 saatte bir
-SQUAD_MAX_AGE = 5 * 3600
+CACHE = "detail_cache"
 PAGES = "pages_fb"
+TICK = 60  # her dakika kontrol eder, istek sadece süresi dolan işler için atılır
+
+# saniye cinsinden aralıklar
+MATCHES_LIVE = 480
+MATCHES_IDLE = 7200
+LAST_LIVE = 1800
+LAST_IDLE = 21600
+INCIDENTS_EVERY = 300
+STATS_EVERY = 900
+LINEUPS_EVERY = 900
+
+backoff = {}
 
 
-def _rm(*names):
-    """Kayıtlı maç sayfasını siler ki sync yeniden çeksin (90 sn'den yeniyse dokunmaz)."""
-    for n in names:
-        p = f"{PAGES}/{n}.json"
-        if os.path.exists(p) and time.time() - os.path.getmtime(p) > 90:
-            os.remove(p)
+def due(path, every):
+    return (not os.path.exists(path)) or time.time() - os.path.getmtime(path) >= every
 
 
-def window_state():
-    """(şu an maç penceresinde mi, bir sonraki pencereye kaç saniye var)
-    Pencere: başlamadan 10 dk önce -> başlamadan 150 dk sonra."""
+def guard(key, fn):
+    """Hata olursa 5 dakika bekletir, istek yakmasın."""
+    if time.time() < backoff.get(key, 0):
+        return None
+    try:
+        return fn()
+    except Exception:
+        backoff[key] = time.time() + 300
+        traceback.print_exc()
+        return None
+
+
+def snapshot():
     now = datetime.now(sync.TR_TZ)
-    fast = False
-    next_start = None
+    out = []
     db = SessionLocal()
     try:
         rows = db.query(models.Match).filter(
             models.Match.status != "finished", models.Match.match_date.is_not(None)
         ).all()
         for m in rows:
-            if m.status == "live":
-                fast = True
             if not m.kickoff_time:
                 continue
             ko = datetime.combine(m.match_date, m.kickoff_time, tzinfo=sync.TR_TZ)
-            start, end = ko - timedelta(minutes=10), ko + timedelta(minutes=150)
-            if start <= now <= end:
-                fast = True
-            elif start > now and (next_start is None or start < next_start):
-                next_start = start
+            out.append({
+                "id": m.api_id,
+                "status": m.status,
+                "d": (now - ko).total_seconds() / 60,  # başlamasından beri dakika
+            })
     finally:
         db.close()
-    wait = None if next_start is None else max(30, int((next_start - now).total_seconds()))
-    return fast, wait
+    return out
 
 
-def run_matches():
+def in_live_window(m):
+    # 4 saatten eski "live" kaydı takılı kalmış sayılır, istek yakmasın
+    return (m["status"] == "live" and m["d"] <= 240) or -10 <= m["d"] <= 150
+
+
+def refresh_matches(full):
+    for name in (("next_0", "last_0") if full else ("next_0",)):
+        p = f"{PAGES}/{name}.json"
+        if os.path.exists(p) and time.time() - os.path.getmtime(p) > 120:
+            os.remove(p)
     events = sync.fetch_events()
     db = SessionLocal()
     try:
@@ -68,72 +85,71 @@ def run_matches():
         db.close()
 
 
-def run_standings(max_age):
-    old = sync.STANDINGS_MAX_AGE
-    sync.STANDINGS_MAX_AGE = max_age
+def fetch_kind(api_id, kind):
+    data = sync.api_get(f"/match/{api_id}/{kind}")
+    os.makedirs(CACHE, exist_ok=True)
+    with open(f"{CACHE}/{api_id}_{kind}.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False)
+    return data
+
+
+def has_ft(data):
+    inc = (data.get("data") or {}).get("incidents") or []
+    return any(i.get("incidentType") == "period" and i.get("text") == "FT" for i in inc)
+
+
+def lineups_ready(aid):
+    p = f"{CACHE}/{aid}_lineups.json"
+    if not os.path.exists(p):
+        return False
     try:
-        sync.fetch_standings()
-    finally:
-        sync.STANDINGS_MAX_AGE = old
-
-
-def load_squad():
-    fn = "squad_raw.json"
-    if os.path.exists(fn) and time.time() - os.path.getmtime(fn) < SQUAD_MAX_AGE:
-        with open(fn, encoding="utf-8") as f:
-            return json.load(f)["data"]["players"]
-    return sync.fetch_squad()
-
-
-def run_roster(force_stats=False):
-    squad = load_squad()
-    old = sync.STATS_MAX_AGE
-    if force_stats:
-        sync.STATS_MAX_AGE = 0
-    try:
-        stats = sync.fetch_player_stats(squad)
-    finally:
-        sync.STATS_MAX_AGE = old
-    db = SessionLocal()
-    try:
-        team = sync.sync_squad(db, squad)
-        db.flush()
-        sync.remove_excluded(db)
-        sync.sync_player_stats(db, team, stats)
-        db.commit()
+        with open(p, encoding="utf-8") as f:
+            return bool((json.load(f).get("data") or {}).get("confirmed"))
     except Exception:
-        db.rollback()
-        raise
-    finally:
-        db.close()
+        return False
+
+
+def tick():
+    ms = snapshot()
+    live = [m for m in ms if in_live_window(m)]
+    next_p = f"{PAGES}/next_0.json"
+    last_p = f"{PAGES}/last_0.json"
+
+    # 1) maç listesi
+    if due(next_p, MATCHES_LIVE if live else MATCHES_IDLE):
+        full = due(last_p, LAST_LIVE if live else LAST_IDLE)
+        guard("matches", lambda: refresh_matches(full))
+
+    for m in ms:
+        aid = m["id"]
+        if not aid:
+            continue
+
+        # 2) ilk 11: başlamadan ~75 dk önce onaylanana kadar
+        if -75 <= m["d"] < 5 and not lineups_ready(aid) and due(f"{CACHE}/{aid}_lineups.json", LINEUPS_EVERY):
+            guard(f"lin{aid}", lambda a=aid: fetch_kind(a, "lineups"))
+
+        # 3) olaylar ve istatistik: sadece maç başladıysa
+        if not in_live_window(m) or (m["d"] < 0 and m["status"] != "live"):
+            continue
+        if os.path.exists(f"{CACHE}/{aid}_done.flag"):
+            continue
+        if due(f"{CACHE}/{aid}_incidents.json", INCIDENTS_EVERY):
+            data = guard(f"inc{aid}", lambda a=aid: fetch_kind(a, "incidents"))
+            if data and has_ft(data):
+                guard(f"st{aid}", lambda a=aid: fetch_kind(a, "statistics"))   # final istatistik
+                guard("matches", lambda: refresh_matches(True))
+                os.makedirs(CACHE, exist_ok=True)
+                open(f"{CACHE}/{aid}_done.flag", "w").close()
+                continue
+        if due(f"{CACHE}/{aid}_statistics.json", STATS_EVERY):
+            guard(f"st{aid}", lambda a=aid: fetch_kind(a, "statistics"))
 
 
 async def sync_loop():
-    n = 0
-    last_roster = 0.0
-    was_fast = False
     while True:
-        fast, wait = False, None
         try:
-            fast, wait = window_state()
-            just_ended = was_fast and not fast   # pencere kapandı: son bir tam yenileme
-            n += 1
-            _rm("next_0")
-            if fast or just_ended:
-                _rm("last_0")                    # biten maç last/0'a düşer
-            if not fast and n % 6 == 0:
-                _rm("next_1", "last_0")
-            await asyncio.to_thread(run_matches)
-            await asyncio.to_thread(run_standings, 0 if just_ended else (900 if fast else 3600))
-            if just_ended or time.time() - last_roster > ROSTER_EVERY:
-                await asyncio.to_thread(run_roster, just_ended)
-                last_roster = time.time()
-            print(f"[auto_sync] tamam, mod: {'CANLI' if fast else 'normal'}")
+            await asyncio.to_thread(tick)
         except Exception:
             traceback.print_exc()
-        was_fast = fast
-        if fast:
-            delay = FAST
-        else:
-            delay = min(SLOW, wait) if wait else SLOW   # bir sonraki maç penceresini kaçırma
-        await asyncio.sleep(delay)
+        await asyncio.sleep(TICK)

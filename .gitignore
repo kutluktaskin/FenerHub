@@ -21,3 +21,6 @@ backend/pages_fb/
 probe_*
 standings_super_lig.json
 standings_uefa.json
+backend/detail_cache/
+backend/detail_*.json
+backend/events_all.json

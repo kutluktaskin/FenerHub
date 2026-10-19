@@ -28,6 +28,7 @@ function openSimulation(matchKey) {
 
     wrapper.classList.add("open");
     switchTab('pitchTab');
+    if (typeof simStartFeed === 'function') simStartFeed(matchKey, data);
 
     setTimeout(() => {
         if (typeof resizePitch === 'function') resizePitch();

@@ -43,6 +43,7 @@ class Match(Base):
     status_code = Column(Integer)
     period_start = Column(Integer)
     period_initial = Column(Integer)
+    api_id = Column(Integer)
 
 class PlayerStat(Base):
     __tablename__ = "player_stats"

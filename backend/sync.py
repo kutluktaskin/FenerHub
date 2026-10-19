@@ -259,6 +259,7 @@ def sync_matches(db, events):
             home_score=score(e.get("homeScore")),
             away_score=score(e.get("awayScore")),
             status=map_status(st),
+            api_id=e["id"],
             minute=None,
             status_code=st.get("code") if live else None,
             period_start=t.get("currentPeriodStartTimestamp") if live else None,

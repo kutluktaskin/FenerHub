@@ -147,6 +147,7 @@
                         <div class="match-tabs">
                             <button class="tab-btn active" id="btn-pitchTab" onclick="switchTab('pitchTab')">⚽ Akıllı Canlı 2D Simülasyon</button>
                             <button class="tab-btn" id="btn-statsTab" onclick="switchTab('statsTab')">📊 Anlık Maç İstatistikleri</button>
+                            <button class="tab-btn" id="btn-lineupTab" onclick="switchTab('lineupTab')">👥 İlk 11</button>
                         </div>
                         <button class="close-sim-btn" onclick="closeSimulation()">✖ Simülasyonu Kapat</button>
                     </div>
@@ -166,20 +167,28 @@
                         </div>
                     </div>
 
-                    <div id="statsTab" class="tab-content">
+                                        <div id="statsTab" class="tab-content">
+    <div class="info-panel">
+        <h3 ...>📊 Karşılaşma İstatistikleri</h3>
+        <div id="statsBody">...</div>
+    </div>
+</div>
+
+<div id="lineupTab" class="tab-content">
+    ...
+</div>
+                    </div>
+
+                    <div id="lineupTab" class="tab-content">
                         <div class="info-panel">
-                            <h3 style="color:var(--primary-color); margin-top:0;">📊 Karşılaşma İstatistikleri</h3>
-                            <div class="stats-row">
-                                <div class="stats-label"><span>%64</span><span>Topla Oynama</span><span>%36</span></div>
-                                <div class="stats-bar-bg"><div class="stats-bar-fb" style="width: 64%;"></div></div>
+                            <h3 style="color:var(--primary-color); margin-top:0;">👥 Maç İlk 11'leri</h3>
+                            <div id="lineupBody">
+                                <p style="color:#aaa;">İlk 11 henüz açıklanmadı. Genelde maçtan 30-60 dk önce gelir.</p>
                             </div>
-                            <div class="stats-row">
-                                <div class="stats-label"><span>18 (8)</span><span>Toplam Şut (İsabetli)</span><span>7 (3)</span></div>
-                                <div class="stats-bar-bg"><div class="stats-bar-fb" style="width: 72%;"></div></div>
+                        </div>
+                    </div>
                             </div>
-                            <div class="stats-row">
-                                <div class="stats-label"><span>482</span><span>Başarılı Pas</span><span>245</span></div>
-                                <div class="stats-bar-bg"><div class="stats-bar-fb" style="width: 66%;"></div></div>
+                           
                             </div>
                         </div>
                     </div>

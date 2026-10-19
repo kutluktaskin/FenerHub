@@ -207,6 +207,7 @@ function syncMatchMeta(m, key) {
     if (typeof matchMeta === "undefined") return;
     const live = m.status === "live";
     matchMeta[key] = {
+        id: m.id,
         home: m.home.toUpperCase(),
         away: m.away.toUpperCase(),
         score: m.home_score === null ? "v" : `${m.home_score} - ${m.away_score}`,
