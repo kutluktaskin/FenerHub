@@ -251,21 +251,57 @@ async function loadSquad() {
 }
 
 // ---------- Sakatlık & Ceza Raporu ----------
+// API sakatlığın başlangıç tarihini vermiyor, sadece "2 Hafta", "10 Gün", "Mart 2027" gibi bir dönüş notu var.
+// Bu nottan kalan gün sayısı tahmin edilir; çözülemezse null (çubuk gösterilmez, sadece metin).
+const RETURN_SCALE_DAYS = 84;   // çubuk ölçeği: 12 hafta ve üstü = boş
+function daysUntilReturn(note) {
+    if (!note) return null;
+    const t = note.toLocaleLowerCase("tr").trim();
+    const n = t.match(/(\d+)\s*(gün|hafta|ay)/);
+    if (n) return Number(n[1]) * { "gün": 1, "hafta": 7, "ay": 30 }[n[2]];
+    const month = MONTHS_TR.findIndex(mo => t.startsWith(mo.toLocaleLowerCase("tr")));
+    if (month >= 0) {
+        const year = Number((t.match(/\d{4}/) || [])[0]) || new Date().getFullYear();
+        return Math.max(0, Math.round((new Date(year, month, 1) - Date.now()) / 86400000));
+    }
+    return null;
+}
+
+function returnBar(note) {
+    const days = daysUntilReturn(note);
+    if (days === null) return "";
+    // Doluluk dönüşe yakınlığı gösterir: dolu = dönüşe az kaldı
+    const near = 1 - Math.min(days, RETURN_SCALE_DAYS) / RETURN_SCALE_DAYS;
+    const label = days < 14 ? `~${days} gün` : `~${Math.round(days / 7)} hafta`;
+    return `<div class="ir-return" role="img" aria-label="Dönüşe yaklaşık ${label} kaldı">
+        <span class="ir-track"><i style="transform:scaleX(${near.toFixed(3)})"></i></span>
+        <span class="ir-left">Dönüşe ${label}</span>
+    </div>`;
+}
+
 function renderAbsences(container, rows) {
     container.innerHTML = rows.map(a => {
         const suspended = a.type === "suspension";
-        const detail = [a.reason, a.return_note ? `Dönüş: ${a.return_note}` : null]
-            .filter(Boolean).join(" • ");
-        const pos = a.position ? ` (${a.position})` : "";
-        return `<div class="injury-report-card ${suspended ? "suspended-card" : ""}">
-            <div>
-                <div class="ir-name">${esc(a.player + pos)}</div>
-                <div class="ir-stats">${a.appearances} Maç • ${a.goals} Gol • ${a.assists} Asist</div>
-                <div class="ir-detail">${esc(detail)}</div>
+        const pos = POSITION_TR[a.position] ?? a.position ?? "";
+        return `<div class="injury-report-card ${suspended ? "suspended-card" : ""}" data-pos="${esc(a.position ?? "")}">
+            <div class="ir-main">
+                <div class="ir-head">
+                    <span class="ir-name">${esc(a.player)}</span>
+                    ${pos ? `<span class="pos-tag">${esc(pos)}</span>` : ""}
+                </div>
+                <div class="ir-detail">${icon(suspended ? "card" : "injury")}${esc(a.reason || (suspended ? "Ceza" : "Sakatlık"))}${a.return_note ? ` · Dönüş: ${esc(a.return_note)}` : ""}</div>
+                ${returnBar(a.return_note)}
+                <div class="ir-stats">${a.appearances} maç · ${a.goals} gol · ${a.assists} asist</div>
             </div>
             <span class="status-tag ${suspended ? "tag-suspended" : "tag-injured"}">${suspended ? icon("card") + "Cezalı" : icon("injury") + "Sakat"}</span>
         </div>`;
     }).join("") || `<p class="empty-note">${icon("check-circle")}Sakat ya da cezalı oyuncu yok.</p>`;
+
+    const badge = document.getElementById("injuryCount");
+    if (badge) {
+        badge.textContent = rows.length ? `${rows.length} eksik` : "Tam kadro";
+        badge.classList.toggle("is-clear", !rows.length);
+    }
 }
 
 async function loadAbsences() {

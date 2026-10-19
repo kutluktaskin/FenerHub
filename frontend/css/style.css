@@ -1511,10 +1511,72 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     transition: opacity var(--t-fast), transform var(--t-fast);
 }
 
-/* Sakatlık raporu: kart içeriğe göre boyutlanır (sabit yükseklik yok) */
-.team-box.injury-box { height: auto; }
-.injury-box .box-scroll { flex: none; max-height: 340px; }
+/* Sakatlık ve ceza: uyarı paneli. Kart içeriğe göre boyutlanır (sabit yükseklik yok). */
+.team-box.injury-box {
+    height: auto;
+    background:
+        radial-gradient(90% 50% at 0% 0%, color-mix(in srgb, var(--c-injury) 10%, transparent), transparent 60%),
+        var(--g-card);
+}
+/* Üst kenarda kırmızı-sarı uyarı şeridi */
+.injury-box::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 5px;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    background: repeating-linear-gradient(-45deg, var(--c-injury) 0 10px, var(--c-accent) 10px 20px);
+}
+.injury-box > .box-title .ico { background: var(--c-injury-soft); color: var(--c-injury); box-shadow: inset 0 0 0 1px var(--c-injury-line); }
+.alert-count {
+    padding: 3px 10px;
+    border-radius: var(--r-pill);
+    background: var(--c-injury);
+    color: var(--c-accent-ink) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em;
+}
+.alert-count:empty { display: none; }
+.alert-count.is-clear { background: var(--c-win); }
+.injury-box .box-scroll { flex: none; max-height: 360px; }
 .injury-report-list { display: flex; flex-direction: column; gap: var(--s-3); }
+.injury-report-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--s-3);
+    padding: var(--s-3) var(--s-4);
+    border: 1px solid var(--c-injury-line);
+    border-left: 4px solid var(--c-injury);
+    border-radius: var(--r-md);
+    background: linear-gradient(90deg, var(--c-injury-soft), var(--c-inset) 60%);
+}
+.injury-report-card.suspended-card {
+    border-color: var(--c-susp-line);
+    border-left-color: var(--c-susp);
+    background: linear-gradient(90deg, var(--c-susp-soft), var(--c-inset) 60%);
+}
+.injury-report-card.skel-card { border-color: var(--c-line); border-left-color: var(--c-line); background: var(--c-inset); align-items: stretch; flex-direction: column; }
+.ir-main { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
+.ir-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-2); }
+.ir-name { font-family: var(--f-display); font-size: var(--fs-lg); font-weight: 700; text-transform: uppercase; line-height: 1.1; }
+.ir-head .pos-tag { font-size: var(--fs-xs); }
+.ir-detail { display: flex; align-items: center; gap: 6px; color: var(--c-text-2); font-size: var(--fs-sm); }
+.ir-detail .ico { color: var(--c-injury); }
+.suspended-card .ir-detail .ico { color: var(--c-susp); }
+.ir-stats { color: var(--c-text-3); font-size: var(--fs-xs); }
+
+/* Dönüşe kalan süre: dolu = dönüşe az kaldı (12 hafta ölçek). Sadece transform ile çizilir. */
+.ir-return { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--s-3); }
+.ir-track { height: 6px; overflow: hidden; border-radius: var(--r-pill); background: var(--c-inset-strong); }
+.ir-track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--c-injury), var(--c-accent)); transform-origin: left; }
+.ir-left { color: var(--c-accent); font-size: var(--fs-xs); font-weight: 700; white-space: nowrap; }
+@media (prefers-reduced-motion: no-preference) {
+    .ir-track i { animation: bar-grow 0.9s var(--ease) both; }
+}
+@keyframes bar-grow { from { transform: scaleX(0); } }
 
 /* Kadro hazırlık özeti: yüzde halkası + mevki çubukları */
 .readiness {
@@ -1545,22 +1607,6 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .rb-ok { background: var(--c-accent); }
 .rb-miss { background: var(--c-injury); }
 .rb-count { font-weight: 700; text-align: right; }
-.injury-report-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--s-3);
-    padding: var(--s-3) var(--s-4);
-    border: 1px solid var(--c-line);
-    border-left: 3px solid var(--c-injury);
-    border-radius: var(--r-md);
-    background: var(--c-inset);
-}
-.injury-report-card.suspended-card { border-left-color: var(--c-susp); }
-.injury-report-card.skel-card { border-left-color: var(--c-line); align-items: stretch; flex-direction: column; }
-.ir-name { font-weight: 600; }
-.ir-stats { margin-top: 2px; color: var(--c-text-3); font-size: var(--fs-xs); }
-.ir-detail { margin-top: 2px; color: var(--c-text-2); font-size: var(--fs-xs); }
 
 @media (max-width: 1024px) {
     .team-overview-grid { grid-template-columns: minmax(0, 1fr); }
