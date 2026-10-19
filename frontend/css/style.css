@@ -499,11 +499,66 @@ table { font-variant-numeric: tabular-nums; }
 .nn-box i { font-style: normal; font-size: 0.6rem; color: var(--c-text-3); text-transform: uppercase; letter-spacing: 0.05em; }
 .nn-live { font-family: var(--f-display); font-size: 1.05rem; }
 
+/* Forum paneli açıkken menüdeki butonu */
+.nav-links .nav-forum[aria-expanded="true"] { color: var(--c-text); background: var(--c-hover); }
+
+/* Hamburger (sadece dar ekranda) */
+.nav-toggle {
+    display: none;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    margin-left: auto;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-md);
+    background: var(--c-hover);
+    color: var(--c-text);
+}
+.nav-toggle .ico { width: 20px; height: 20px; }
+
 @media (max-width: 1250px) {
     .nav-next { display: none !important; }
 }
+@media (max-width: 1100px) {
+    .nav-links button { padding: 10px 10px; }
+    .nav-links button.is-active::after { left: 10px; right: 10px; }
+}
 @media (max-width: 900px) {
     .nav-right { display: none; }
+    .nav-toggle { display: grid; }
+
+    /* Menü, üst çubuğun altında açılan bir panel olur */
+    .nav-links {
+        position: fixed;
+        top: var(--nav-h);
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2px;
+        margin: 0;
+        padding: var(--s-2) var(--gutter) var(--s-4);
+        background: var(--c-bg);
+        border-bottom: 1px solid var(--c-line);
+        box-shadow: var(--sh-3);
+        visibility: hidden;
+        opacity: 0;
+        transform: translateY(-8px);
+        transition: opacity var(--t) var(--ease), transform var(--t) var(--ease), visibility 0s linear var(--t);
+    }
+    .nav-links.is-open {
+        visibility: visible;
+        opacity: 1;
+        transform: none;
+        transition: opacity var(--t) var(--ease), transform var(--t) var(--ease);
+    }
+    .nav-links button {
+        padding: 14px var(--s-3);
+        font-size: var(--fs-base);
+        text-align: left;
+    }
+    .nav-links button.is-active { background: var(--c-hover); }
+    .nav-links button.is-active::after { left: 0; right: auto; top: 12px; bottom: 12px; width: 3px; height: auto; }
 }
 
 /* ---------- 06 SAYFA VE BÖLÜMLER ---------- */
@@ -512,16 +567,14 @@ table { font-variant-numeric: tabular-nums; }
     z-index: 10;
     width: min(var(--page-w), 100% - 2 * var(--gutter));
     margin: 0 auto;
-    padding: calc(var(--nav-h) + var(--s-6)) 0 var(--s-6);
+    padding: calc(var(--nav-h) + var(--s-6)) 0 var(--s-8);
     display: flex;
     flex-direction: column;
     gap: var(--s-8);
 }
+.page-container:focus { outline: none; }
 .page-section { width: 100%; scroll-margin-top: calc(var(--nav-h) + var(--s-4)); }
 
-/* Sekme sistemi (tabs.js): sadece seçili bölüm görünür */
-body.tabs-on .page-section:not(.active) { display: none !important; }
-body.tabs-on .page-section.active { animation: sectionIn 0.4s var(--ease); }
 @keyframes sectionIn {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: none; }
@@ -1222,10 +1275,14 @@ body.tabs-on .page-section.active { animation: sectionIn 0.4s var(--ease); }
 
 /* ---------- 13 FOOTER ---------- */
 .site-footer {
+    position: relative;
+    z-index: 10;
+    width: min(var(--page-w), 100% - 2 * var(--gutter));
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: var(--s-2);
-    padding-top: var(--s-5);
+    padding: var(--s-5) 0 var(--s-7);
     border-top: 1px solid var(--c-line);
     color: var(--c-text-3);
     font-size: var(--fs-sm);

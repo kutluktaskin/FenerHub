@@ -16,7 +16,7 @@
 </head>
 <body>
     <script src="js/ui.js"></script>
-    <a class="skip-link" href="#yakindakiMaclar">İçeriğe geç</a>
+    <a class="skip-link" href="#icerik">İçeriğe geç</a>
 
     <div id="preloader">
         <div class="spinner"></div>
@@ -24,19 +24,20 @@
     </div>
 
     <!-- SABİT ÜST MENÜ -->
-    <nav class="navbar">
+    <nav class="navbar" aria-label="Ana menü">
         <a href="#yakindakiMaclar" onclick="event.preventDefault(); scrollToSection('yakindakiMaclar')" class="logo fh-logo" aria-label="FenerHub ana sayfa">
-            <div class="live-pulse"></div>
+            <span class="live-pulse"></span>
             <span class="fh-word"><span style="--i:0">F</span><span style="--i:1">E</span><span style="--i:2">N</span><span style="--i:3">E</span><span style="--i:4">R</span></span><span class="fh-badge">HUB</span>
         </a>
         <div class="nav-links" id="navLinks">
-            <button type="button" style="--d:0" onclick="scrollToSection('yakindakiMaclar')">Yakın Maçlar</button>
-            <button type="button" style="--d:1" onclick="scrollToSection('takimIstatistikBolumu')">Takım Kadrosu</button>
-            <button type="button" style="--d:2" onclick="openSimulation('alanya')">Canlı Simülasyon</button>
-            <button type="button" style="--d:3" onclick="scrollToSection('puanlar')">Puan Durumu</button>
-            <button type="button" style="--d:4" onclick="scrollToSection('fikstur')">Fikstür</button>
-            <button type="button" style="--d:5" onclick="toggleForum()">12. Adam</button>
+            <button type="button" data-section="yakindakiMaclar" onclick="scrollToSection('yakindakiMaclar')">Yakın Maçlar</button>
+            <button type="button" data-section="takimIstatistikBolumu" onclick="scrollToSection('takimIstatistikBolumu')">Takım Kadrosu</button>
+            <button type="button" onclick="openSimulation('alanya')">Canlı Simülasyon</button>
+            <button type="button" data-section="puanlar" onclick="scrollToSection('puanlar')">Puan Durumu</button>
+            <button type="button" data-section="fikstur" onclick="scrollToSection('fikstur')">Fikstür</button>
+            <button type="button" class="nav-forum" data-forum-toggle aria-controls="fchat" aria-expanded="false" onclick="toggleForum()">12. Adam</button>
         </div>
+        <button type="button" class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Menüyü aç"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></button>
         <div class="nav-right">
             <img src="img/fenerbahce-logo.png" alt="Fenerbahçe" class="fb-crest" onerror="this.style.display='none'">
             <button type="button" class="nav-next" id="navNext" onclick="scrollToSection('yakindakiMaclar')" style="display:none;" aria-label="Sıradaki maça git"></button>
@@ -49,7 +50,7 @@
         <div class="vignette-overlay"></div>
     </div>
 
-    <div class="page-container">
+    <main class="page-container" id="icerik" tabindex="-1">
 
         <!-- 1. BÖLÜM: YAKIN MAÇLAR -->
         <section class="page-section hero-matches-section" id="yakindakiMaclar">
@@ -302,13 +303,13 @@
             </div>
         </section>
 
-        <footer class="site-footer">
-            <div class="footer-brand">FENER<span>HUB</span></div>
-            <p>Maç, kadro ve puan verileri SportsAPI Pro üzerinden otomatik alınır; canlı skorlar birkaç dakika gecikebilir.</p>
-            <p>Taraftar projesidir, Fenerbahçe SK ile resmi bir bağı yoktur. · <span id="footerYear">2026</span></p>
-        </footer>
+    </main>
 
-    </div>
+    <footer class="site-footer">
+        <div class="footer-brand">FENER<span>HUB</span></div>
+        <p>Maç, kadro ve puan verileri SportsAPI Pro üzerinden otomatik alınır; canlı skorlar birkaç dakika gecikebilir.</p>
+        <p>Taraftar projesidir, Fenerbahçe SK ile resmi bir bağı yoktur. · <span id="footerYear">2026</span></p>
+    </footer>
 
     <aside class="fchat" id="fchat">
     <button type="button" class="fchat-tab" onclick="toggleForum()"><svg class="ico" aria-hidden="true"><use href="#i-message"/></svg>12. Adam</button>
@@ -347,7 +348,7 @@
     <script src="js/matchEngine.js"></script>
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/tabs.js"></script>
+    <script src="js/nav.js"></script>
     <script src="js/forum.js"></script>
 </body>
 </html>

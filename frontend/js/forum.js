@@ -5,6 +5,7 @@ window.toggleForum = function () {
   const open = !f.classList.contains("open");
   f.classList.toggle("open", open);
   document.body.classList.toggle("fchat-open", open);
+  document.querySelectorAll("[data-forum-toggle]").forEach(b => b.setAttribute("aria-expanded", String(open)));
   try { localStorage.setItem("fhChatOpen", open ? "1" : "0"); } catch (e) {}
   if (open) {
     const feed = document.getElementById("forumFeed");

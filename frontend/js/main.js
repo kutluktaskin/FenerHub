@@ -1,13 +1,7 @@
 const footerYear = document.getElementById("footerYear");
 if (footerYear) footerYear.textContent = new Date().getFullYear();
 
-function scrollToSection(id) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const navHeight = 90;
-    const y = el.getBoundingClientRect().top + window.pageYOffset - navHeight;
-    window.scrollTo({ top: y, behavior: 'smooth' });
-}
+// scrollToSection nav.js'te tanımlı
 
 const matchMeta = {
     alanya: { home: 'FENERBAHÇE', away: 'ALANYASPOR', score: '2 - 1', minute: "89'", league: 'Trendyol Süper Lig' },
