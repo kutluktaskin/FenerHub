@@ -1,0 +1,74 @@
+
+##### İrfan Can Kahveci (id 226986) #####
+durum: 200
+data anahtarları: seasons, typesMap
+sezon kaydı sayısı: 40
+
+-- kayıt 0 --
+diğer alanlar: {"year": "26/27", "startYear": 2026, "endYear": 2027, "team": {"name": "Fenerbahçe", "slug": "fenerbahce", "shortName": "Fenerbahçe", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 639134, "nameCode": "FEN", "disabled": false, "national": false, "type": 0, "id": 3052, "teamColors": {"primary": "#000066", "secondary": "#ffff00", "text": "#ffff00"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "Trendyol Süper Lig", "slug": "trendyol-super-lig", "primaryColorHex": "#e51937", "secondaryCol
+istatistik: {"appearances": 7, "matchesStarted": 5, "goals": 2, "assists": 3, "minutesPlayed": 406, "rating": 7.3}
+
+-- kayıt 1 --
+diğer alanlar: {"year": "26/27", "startYear": 2026, "endYear": 2027, "team": {"name": "Fenerbahçe", "slug": "fenerbahce", "shortName": "Fenerbahçe", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 639134, "nameCode": "FEN", "disabled": false, "national": false, "type": 0, "id": 3052, "teamColors": {"primary": "#000066", "secondary": "#ffff00", "text": "#ffff00"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "UEFA Champions League", "slug": "uefa-champions-league", "primaryColorHex": "#062b5c", "second
+istatistik: {"appearances": 1, "matchesStarted": 1, "goals": 0, "assists": 0, "minutesPlayed": 90, "rating": 7}
+
+-- kayıt 2 --
+diğer alanlar: {"year": "26/27", "startYear": 2026, "endYear": 2027, "team": {"name": "Türkiye", "slug": "turkey", "shortName": "Türkiye", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 473388, "nameCode": "TUR", "ranking": 31, "disabled": false, "national": true, "type": 0, "id": 4700, "teamColors": {"primary": "#ffffff", "secondary": "#ff0000", "text": "#ff0000"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "UEFA Nations League", "slug": "uefa-nations-league", "primaryColorHex": "#3a4179", "second
+istatistik: {"appearances": 1, "matchesStarted": 1, "goals": 0, "assists": 0, "minutesPlayed": 70, "rating": 6.9}
+
+-- kayıt 3 --
+diğer alanlar: {"year": "2026", "startYear": 2026, "endYear": 2026, "team": {"name": "Türkiye", "slug": "turkey", "shortName": "Türkiye", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 473388, "nameCode": "TUR", "ranking": 31, "disabled": false, "national": true, "type": 0, "id": 4700, "teamColors": {"primary": "#ffffff", "secondary": "#ff0000", "text": "#ff0000"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "FIFA World Cup", "slug": "world-championship", "primaryColorHex": "#d20a11", "secondaryColo
+istatistik: {"appearances": 1, "matchesStarted": 0, "goals": 0, "assists": 0, "minutesPlayed": 1, "rating": null}
+
+-- kayıt 4 --
+diğer alanlar: {"year": "2026", "startYear": 2026, "endYear": 2026, "team": {"name": "Türkiye", "slug": "turkey", "shortName": "Türkiye", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 473388, "nameCode": "TUR", "ranking": 31, "disabled": false, "national": true, "type": 0, "id": 4700, "teamColors": {"primary": "#ffffff", "secondary": "#ff0000", "text": "#ff0000"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "International Friendly Games", "slug": "int-friendly-games", "primaryColorHex": "#25497d", 
+istatistik: {"appearances": 2, "matchesStarted": 1, "goals": 0, "assists": 1, "minutesPlayed": 90, "rating": 6.75}
+
+-- kayıt 5 --
+diğer alanlar: {"year": "25/26", "startYear": 2025, "endYear": 2026, "team": {"name": "Kasımpaşa", "slug": "kasimpasa", "shortName": "Kasımpaşa", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 29926, "nameCode": "KAS", "disabled": false, "national": false, "type": 0, "id": 6063, "teamColors": {"primary": "#ffffff", "secondary": "#0066ff", "text": "#0066ff"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "Trendyol Süper Lig", "slug": "trendyol-super-lig", "primaryColorHex": "#e51937", "secondaryColorHe
+istatistik: {"appearances": 16, "matchesStarted": 16, "goals": 2, "assists": 3, "minutesPlayed": 1371, "rating": 7.11}
+
+-- kayıt 6 --
+diğer alanlar: {"year": "25/26", "startYear": 2025, "endYear": 2026, "team": {"name": "Türkiye", "slug": "turkey", "shortName": "Türkiye", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 473388, "nameCode": "TUR", "ranking": 31, "disabled": false, "national": true, "type": 0, "id": 4700, "teamColors": {"primary": "#ffffff", "secondary": "#ff0000", "text": "#ff0000"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "World Cup Qual. UEFA", "slug": "world-championship-qual-uefa", "primaryColorHex": "#9a1133
+istatistik: {"appearances": 3, "matchesStarted": 1, "goals": 1, "assists": 0, "minutesPlayed": 111, "rating": 6.97}
+
+-- kayıt 7 --
+diğer alanlar: {"year": "25/26", "startYear": 2025, "endYear": 2026, "team": {"name": "Fenerbahçe", "slug": "fenerbahce", "shortName": "Fenerbahçe", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 639134, "nameCode": "FEN", "disabled": false, "national": false, "type": 0, "id": 3052, "teamColors": {"primary": "#000066", "secondary": "#ffff00", "text": "#ffff00"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "Trendyol Süper Lig", "slug": "trendyol-super-lig", "primaryColorHex": "#e51937", "secondaryCol
+istatistik: {"appearances": 8, "matchesStarted": 2, "goals": 0, "assists": 0, "minutesPlayed": 288, "rating": 6.86}
+
+##### Romelu Lukaku (id 78893) #####
+durum: 200
+data anahtarları: seasons, typesMap
+sezon kaydı sayısı: 55
+
+-- kayıt 0 --
+diğer alanlar: {"year": "26/27", "startYear": 2026, "endYear": 2027, "team": {"name": "Fenerbahçe", "slug": "fenerbahce", "shortName": "Fenerbahçe", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 637862, "nameCode": "FEN", "disabled": false, "national": false, "type": 0, "id": 3052, "teamColors": {"primary": "#000066", "secondary": "#ffff00", "text": "#ffff00"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "Trendyol Süper Lig", "slug": "trendyol-super-lig", "primaryColorHex": "#e51937", "secondaryCol
+istatistik: {"appearances": 7, "matchesStarted": 2, "goals": 1, "assists": 1, "minutesPlayed": 246, "rating": 6.34}
+
+-- kayıt 1 --
+diğer alanlar: {"year": "26/27", "startYear": 2026, "endYear": 2027, "team": {"name": "Fenerbahçe", "slug": "fenerbahce", "shortName": "Fenerbahçe", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 637862, "nameCode": "FEN", "disabled": false, "national": false, "type": 0, "id": 3052, "teamColors": {"primary": "#000066", "secondary": "#ffff00", "text": "#ffff00"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "UEFA Champions League", "slug": "uefa-champions-league", "primaryColorHex": "#062b5c", "second
+istatistik: {"appearances": 2, "matchesStarted": 0, "goals": 0, "assists": 0, "minutesPlayed": 39, "rating": 6.75}
+
+-- kayıt 2 --
+diğer alanlar: {"year": "26/27", "startYear": 2026, "endYear": 2027, "team": {"name": "Belgium", "slug": "belgium", "shortName": "Belgium", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 552572, "nameCode": "BEL", "ranking": 8, "disabled": false, "national": true, "type": 0, "id": 4717, "teamColors": {"primary": "#ff0033", "secondary": "#000000", "text": "#000000"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "UEFA Nations League", "slug": "uefa-nations-league", "primaryColorHex": "#3a4179", "second
+istatistik: {"appearances": 3, "matchesStarted": 1, "goals": 1, "assists": 0, "minutesPlayed": 109, "rating": 6.8}
+
+-- kayıt 3 --
+diğer alanlar: {"year": "2026", "startYear": 2026, "endYear": 2026, "team": {"name": "Belgium", "slug": "belgium", "shortName": "Belgium", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 552572, "nameCode": "BEL", "ranking": 8, "disabled": false, "national": true, "type": 0, "id": 4717, "teamColors": {"primary": "#ff0033", "secondary": "#000000", "text": "#000000"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "FIFA World Cup", "slug": "world-championship", "primaryColorHex": "#d20a11", "secondaryColo
+istatistik: {"appearances": 6, "matchesStarted": 1, "goals": 3, "assists": 1, "minutesPlayed": 236, "rating": 6.82}
+
+-- kayıt 4 --
+diğer alanlar: {"year": "2026", "startYear": 2026, "endYear": 2026, "team": {"name": "Belgium", "slug": "belgium", "shortName": "Belgium", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 552572, "nameCode": "BEL", "ranking": 8, "disabled": false, "national": true, "type": 0, "id": 4717, "teamColors": {"primary": "#ff0033", "secondary": "#000000", "text": "#000000"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "International Friendly Games", "slug": "int-friendly-games", "primaryColorHex": "#25497d", 
+istatistik: {"appearances": 2, "matchesStarted": 0, "goals": 1, "assists": 1, "minutesPlayed": 41, "rating": 6.9}
+
+-- kayıt 5 --
+diğer alanlar: {"year": "25/26", "startYear": 2025, "endYear": 2026, "team": {"name": "SSC Napoli", "slug": "napoli", "shortName": "Napoli", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 949528, "nameCode": "NAP", "disabled": false, "national": false, "type": 0, "id": 2714, "teamColors": {"primary": "#008cea", "secondary": "#ffffff", "text": "#ffffff"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "Serie A", "slug": "serie-a", "primaryColorHex": "#09519e", "secondaryColorHex": "#008fd7", "category":
+istatistik: {"appearances": 5, "matchesStarted": 0, "goals": 1, "assists": 0, "minutesPlayed": 50, "rating": 6.57}
+
+-- kayıt 6 --
+diğer alanlar: {"year": "25/26", "startYear": 2025, "endYear": 2026, "team": {"name": "SSC Napoli", "slug": "napoli", "shortName": "Napoli", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 949528, "nameCode": "NAP", "disabled": false, "national": false, "type": 0, "id": 2714, "teamColors": {"primary": "#008cea", "secondary": "#ffffff", "text": "#ffffff"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "Coppa Italia", "slug": "coppa-italia", "primaryColorHex": "#8d041e", "secondaryColorHex": "#bd0a1f", "
+istatistik: {"appearances": 1, "matchesStarted": 0, "goals": 0, "assists": 0, "minutesPlayed": 16, "rating": 6.1}
+
+-- kayıt 7 --
+diğer alanlar: {"year": "25/26", "startYear": 2025, "endYear": 2026, "team": {"name": "SSC Napoli", "slug": "napoli", "shortName": "Napoli", "gender": "M", "sport": {"name": "Football", "slug": "football", "id": 1}, "userCount": 949528, "nameCode": "NAP", "disabled": false, "national": false, "type": 0, "id": 2714, "teamColors": {"primary": "#008cea", "secondary": "#ffffff", "text": "#ffffff"}, "fieldTranslations": {"nameTranslation": "{...}", "shortNameTranslation": "{...}"}}, "uniqueTournament": {"name": "UEFA Champions League", "slug": "uefa-champions-league", "primaryColorHex": "#062b5c", "secondaryColor
+istatistik: {"appearances": 1, "matchesStarted": 0, "goals": 0, "assists": 0, "minutesPlayed": 8, "rating": 6.3}
