@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://fenerhub.onrender.com";
+const API_BASE = "https://fenerhub.onrender.com";
 
 async function apiGet(path) {
     const res = await fetch(`${API_BASE}${path}`);
