@@ -1434,6 +1434,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .fchat { position: fixed; z-index: 99990; pointer-events: none; }
 .fchat-tab, .fchat-panel { pointer-events: auto; }
 
+/* Kapalıyken sağ kenardaki sekme (geniş ekran) */
 .fchat-tab {
     position: fixed;
     right: 0;
@@ -1442,7 +1443,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     display: inline-flex;
     align-items: center;
     gap: var(--s-2);
-    padding: 14px 10px;
+    padding: 16px 10px;
     border: 0;
     border-radius: var(--r-md) 0 0 var(--r-md);
     background: var(--c-accent);
@@ -1450,12 +1451,14 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     font-family: var(--f-display);
     font-size: var(--fs-md);
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     writing-mode: vertical-rl;
     transform: translateY(-50%);
     box-shadow: var(--sh-2);
+    transition: padding var(--t-fast) var(--ease), box-shadow var(--t-fast);
 }
+.fchat-tab:hover { padding-right: 14px; box-shadow: var(--sh-3); }
 .fchat-tab .ico { transform: rotate(90deg); }
 .fchat.open .fchat-tab { display: none; }
 
@@ -1464,74 +1467,120 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     top: calc(var(--nav-h) + var(--s-3));
     right: var(--s-3);
     bottom: var(--s-3);
-    width: 350px;
+    width: 360px;
     display: none;
     flex-direction: column;
     overflow: hidden;
     border: 1px solid var(--c-line-strong);
     border-radius: var(--r-xl);
-    background: rgba(7, 14, 30, 0.94);
+    background: rgba(6, 12, 26, 0.95);
     -webkit-backdrop-filter: var(--blur);
     backdrop-filter: var(--blur);
     box-shadow: var(--sh-3);
 }
 .fchat.open .fchat-panel { display: flex; animation: sectionIn 0.3s var(--ease); }
 
+/* Başlık: lacivert zemin, arkada forma numarası gibi büyük "12" */
 .fchat-head {
+    position: relative;
     display: flex;
-    justify-content: space-between;
     align-items: flex-start;
-    padding: var(--s-4);
+    gap: var(--s-3);
+    padding: var(--s-4) var(--s-4) var(--s-5);
+    overflow: hidden;
+    background: linear-gradient(135deg, #15306a 0%, #0b1a3c 60%, rgba(6, 12, 26, 0) 100%);
     border-bottom: 1px solid var(--c-line);
 }
-.fchat-title { display: flex; flex-direction: column; gap: 2px; }
-.fchat-name { font-size: 1.5rem; letter-spacing: 0.03em; }
-.fchat-sub { color: var(--c-text-2); font-size: var(--fs-sm); }
-.fchat-online { display: flex; align-items: center; gap: 6px; margin-top: var(--s-1); color: var(--c-text-3); font-size: var(--fs-xs); }
-.fchat-online .live-pulse { width: 7px; height: 7px; background: var(--c-win); animation: none; }
+.fchat-head::after {
+    content: "12";
+    position: absolute;
+    right: 52px;
+    top: -26px;
+    font-family: var(--f-display);
+    font-size: 132px;
+    font-weight: 700;
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(255, 210, 0, 0.28);
+    pointer-events: none;
+}
+.fchat-title { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.fchat-name { font-size: 1.85rem; letter-spacing: 0.03em; }
+.fchat-sub {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    color: var(--c-text-2);
+    font-size: var(--fs-sm);
+}
+.fchat-sub::before { content: ""; width: 16px; height: 2px; border-radius: 2px; background: var(--c-accent); }
+.fchat-online {
+    position: absolute;
+    left: var(--s-4);
+    bottom: 6px;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--c-text-3);
+    font-size: var(--fs-xs);
+}
+.fchat-online .live-pulse { width: 7px; height: 7px; background: var(--c-win); animation: none; box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18); }
 .fchat-online b { color: var(--c-text); }
 .fchat-close {
+    position: relative;
+    z-index: 1;
     display: grid;
     place-items: center;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border: 0;
     border-radius: 50%;
-    background: var(--c-hover);
+    background: rgba(255, 255, 255, 0.08);
     color: var(--c-text-2);
+    transition: background var(--t-fast), color var(--t-fast);
 }
-.fchat-close:hover { background: rgba(255, 255, 255, 0.12); color: var(--c-text); }
+.fchat-close:hover { background: rgba(255, 255, 255, 0.16); color: var(--c-text); }
 
-.fchat-rooms, #forumRooms {
-    display: flex;
-    gap: var(--s-1);
-    padding: var(--s-3) var(--s-4);
-    overflow-x: auto;
-    scrollbar-width: none;
+/* Oda seçici: eşit genişlikte segmentler, aktif oda beyaz */
+.fchat-rooms {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 4px;
+    margin: var(--s-3) var(--s-4) var(--s-2);
+    padding: 4px;
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-md);
+    background: rgba(0, 0, 0, 0.35);
 }
-.fchat-rooms::-webkit-scrollbar { display: none; }
 .fchat-rooms button {
-    flex: 0 0 auto;
-    padding: 6px 12px;
-    border: 1px solid var(--c-line-strong);
-    border-radius: var(--r-pill);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 8px 6px;
+    border: 0;
+    border-radius: var(--r-sm);
     background: none;
     color: var(--c-text-2);
     font-size: var(--fs-sm);
     font-weight: 600;
-    white-space: nowrap;
-    transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+    transition: background var(--t-fast), color var(--t-fast);
 }
+.fchat-rooms button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fchat-rooms button:hover { color: var(--c-text); background: var(--c-hover); }
-.fchat-rooms button.on { background: var(--c-text); border-color: var(--c-text); color: var(--c-accent-ink); }
+.fchat-rooms button.on { background: var(--c-text); color: var(--c-accent-ink); box-shadow: var(--sh-1); }
 
+/* Mesaj akışı */
 .fchat-feed-wrap { position: relative; flex: 1; min-height: 0; display: flex; }
 .fchat-feed {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: var(--s-2);
-    padding: var(--s-2) var(--s-4);
+    gap: var(--s-3);
+    padding: var(--s-3) var(--s-4);
     overflow-y: auto;
 }
 .fchat-empty { margin: auto; padding: var(--s-5); color: var(--c-text-3); font-size: var(--fs-sm); text-align: center; }
@@ -1554,11 +1603,104 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     transform: translateX(-50%);
     box-shadow: var(--sh-2);
 }
-.fchat-new[hidden] { display: none; }
 
 .fchat-error { min-height: 16px; padding: 0 var(--s-4); color: var(--c-loss); font-size: var(--fs-xs); }
 
-.fchat-compose { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-2) var(--s-4) var(--s-4); }
+/* Mesaj balonu: başkaları solda, kendi mesajın sağda */
+.fc2-msg {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    max-width: 88%;
+    align-self: flex-start;
+}
+.fc2-msg.is-mine { align-self: flex-end; align-items: flex-end; }
+.fc2-main {
+    min-width: 0;
+    max-width: 100%;
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--c-line);
+    border-radius: 16px 16px 16px 4px;
+    background: rgba(255, 255, 255, 0.055);
+}
+.fc2-msg.is-mine .fc2-main {
+    border-color: rgba(143, 176, 255, 0.32);
+    border-radius: 16px 16px 4px 16px;
+    background: rgba(70, 110, 210, 0.22);
+}
+.fc2-msg.flash .fc2-main { animation: fc2flash 1.2s ease; }
+@keyframes fc2flash { 40% { box-shadow: 0 0 0 2px var(--c-navy-tint); } }
+
+.fc2-head { display: flex; align-items: baseline; gap: var(--s-3); }
+.fc2-nick { font-size: var(--fs-sm); font-weight: 700; color: var(--c-text); }
+.fc2-right-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.fc2-you {
+    padding: 0 6px;
+    border-radius: var(--r-pill);
+    background: rgba(143, 176, 255, 0.2);
+    color: var(--c-navy-tint);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.6;
+}
+.fc2-time { font-size: 11px; }
+
+/* Yanıt önizlemesi balonun içinde */
+.fc2-quote {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: 6px 0 4px;
+    padding: 5px 9px;
+    border-left: 2px solid var(--c-navy-tint);
+    border-radius: var(--r-sm);
+    background: rgba(0, 0, 0, 0.28);
+    color: var(--c-text-3);
+    font-size: var(--fs-xs);
+    cursor: pointer;
+}
+.fc2-quote:hover { background: rgba(0, 0, 0, 0.4); }
+.fc2-quote b { color: var(--c-text-2); font-weight: 600; }
+.fc2-quote-body { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.fc2-quote .gone { font-style: italic; }
+.fc2-body { margin-top: 2px; color: var(--c-text); font-size: var(--fs-sm); line-height: 1.5; overflow-wrap: anywhere; white-space: pre-wrap; }
+.fc2-msg.is-deleted { opacity: 0.65; }
+.fc2-msg.is-deleted .fc2-body { font-style: italic; color: var(--c-text-3); }
+
+/* Tepki ve işlem butonları balonun altında tek sırada */
+.fc2-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 0 2px; }
+.fc2-acts button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 26px;
+    padding: 0 8px;
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--c-text-3);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+}
+.fc2-acts .ico { width: 14px; height: 14px; }
+.fc2-acts .fc2-act { width: 26px; padding: 0; justify-content: center; }
+.fc2-acts button:hover { background: rgba(255, 255, 255, 0.1); color: var(--c-text); }
+.fc2-acts [data-type="fire"]:hover { color: #ff9b5e; border-color: rgba(255, 155, 94, 0.5); }
+.fc2-acts [data-type="heart"]:hover { color: var(--c-accent); border-color: var(--c-accent-line); }
+.fc2-acts .fc2-del:hover { background: var(--c-loss-soft); border-color: var(--c-loss); color: var(--c-loss); }
+
+/* Yazma alanı */
+.fchat-compose {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    padding: var(--s-3) var(--s-4) var(--s-4);
+    border-top: 1px solid var(--c-line);
+    background: rgba(0, 0, 0, 0.2);
+}
 .fchat-compose input, .fchat-compose textarea {
     padding: 9px 12px;
     border: 1px solid var(--c-line-strong);
@@ -1569,8 +1711,10 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     resize: none;
     transition: border-color var(--t-fast);
 }
+.fchat-compose input { align-self: flex-start; width: 60%; padding: 6px 10px; font-size: var(--fs-xs); }
 .fchat-compose input::placeholder, .fchat-compose textarea::placeholder { color: var(--c-text-3); }
 .fchat-compose input:focus, .fchat-compose textarea:focus { outline: none; border-color: var(--c-navy-tint); }
+.fchat-compose input:focus-visible, .fchat-compose textarea:focus-visible { box-shadow: 0 0 0 1px var(--c-navy-tint); }
 .fchat-row { display: flex; gap: var(--s-2); }
 .fchat-row textarea { flex: 1; }
 .fchat-row button {
@@ -1581,69 +1725,10 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     border-radius: var(--r-md);
     background: var(--c-accent);
     color: var(--c-accent-ink);
+    transition: background var(--t-fast), transform var(--t-fast);
 }
-
-/* Mesaj kartları */
-.fc2-msg {
-    padding: var(--s-2) var(--s-3);
-    border: 1px solid var(--c-line);
-    border-radius: var(--r-lg);
-    background: rgba(255, 255, 255, 0.03);
-    transition: background var(--t-fast);
-}
-.fc2-msg:hover { background: rgba(255, 255, 255, 0.06); }
-.fc2-msg.is-mine { border-color: rgba(143, 176, 255, 0.3); background: var(--c-navy-soft); }
-.fc2-msg.flash { animation: fc2flash 1.2s ease; }
-@keyframes fc2flash { 40% { box-shadow: 0 0 0 2px var(--c-navy-tint); } }
-
-.fc2-main { width: 100%; min-width: 0; }
-.fc2-head { display: flex; align-items: center; gap: var(--s-2); }
-.fc2-nick { color: var(--c-text); font-size: var(--fs-sm); font-weight: 700; }
-.fc2-right-meta { display: flex; align-items: center; gap: var(--s-2); margin-left: auto; }
-.fc2-you {
-    padding: 1px 6px;
-    border-radius: var(--r-pill);
-    background: var(--c-navy-soft);
-    color: var(--c-navy-tint);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-}
-.fc2-time { font-size: var(--fs-xs); }
-.fc2-quote {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    margin: 6px 0 4px;
-    padding: 5px 9px;
-    border-left: 2px solid var(--c-navy-tint);
-    border-radius: var(--r-sm);
-    background: rgba(0, 0, 0, 0.25);
-    color: var(--c-text-3);
-    font-size: var(--fs-xs);
-    cursor: pointer;
-}
-.fc2-quote b { color: var(--c-text-2); font-weight: 600; }
-.fc2-quote .gone { font-style: italic; }
-.fc2-body { margin-top: 4px; color: var(--c-text); font-size: var(--fs-sm); line-height: 1.5; word-break: break-word; }
-.fc2-msg.is-deleted { opacity: 0.65; }
-.fc2-msg.is-deleted .fc2-body { font-style: italic; color: var(--c-text-3); }
-
-.fc2-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--s-2); }
-.fc2-acts button {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 9px;
-    border: 1px solid var(--c-line);
-    border-radius: var(--r-pill);
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--c-text-2);
-    font-size: var(--fs-xs);
-    transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
-}
-.fc2-acts button:hover { background: rgba(255, 255, 255, 0.1); color: var(--c-text); }
-.fc2-acts .fc2-del:hover { background: var(--c-loss-soft); border-color: var(--c-loss); color: var(--c-loss); }
+.fchat-row button:hover { background: #ffdc33; }
+.fchat-row button:active { transform: scale(0.95); }
 
 .fc2-reply-bar {
     display: flex;
@@ -1655,20 +1740,35 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     background: var(--c-navy-soft);
     font-size: var(--fs-xs);
 }
-.fc2-reply-bar[hidden] { display: none; }
 .fc2-reply-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .fc2-reply-text b { color: var(--c-text); font-weight: 600; }
 .fc2-reply-text span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--c-text-3); }
-.fc2-reply-x { padding: 4px; border: 0; border-radius: var(--r-sm); background: none; color: var(--c-text-3); }
+.fc2-reply-x { display: grid; place-items: center; padding: 4px; border: 0; border-radius: var(--r-sm); background: none; color: var(--c-text-3); }
 .fc2-reply-x:hover { color: var(--c-text); }
 
 /* Panel açıkken sayfa içeriği panelin soluna sığsın */
 @media (min-width: 1100px) {
-    body.fchat-open { padding-right: 374px; }
+    body.fchat-open { padding-right: 384px; }
 }
 /* Dar ekran: alttan açılan panel */
 @media (max-width: 1099px) {
-    .fchat-panel { left: var(--s-2); right: var(--s-2); top: auto; bottom: var(--s-2); width: auto; height: 72vh; }
+    .fchat-panel { left: var(--s-2); right: var(--s-2); top: auto; bottom: var(--s-2); width: auto; height: min(76vh, 640px); }
+}
+/* Mobil: kenar sekmesi içeriği örtmesin, sağ altta yuvarlak buton olur */
+@media (max-width: 900px) {
+    .fchat-tab {
+        top: auto;
+        right: var(--s-4);
+        bottom: calc(var(--s-4) + env(safe-area-inset-bottom, 0px));
+        padding: 12px 16px;
+        border-radius: var(--r-pill);
+        font-size: var(--fs-base);
+        writing-mode: horizontal-tb;
+        transform: none;
+        box-shadow: var(--sh-3), 0 0 0 4px rgba(5, 10, 22, 0.6);
+    }
+    .fchat-tab:hover { padding-right: 16px; }
+    .fchat-tab .ico { transform: none; }
 }
 
 /* ---------- 13 FOOTER ---------- */

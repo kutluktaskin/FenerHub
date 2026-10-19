@@ -1,8 +1,12 @@
-/* Panel aç/kapat */
-window.toggleForum = function () {
+/* 12. Adam paneli aç/kapat.
+   Butondan açılınca odak panele geçer, kapanınca açan butona döner.
+   opts.focus=false: sayfa açılışında kayıtlı durumu geri yüklerken odak çalınmaz */
+let forumOpener = null;
+window.toggleForum = function (opts = {}) {
   const f = document.getElementById("fchat");
   if (!f) return;
   const open = !f.classList.contains("open");
+  const moveFocus = opts.focus !== false;
   f.classList.toggle("open", open);
   document.body.classList.toggle("fchat-open", open);
   document.querySelectorAll("[data-forum-toggle]").forEach(b => b.setAttribute("aria-expanded", String(open)));
@@ -10,8 +14,22 @@ window.toggleForum = function () {
   if (open) {
     const feed = document.getElementById("forumFeed");
     if (feed) feed.scrollTop = feed.scrollHeight;
+    if (moveFocus) {
+      forumOpener = document.activeElement;
+      f.querySelector(".fchat-rooms .on")?.focus();
+    }
+  } else if (moveFocus && forumOpener && document.contains(forumOpener) && forumOpener.offsetParent !== null) {
+    forumOpener.focus();
   }
 };
+
+// Esc: odak paneldeyken paneli kapatır
+document.addEventListener("keydown", e => {
+  const f = document.getElementById("fchat");
+  if (e.key === "Escape" && f && f.classList.contains("open") && f.contains(document.activeElement)) {
+    window.toggleForum();
+  }
+});
 
 (() => {
   const API = API_BASE; // api.js'de tanımlı (önce yüklenir)
@@ -21,7 +39,10 @@ window.toggleForum = function () {
     { key: "mac", label: "Gelecek Maç" },
     { key: "transfer", label: "Transfer" }
   ];
-  const SHORT = { "Fenerbahçe": "FB", "Galatasaray": "GS", "Beşiktaş": "BJK", "Trabzonspor": "TS" };
+  const SHORT = { "Fenerbahçe": "FB", "Galatasaray": "GS", "Beşiktaş": "BJK", "Beşiktaş JK": "BJK", "Trabzonspor": "TS" };
+  // Başkalarının takma adları için okunaklı, sabit renkler (aynı ad hep aynı renk)
+  const NICK_COLORS = ["#8fb0ff", "#7fd7c4", "#f5a97f", "#c9a7ff", "#ffd27a", "#9fd88f", "#ff9fb2"];
+  const nickColor = n => NICK_COLORS[[...n].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % NICK_COLORS.length];
   const MAX_DOM = 200;
   console.log("12. Adam (forum.js v8) yüklendi");
   let tabKey = "genel", room = "genel", nextMatch = null, ws, stick = true, replyTo = null;
@@ -98,6 +119,7 @@ window.toggleForum = function () {
     const nick = document.createElement("strong");
     nick.className = "fc2-nick";
     nick.textContent = p.nick;
+    if (!isMine) nick.style.color = nickColor(p.nick);
     head.append(nick);
 
     const rightMeta = document.createElement("div");
@@ -158,7 +180,9 @@ window.toggleForum = function () {
       if (isMine) {
         acts.append(mkBtn("fc2-act fc2-del", icon("trash"), "Sil", (e) => removePost(p.id, e)));
       }
-      main.append(acts);
+      // Balon (main) üstte, tepki ve işlem butonları balonun altında
+      el.append(main, acts);
+      return el;
     }
 
     el.append(main);
@@ -320,7 +344,10 @@ window.toggleForum = function () {
       nextMatch = m.room ? m : null;
       const btn = $("forumRooms").querySelector('[data-key="mac"]');
       const label = nextMatch ? (SHORT[nextMatch.opponent] || nextMatch.opponent) : "Gelecek Maç";
-      if (btn) btn.textContent = label;
+      if (btn) {
+        btn.innerHTML = icon("ball") + `<span>${esc(label)}</span>`;
+        btn.title = nextMatch ? `Maç odası: ${nextMatch.home} - ${nextMatch.away}` : "Gelecek maç odası";
+      }
       if (changed && tabKey === "mac") { room = roomFor("mac"); clearReply(); load(); }
     } catch {}
   }
@@ -336,16 +363,24 @@ window.toggleForum = function () {
     nickEl.parentNode.insertBefore(replyBar, nickEl);
 
     const roomsEl = $("forumRooms");
+    // Oda seçici: sekme (tab) olarak işaretlenir, aktif oda aria-selected
     ROOMS.forEach(({ key, label }) => {
       const b = document.createElement("button");
-      b.textContent = label;
+      b.type = "button";
+      b.setAttribute("role", "tab");
+      b.innerHTML = key === "mac" ? icon("ball") + `<span>${label}</span>` : `<span>${label}</span>`;
       b.dataset.key = key;
-      if (key === tabKey) b.classList.add("on");
+      const on = key === tabKey;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-selected", String(on));
+      b.setAttribute("aria-controls", "forumFeed");
       b.onclick = () => {
         tabKey = key;
         room = roomFor(key);
-        roomsEl.querySelectorAll("button").forEach(x => x.classList.remove("on"));
-        b.classList.add("on");
+        roomsEl.querySelectorAll("button").forEach(x => {
+          x.classList.toggle("on", x === b);
+          x.setAttribute("aria-selected", String(x === b));
+        });
         clearReply();
         load();
       };
@@ -369,7 +404,7 @@ window.toggleForum = function () {
     let saved = null;
     try { saved = localStorage.getItem("fhChatOpen"); } catch (e) {}
     const wantOpen = saved === null ? window.innerWidth >= 1400 : saved === "1";
-    if (wantOpen) window.toggleForum();
+    if (wantOpen) window.toggleForum({ focus: false });
 
     refreshMatch();
     setInterval(refreshMatch, 60 * 1000);

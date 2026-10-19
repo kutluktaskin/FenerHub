@@ -263,37 +263,38 @@
         <p>Taraftar projesidir, Fenerbahçe SK ile resmi bir bağı yoktur. · <span id="footerYear">2026</span></p>
     </footer>
 
-    <aside class="fchat" id="fchat">
-    <button type="button" class="fchat-tab" onclick="toggleForum()"><svg class="ico" aria-hidden="true"><use href="#i-message"/></svg>12. Adam</button>
+    <!-- 12. ADAM: taraftar forumu (forum.js) -->
+    <aside class="fchat" id="fchat" aria-labelledby="fchatTitle">
+        <button type="button" class="fchat-tab" data-forum-toggle aria-controls="fchat" aria-expanded="false" onclick="toggleForum()"><svg class="ico" aria-hidden="true"><use href="#i-message"/></svg><span>12. Adam</span></button>
 
-    <div class="fchat-panel" role="dialog" aria-labelledby="fchatTitle">
-        <div class="fchat-head">
-            <div class="fchat-title">
-                <h2 class="fchat-name" id="fchatTitle">12. ADAM</h2>
-                <span class="fchat-sub">Tribünün sesi</span>
-                <span class="fchat-online"><i class="live-pulse"></i><b id="forumOnline">0</b> çevrimiçi</span>
+        <div class="fchat-panel">
+            <div class="fchat-head">
+                <div class="fchat-title">
+                    <h2 class="fchat-name" id="fchatTitle">12. ADAM</h2>
+                    <span class="fchat-sub">Tribünün sesi</span>
+                </div>
+                <span class="fchat-online" title="Şu an bağlı taraftar"><i class="live-pulse"></i><b id="forumOnline">0</b> çevrimiçi</span>
+                <button type="button" class="fchat-close" onclick="toggleForum()" aria-label="Paneli kapat"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button>
             </div>
-            <button type="button" class="fchat-close" onclick="toggleForum()" aria-label="Paneli kapat"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button>
-        </div>
 
-        <div class="fchat-rooms" id="forumRooms"></div>
+            <div class="fchat-rooms" id="forumRooms" role="tablist" aria-label="Odalar"></div>
 
-        <div class="fchat-feed-wrap">
-            <div class="fchat-feed" id="forumFeed"></div>
-            <button type="button" class="fchat-new" id="forumNew" hidden><svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg>Yeni mesajlar</button>
-        </div>
+            <div class="fchat-feed-wrap">
+                <div class="fchat-feed" id="forumFeed" role="log" aria-label="Mesajlar"></div>
+                <button type="button" class="fchat-new" id="forumNew" hidden><svg class="ico" aria-hidden="true"><use href="#i-arrow-down"/></svg>Yeni mesajlar</button>
+            </div>
 
-        <div class="fchat-error" id="forumError"></div>
+            <div class="fchat-error" id="forumError" role="status"></div>
 
-        <div class="fchat-compose">
-            <input id="forumNick" maxlength="20" placeholder="Takma adın" aria-label="Takma ad" autocomplete="nickname">
-            <div class="fchat-row">
-                <textarea id="forumText" maxlength="500" rows="1" placeholder="Mesaj yaz..." aria-label="Mesaj"></textarea>
-                <button type="button" id="forumSend" aria-label="Gönder"><svg class="ico" aria-hidden="true"><use href="#i-send"/></svg></button>
+            <div class="fchat-compose">
+                <input id="forumNick" maxlength="20" placeholder="Takma adın" aria-label="Takma ad" autocomplete="nickname">
+                <div class="fchat-row">
+                    <textarea id="forumText" maxlength="500" rows="1" placeholder="Tribüne bir şey yaz..." aria-label="Mesaj"></textarea>
+                    <button type="button" id="forumSend" aria-label="Gönder"><svg class="ico" aria-hidden="true"><use href="#i-send"/></svg></button>
+                </div>
             </div>
         </div>
-    </div>
-</aside>
+    </aside>
 
     <!-- Harici JS Dosyaları -->
     <script src="js/background.js"></script>
