@@ -30,6 +30,38 @@ def _parse(raw):
         return None
 
 
+def _trusted_proxy(ip):
+    """Render'ın iç ağı (özel adresler) ve Cloudflare: bunlar proxy'dir, kullanıcı değildir."""
+    return (ip.is_private or ip.is_loopback or ip.is_link_local
+            or any(ip in net for net in CLOUDFLARE_NETS))
+
+
+def client_ip(request):
+    """Gerçek kullanıcı IP'si (metin).
+
+    X-Forwarded-For'a her proxy kendi gördüğü adresi SONA ekler; kullanıcı ise başlığa
+    sadece en sola sahte değer koyabilir. Bu yüzden liste sağdan okunur, güvenilen proxy
+    adresleri atlanır ve ilk güvenilmeyen adres alınır. Böylece sahte başlıkla bekleme
+    süresi atlatılamaz. (uvicorn --forwarded-allow-ips="*" en soldakini aldığı için
+    sahtelenebilir; o yüzden kullanılmadı.)
+    Başlık yoksa (yerel geliştirme) doğrudan bağlantı adresi kullanılır.
+    """
+    peer = request.client.host if request.client else ""
+    peer_ip = _parse(peer)
+    # Başlığa sadece bağlantı bir proxy'den geliyorsa güvenilir
+    if peer_ip is not None and not _trusted_proxy(peer_ip):
+        return str(peer_ip)
+    hops = [_parse(p) for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
+    for ip in reversed(hops):
+        if ip is None:
+            continue
+        if not _trusted_proxy(ip):
+            return str(ip)
+    # Hepsi proxy ya da başlık yok: en soldaki geçerli adres, o da yoksa bağlantı adresi
+    first = next((ip for ip in hops if ip is not None), None)
+    return str(first or peer_ip or "unknown")
+
+
 def classify(ip):
     """Teşhis için adres türü: özel / cloudflare / genel / geçersiz."""
     if ip is None:

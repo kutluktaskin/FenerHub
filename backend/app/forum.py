@@ -9,6 +9,8 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
+from .net import client_ip
+
 forum_router = APIRouter(tags=["forum"])
 
 # Eski yerinde (backend/forum.db) kalsın; mevcut mesajlar kaybolmasın.
@@ -46,6 +48,23 @@ def valid_room(room: str) -> bool:
 
 BAD = ["küfür1", "küfür2"]          # kendi yasaklı kelimelerini ekle
 last_post = {}                      # ip -> son mesaj zamanı
+POST_INTERVAL = 4                   # aynı IP'den iki mesaj arası en az saniye
+LAST_POST_TTL = 60                  # bundan eski kayıtlar sözlükten silinir
+LAST_POST_MAX = 10_000              # üst sınır (temizlikten bağımsız güvence)
+_last_prune = 0.0
+
+
+def prune_last_post(now: float) -> None:
+    """last_post sonsuza kadar büyümesin: en fazla dakikada bir eski kayıtları siler."""
+    global _last_prune
+    if now - _last_prune < LAST_POST_TTL and len(last_post) < LAST_POST_MAX:
+        return
+    _last_prune = now
+    for key in [k for k, t in last_post.items() if now - t > LAST_POST_TTL]:
+        del last_post[key]
+    if len(last_post) >= LAST_POST_MAX:          # hepsi yeni olsa bile sınırı aşmasın
+        for key in sorted(last_post, key=last_post.get)[: len(last_post) - LAST_POST_MAX + 1]:
+            del last_post[key]
 
 
 def db():
@@ -181,9 +200,10 @@ async def create_post(post: PostIn, request: Request):
     if not valid_room(post.room):
         raise HTTPException(status_code=400, detail="Geçersiz oda")
 
-    client_ip = request.client.host if request.client else "unknown"
+    ip = client_ip(request)   # Render proxy'si arkasında gerçek kullanıcı adresi (app/net.py)
     now = time.time()
-    if now - last_post.get(client_ip, 0) < 4:
+    prune_last_post(now)
+    if now - last_post.get(ip, 0) < POST_INTERVAL:
         raise HTTPException(status_code=429, detail="Biraz yavaş, 4 saniye bekle.")
 
     nick = clean(post.nick)
@@ -211,7 +231,7 @@ async def create_post(post: PostIn, request: Request):
             SELECT_POST + " WHERE p.id=?", (cursor.lastrowid,)
         ).fetchone()
 
-    last_post[client_ip] = now
+    last_post[ip] = now
     await hub.broadcast({"type": "post", "post": row_to_post(row)})
     return row_to_post(row, post.owner)
 
