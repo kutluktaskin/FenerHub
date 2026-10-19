@@ -81,24 +81,3 @@ def mask(ip):
         a, b, *_ = str(ip).split(".")
         return f"{a}.{b}.x.x"
     return ":".join(ip.exploded.split(":")[:2]) + "::x"
-
-
-# ---- Geçici teşhis (Aşama 1): proxy zincirini öğrenmek için ilk N isteği maskeli loglar ----
-DIAG_LIMIT = 30
-_diag_count = 0
-
-
-def diagnose(request):
-    """Başlık yapısını maskeli olarak loglar; DIAG_LIMIT istekten sonra susar."""
-    global _diag_count
-    if _diag_count >= DIAG_LIMIT:
-        return
-    _diag_count += 1
-    peer = _parse(request.client.host) if request.client else None
-    xff = [_parse(p) for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
-    extra = {h: ("var" if request.headers.get(h) else "yok")
-             for h in ("cf-connecting-ip", "true-client-ip", "x-real-ip", "forwarded")}
-    msg = (f"ip-teşhis {_diag_count}/{DIAG_LIMIT}: bağlantı={mask(peer)}({classify(peer)}) "
-           f"xff=[{', '.join(f'{mask(i)}({classify(i)})' for i in xff)}] "
-           + " ".join(f"{k}={v}" for k, v in extra.items()))
-    print(msg, flush=True)   # Render loglarında görünür (uvicorn logger seviyesinden bağımsız)
