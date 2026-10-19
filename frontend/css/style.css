@@ -1076,10 +1076,12 @@ table { font-variant-numeric: tabular-nums; }
 .lu-subs { margin: var(--s-3) 0 var(--s-1); color: var(--c-text-3); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.06em; }
 
 /* ---------- Ortak tablo dili (kadro, puan durumu) ---------- */
+/* separate: yapışkan başlık kendi zeminini tam kaplar (collapse modunda satırlar arkadan görünüyordu) */
+.player-stats-table, .standings-table { border-collapse: separate; border-spacing: 0; }
 .player-stats-table thead th, .standings-table thead th {
     position: sticky;
     top: 0;
-    z-index: 5;
+    z-index: 10;              /* avatar ve rozetler (konumlu öğeler) başlığın altında kalsın */
     background: var(--c-navy-900);
     color: var(--c-accent);
     font-size: var(--fs-xs);
@@ -1090,8 +1092,6 @@ table { font-variant-numeric: tabular-nums; }
     border-bottom: 0;
     box-shadow: inset 0 -2px 0 var(--c-accent);
 }
-.player-stats-table thead th:first-child, .standings-table thead th:first-child { border-top-left-radius: var(--r-md); }
-.player-stats-table thead th:last-child, .standings-table thead th:last-child { border-top-right-radius: var(--r-md); }
 /* Satırlar: hafif zebra; hover'da solda sarı şerit ve hafif sarı zemin */
 .player-stats-table tbody tr, .standings-table tbody tr { transition: background var(--t-fast); }
 .player-stats-table tbody tr:nth-child(even), .standings-table tbody tr:nth-child(even) { background: var(--c-zebra); }
@@ -1118,6 +1118,7 @@ table { font-variant-numeric: tabular-nums; }
     padding: var(--s-5);
 }
 .box-scroll { flex: 1; min-height: 0; overflow-y: auto; margin: 0 calc(var(--s-2) * -1); padding: 0 var(--s-2); }
+.squad-box .box-scroll { margin: 0; padding: 0; border-radius: var(--r-md); }
 
 /* Mevki filtresi */
 .squad-filter { display: flex; flex-wrap: wrap; gap: var(--s-1); }
@@ -1134,7 +1135,7 @@ table { font-variant-numeric: tabular-nums; }
 .squad-filter button:hover { color: var(--c-accent); border-color: var(--c-accent-line); }
 .squad-filter button[aria-pressed="true"] { background: var(--c-accent); border-color: var(--c-accent); color: var(--c-accent-ink); }
 
-.player-stats-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.player-stats-table { width: 100%; font-size: var(--fs-sm); }
 .player-stats-table th, .player-stats-table td {
     padding: 9px 8px;
     border-bottom: 1px solid var(--c-line);
@@ -1266,8 +1267,40 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     transition: opacity var(--t-fast), transform var(--t-fast);
 }
 
-/* Sakatlık raporu */
+/* Sakatlık raporu: kart içeriğe göre boyutlanır (sabit yükseklik yok) */
+.team-box.injury-box { height: auto; }
+.injury-box .box-scroll { flex: none; max-height: 340px; }
 .injury-report-list { display: flex; flex-direction: column; gap: var(--s-3); }
+
+/* Kadro hazırlık özeti: yüzde halkası + mevki çubukları */
+.readiness {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--s-4) var(--s-5);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--c-line);
+}
+.ready-ring {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 92px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: conic-gradient(var(--c-accent) calc(var(--p) * 1%), var(--c-injury) 0);
+}
+.ready-ring::before { content: ""; position: absolute; inset: 9px; border-radius: 50%; background: var(--c-navy-800); }
+.ready-ring b { position: relative; font-family: var(--f-display); font-size: 1.7rem; color: var(--c-accent); }
+.ready-title { font-family: var(--f-display); font-size: var(--fs-lg); font-weight: 700; text-transform: uppercase; }
+.ready-sub { color: var(--c-text-3); font-size: var(--fs-sm); }
+.ready-bars { grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--s-2); margin: 0; padding: 0; list-style: none; }
+.ready-bars li { display: grid; grid-template-columns: 76px minmax(0, 1fr) 40px; align-items: center; gap: var(--s-3); font-size: var(--fs-sm); }
+.rb-label { color: var(--c-text-2); }
+.rb-track { display: flex; gap: 2px; height: 8px; overflow: hidden; border-radius: var(--r-pill); background: var(--c-inset-strong); }
+.rb-ok { background: var(--c-accent); }
+.rb-miss { background: var(--c-injury); }
+.rb-count { font-weight: 700; text-align: right; }
 .injury-report-card {
     display: flex;
     justify-content: space-between;
@@ -1316,7 +1349,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .standings-box { display: flex; flex-direction: column; gap: var(--s-4); padding: var(--s-5); }
 .table-scroll-container { max-height: 480px; overflow-y: auto; }
 
-.standings-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.standings-table { width: 100%; font-size: var(--fs-sm); }
 .standings-table th, .standings-table td {
     padding: 9px 8px;
     border-bottom: 1px solid var(--c-line);

@@ -204,12 +204,42 @@ function initSquadControls() {
     });
 }
 
+// Kadro hazırlık özeti: yüzde halkası + mevki başına hazır/eksik çubuğu
+function renderReadiness(players) {
+    const el = document.getElementById("readiness");
+    if (!el || !players.length) return;
+    const isReady = p => p.status !== "injured" && p.status !== "suspended";
+    const ready = players.filter(isReady).length;
+    const pct = Math.round(ready / players.length * 100);
+    const rows = ["G", "D", "M", "F"].map(pos => {
+        const group = players.filter(p => p.position === pos);
+        const ok = group.filter(isReady).length;
+        const miss = group.length - ok;
+        return `<li>
+            <span class="rb-label">${POSITION_TR[pos]}</span>
+            <span class="rb-track" aria-hidden="true">
+                <i class="rb-ok" style="flex-grow:${ok}"></i>${miss ? `<i class="rb-miss" style="flex-grow:${miss}"></i>` : ""}
+            </span>
+            <span class="rb-count">${ok}/${group.length}</span>
+        </li>`;
+    }).join("");
+    el.innerHTML = `
+        <div class="ready-ring" style="--p:${pct}" role="img" aria-label="Kadronun yüzde ${pct}'i hazır"><b>%${pct}</b></div>
+        <div class="ready-text">
+            <p class="ready-title">Kadronun %${pct}'i hazır</p>
+            <p class="ready-sub">${players.length} oyuncudan ${ready} hazır, ${players.length - ready} eksik</p>
+        </div>
+        <ul class="ready-bars" aria-label="Mevkilere göre hazır oyuncu">${rows}</ul>`;
+    el.hidden = false;
+}
+
 async function loadSquad() {
     const tbody = document.querySelector(".player-stats-table tbody");
     if (!tbody) return;
     try {
         squadState.players = await apiGet("/api/squad");
         renderSquad();
+        renderReadiness(squadState.players);
         console.log("Kadro API'den yüklendi");
     } catch (err) {
         console.warn("Kadro API'sine ulaşılamadı:", err);
