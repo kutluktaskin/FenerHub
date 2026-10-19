@@ -22,11 +22,16 @@
   - Dakikada bir 60 sn'den eski kayıtlar silinir, 10.000 üst sınır. Testler: `backend/tests/test_client_ip.py` (`python -m pytest`).
 
 ## Aşama 2: Kalıcı veritabanı (PostgreSQL)
-- [ ] SQLite Render'da her deploy'da siliniyor. Ücretsiz bir Postgres'e geç (Neon ya da Supabase, hangisini önerdiğini gerekçesiyle söyle). Hesabı ben açacağım, adım adım yaz.
-- [ ] DATABASE_URL varsa Postgres, yoksa yerelde SQLite kullanılsın.
-- [ ] Forum (şu an ayrı forum.db ve ham sqlite3) da aynı veritabanına ve SQLAlchemy'ye taşınsın.
-- [ ] Şema değişiklikleri için Alembic migration'ları kur.
-- [ ] Yereldeki mevcut verileri (forum mesajları, elle girilen sakatlıklar) yeni veritabanına aktaran tek seferlik bir script yaz.
+- [x] SQLite Render'da her deploy'da siliniyor. Ücretsiz bir Postgres'e geç (Neon ya da Supabase, hangisini önerdiğini gerekçesiyle söyle). Hesabı ben açacağım, adım adım yaz.
+  - Not: Neon seçildi (uyumayan ücretsiz plan, Frankfurt). Render Environment'a DATABASE_URL (pooler adresi) ve SPORTS_API_KEY eklendi.
+- [x] DATABASE_URL varsa Postgres, yoksa yerelde SQLite kullanılsın.
+  - Not: app/database.py, psycopg 3 + pool_pre_ping. Render'da SQLite'a düşerse log'a UYARI yazılır.
+- [x] Forum (şu an ayrı forum.db ve ham sqlite3) da aynı veritabanına ve SQLAlchemy'ye taşınsın.
+  - Not: posts tablosu (ForumPost), API alanları aynı kaldı; testler tests/test_forum.py.
+- [x] Şema değişiklikleri için Alembic migration'ları kur.
+  - Not: 0001 baseline + 0002 posts; açılışta run_migrations() mevcut tabloyu stamp'leyip upgrade eder (Render'da shell gerekmez).
+- [x] Yereldeki mevcut verileri (forum mesajları, elle girilen sakatlıklar) yeni veritabanına aktaran tek seferlik bir script yaz.
+  - Not: scripts/migrate_to_postgres.py çalıştırıldı: tüm tablolar + 14 forum mesajı (yerel + canlı site birleştirildi) Neon'a aktarıldı.
 
 ## Aşama 3: Canlı maç ve otomatik sakatlıklar
 Önce bana SportsAPI planımı (Free/Pro/Ultra) ve Render'ın ücretsiz olup olmadığını sor.
