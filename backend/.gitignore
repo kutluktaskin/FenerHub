@@ -1,0 +1,3 @@
+# Keşif/deneme scriptleri ve çıktıları (API anahtarıyla çalışır, repoya girmez)
+scripts/probe_*
+scripts/*.out.json

@@ -50,13 +50,15 @@ STANDINGS = {
     "uefa": (7, 96518),
 }
 STANDINGS_CACHE = "standings_cache.json"
-STANDINGS_MAX_AGE = 1800  # saniye (30 dk)
+STANDINGS_MAX_AGE = 3 * 3600  # saniye (3 saat): 2 istek x 8 = günde 16 istek (Free plan: 100/gün)
 
 def api_get(path):
     headers = {"x-api-key": os.environ["SPORTS_API_KEY"], "User-Agent": "curl/8"}
     for attempt in range(4):
         r = requests.get(BASE + path, headers=headers, timeout=30)
-        print(f"deneme {attempt + 1}: {path} -> {r.status_code}")
+        # Kalan günlük kota her istekte loglanır (anahtar loga yazılmaz)
+        print(f"deneme {attempt + 1}: {path} -> {r.status_code} · kalan kota: "
+              f"{r.headers.get('x-ratelimit-remaining', '?')}/{r.headers.get('x-ratelimit-limit', '?')}")
         if r.status_code in (503, 504) and attempt < 3:
             time.sleep(5 * (attempt + 1))
             continue
