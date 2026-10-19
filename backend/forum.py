@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, Request
 router = APIRouter()
+
 DB = Path(__file__).parent / "forum.db"
 ROOMS = {"genel", "transfer"}
 TR = timezone(timedelta(hours=3))
@@ -116,7 +117,7 @@ class ReactIn(BaseModel):
 class DelIn(BaseModel):
     owner: str = Field(min_length=8, max_length=64)
 
-@app.get("/api/forum/next-match")
+@router.get("/api/forum/next-match")
 def next_match():
     m = current_match()
     if not m:
@@ -132,7 +133,7 @@ def list_posts(room: str = "genel", limit: int = 60, owner: str = ""):
                          (room, min(limit, 100))).fetchall()
     return [row_to_post(r, owner) for r in rows]
 
-@app.post("/api/forum/posts")
+@router.post("/api/forum/posts")
 async def create_post(p: PostIn, req: Request):
     if not valid_room(p.room): raise HTTPException(400, "Geçersiz oda")
     ip = req.client.host
@@ -175,7 +176,7 @@ async def react(pid: int, r: ReactIn):
     await hub.broadcast({"type": "react", **dict(row)})
     return dict(row)
 
-@app.websocket("/ws/forum")
+@router.websocket("/ws/forum")
 async def ws_forum(ws: WebSocket):
     # Bağlantıyı dış kaynaklardan gelen isteklere (Vercel'e) izin vererek kabul et
     await ws.accept()

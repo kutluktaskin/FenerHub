@@ -3,13 +3,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from .forum import router as forum_router  
 from . import models
 from .database import engine, Base
 from .routers import standings, squad, matches, absences
 from .auto_sync import sync_loop
-from .forum import router as forum_router 
-
 Base.metadata.create_all(bind=engine)
 
 
