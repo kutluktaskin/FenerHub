@@ -1,4 +1,8 @@
 fastapi
 uvicorn[standard]
-sqlalchemy
+sqlalchemy>=2.0
 requests
+python-dotenv
+# Postgres (Neon) sürücüsü ve şema migration'ları
+psycopg[binary]>=3.2
+alembic>=1.13
