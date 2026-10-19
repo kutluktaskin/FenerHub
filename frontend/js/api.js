@@ -52,32 +52,115 @@ async function loadStandings() {
     }
 }
 
+// ---------- Kadro ----------
 const STATUS_VIEW = {
     available: { text: "Hazır",  ic: "check",  cls: "st-ok" },
     injured:   { text: "Sakat",  ic: "injury", cls: "st-injured" },
     suspended: { text: "Cezalı", ic: "card",   cls: "st-suspended" },
 };
+const POSITION_TR = { G: "Kaleci", D: "Defans", M: "Orta Saha", F: "Forvet" };
+const POSITION_ORDER = { G: 0, D: 1, M: 2, F: 3 };
 
-function renderSquad(tbodyEl, players) {
-    tbodyEl.innerHTML = players.map(p => {
-        const s = STATUS_VIEW[p.status] || STATUS_VIEW.available;
-        return `<tr>
-            <td><strong>${esc(p.name)}</strong></td>
-            <td class="muted">${esc(p.position ?? "-")}</td>
-            <td><span class="stat-badge stat-match">${p.appearances}</span></td>
-            <td><span class="stat-badge stat-goal">${p.goals}</span></td>
-            <td><span class="stat-badge stat-assist">${p.assists}</span></td>
-            <td><span class="status ${s.cls}">${icon(s.ic)}${s.text}</span></td>
+// Filtre ve sıralama durumu; veri her yenilemede korunur
+const squadState = { players: null, pos: "all", sort: null, dir: "desc" };
+
+function initials(name) {
+    const w = name.split(/\s+/).filter(Boolean);
+    return ((w[0]?.[0] || "") + (w.length > 1 ? w[w.length - 1][0] : "")).toLocaleUpperCase("tr");
+}
+
+function playerAvatar(p) {
+    const num = p.shirt_number ?? null;
+    return `<span class="avatar" aria-hidden="true">${esc(initials(p.name))}` +
+        (num !== null ? `<b class="avatar-num">${esc(num)}</b>` : "") + `</span>`;
+}
+
+// Sakat/cezalı rozeti: üzerine gelince ya da odaklanınca sebep ve dönüş tarihi görünür
+function statusCell(p) {
+    const s = STATUS_VIEW[p.status];
+    if (!s || p.status === "available") {
+        return `<span class="status st-ok">${icon("check")}<span class="status-text">Hazır</span></span>`;
+    }
+    const detail = [p.status_reason, p.return_note ? `Dönüş: ${p.return_note}` : null]
+        .filter(Boolean).join(" · ") || "Ayrıntı bilinmiyor";
+    const tid = `sq-tip-${p.id}`;
+    return `<span class="tip-wrap">
+        <button type="button" class="status status-tip ${s.cls}" aria-describedby="${tid}">${icon(s.ic)}<span class="status-text">${s.text}</span></button>
+        <span class="tip" role="tooltip" id="${tid}">${esc(detail)}</span>
+    </span>`;
+}
+
+function sortedSquad() {
+    const { players, pos, sort, dir } = squadState;
+    const list = players.filter(p => pos === "all" || p.position === pos);
+    const byName = (a, b) => a.name.localeCompare(b.name, "tr");
+    // Varsayılan: mevki sırası (kaleci → forvet), sonra forma numarası
+    const byDefault = (a, b) =>
+        (POSITION_ORDER[a.position] ?? 9) - (POSITION_ORDER[b.position] ?? 9) ||
+        (a.shirt_number ?? 999) - (b.shirt_number ?? 999) || byName(a, b);
+    return list.sort(sort
+        ? (a, b) => (dir === "desc" ? b[sort] - a[sort] : a[sort] - b[sort]) || byName(a, b)
+        : byDefault);
+}
+
+function renderSquad() {
+    const tbody = document.querySelector(".player-stats-table tbody");
+    if (!tbody || !squadState.players) return;
+    const rows = sortedSquad();
+    const num = v => `<span class="${v ? "" : "is-zero"}">${v}</span>`;
+
+    tbody.innerHTML = rows.map(p => {
+        const out = p.status === "injured" || p.status === "suspended";
+        const pos = POSITION_TR[p.position] ?? p.position ?? "-";
+        return `<tr class="${out ? "is-out" : ""}">
+            <td><div class="player-cell">${playerAvatar(p)}
+                <div class="player-id"><strong>${esc(p.name)}</strong><span class="player-pos-sm">${esc(pos)}</span></div>
+            </div></td>
+            <td class="col-pos">${esc(pos)}</td>
+            <td class="num">${num(p.appearances)}</td>
+            <td class="num">${num(p.goals)}</td>
+            <td class="num">${num(p.assists)}</td>
+            <td class="col-status">${statusCell(p)}</td>
         </tr>`;
-    }).join("");
+    }).join("") || `<tr class="empty-row"><td colspan="6">Bu mevkide oyuncu yok.</td></tr>`;
+
+    document.querySelectorAll(".player-stats-table th[data-sort]").forEach(th => {
+        const on = th.dataset.sort === squadState.sort;
+        th.setAttribute("aria-sort", on ? (squadState.dir === "desc" ? "descending" : "ascending") : "none");
+        th.querySelector(".sort-ico use").setAttribute("href",
+            on ? (squadState.dir === "desc" ? "#i-sort-down" : "#i-sort-up") : "#i-sort");
+    });
+    const count = document.getElementById("squadCount");
+    if (count) count.textContent = `${rows.length} oyuncu`;
+}
+
+function initSquadControls() {
+    document.querySelectorAll(".squad-filter [data-pos]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            squadState.pos = btn.dataset.pos;
+            document.querySelectorAll(".squad-filter [data-pos]")
+                .forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+            renderSquad();
+        });
+    });
+    // Başlığa basınca: çoktan aza → azdan çoka → varsayılan sıra
+    document.querySelectorAll(".player-stats-table th[data-sort] .sort-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const key = btn.closest("th").dataset.sort;
+            if (squadState.sort !== key) Object.assign(squadState, { sort: key, dir: "desc" });
+            else if (squadState.dir === "desc") squadState.dir = "asc";
+            else squadState.sort = null;
+            renderSquad();
+        });
+    });
 }
 
 async function loadSquad() {
     const tbody = document.querySelector(".player-stats-table tbody");
     if (!tbody) return;
     try {
-        const players = await apiGet("/api/squad");
-        renderSquad(tbody, players);
+        squadState.players = await apiGet("/api/squad");
+        renderSquad();
         console.log("Kadro API'den yüklendi");
     } catch (err) {
         console.warn("Kadro API'sine ulaşılamadı:", err);
@@ -477,6 +560,7 @@ async function loadFixtures() {
 document.addEventListener("DOMContentLoaded", () => {
     setInterval(() => { renderNavNext(); tickHeroCard(); }, 1000);
     loadStandings();
+    initSquadControls();
     loadSquad();
     loadAbsences();
     loadUpcomingMatches();

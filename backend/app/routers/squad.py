@@ -35,6 +35,7 @@ def get_squad(db: Session = Depends(get_db)):
             "id": p.id,
             "name": p.name,
             "position": p.position,
+            "shirt_number": p.shirt_number,
             "appearances": stat.appearances if stat else 0,
             "goals": stat.goals if stat else 0,
             "assists": stat.assists if stat else 0,

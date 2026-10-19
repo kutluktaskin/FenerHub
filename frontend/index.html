@@ -129,42 +129,54 @@
         </section>
 
         <!-- 2. BÖLÜM: TAKIM KADROSU / SAKATLIK RAPORU -->
-        <div class="team-overview-grid page-section" id="takimIstatistikBolumu">
-            <div class="team-box">
-                <h3 class="box-title"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg>Takım kadrosu <small>Maç · Gol · Asist</small></h3>
-                <table class="player-stats-table">
-                    <thead>
-                        <tr>
-                            <th>Oyuncu</th>
-                            <th>Mevki</th>
-                            <th>Maç</th>
-                            <th>Gol</th>
-                            <th>Asist</th>
-                            <th>Durum</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
-                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
-                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
-                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
-                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
-                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
-                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
-                        <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
-                    </tbody>
-                </table>
+        <section class="team-overview-grid page-section" id="takimIstatistikBolumu" aria-label="Takım kadrosu ve sakatlık raporu">
+            <div class="team-box squad-box">
+                <h2 class="box-title"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg>Takım kadrosu <small id="squadCount"></small></h2>
+                <div class="squad-filter" role="group" aria-label="Mevkiye göre filtrele">
+                    <button type="button" data-pos="all" aria-pressed="true">Tümü</button>
+                    <button type="button" data-pos="G" aria-pressed="false">Kaleci</button>
+                    <button type="button" data-pos="D" aria-pressed="false">Defans</button>
+                    <button type="button" data-pos="M" aria-pressed="false">Orta Saha</button>
+                    <button type="button" data-pos="F" aria-pressed="false">Forvet</button>
+                </div>
+                <div class="box-scroll scroll-thin">
+                    <table class="player-stats-table">
+                        <caption class="sr-only">Fenerbahçe kadrosu: maç, gol ve asist sayıları. Maç, Gol ve Asist başlıklarına basarak sıralayabilirsin.</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Oyuncu</th>
+                                <th scope="col" class="col-pos">Mevki</th>
+                                <th scope="col" class="num" data-sort="appearances" aria-sort="none"><button type="button" class="sort-btn">Maç<svg class="ico sort-ico" aria-hidden="true"><use href="#i-sort"/></svg></button></th>
+                                <th scope="col" class="num" data-sort="goals" aria-sort="none"><button type="button" class="sort-btn">Gol<svg class="ico sort-ico" aria-hidden="true"><use href="#i-sort"/></svg></button></th>
+                                <th scope="col" class="num" data-sort="assists" aria-sort="none"><button type="button" class="sort-btn">Asist<svg class="ico sort-ico" aria-hidden="true"><use href="#i-sort"/></svg></button></th>
+                                <th scope="col" class="col-status"><span class="th-label">Durum</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="skel-row"><td><div class="player-cell"><span class="skel avatar-skel"></span><span class="skel skel-w60"></span></div></td><td class="col-pos"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="col-status"><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><div class="player-cell"><span class="skel avatar-skel"></span><span class="skel skel-w60"></span></div></td><td class="col-pos"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="col-status"><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><div class="player-cell"><span class="skel avatar-skel"></span><span class="skel skel-w60"></span></div></td><td class="col-pos"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="col-status"><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><div class="player-cell"><span class="skel avatar-skel"></span><span class="skel skel-w60"></span></div></td><td class="col-pos"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="col-status"><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><div class="player-cell"><span class="skel avatar-skel"></span><span class="skel skel-w60"></span></div></td><td class="col-pos"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="col-status"><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><div class="player-cell"><span class="skel avatar-skel"></span><span class="skel skel-w60"></span></div></td><td class="col-pos"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="col-status"><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><div class="player-cell"><span class="skel avatar-skel"></span><span class="skel skel-w60"></span></div></td><td class="col-pos"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="col-status"><span class="skel"></span></td></tr>
+                            <tr class="skel-row"><td><div class="player-cell"><span class="skel avatar-skel"></span><span class="skel skel-w60"></span></div></td><td class="col-pos"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="num"><span class="skel"></span></td><td class="col-status"><span class="skel"></span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="team-box">
-                <h3 class="box-title"><svg class="ico" aria-hidden="true"><use href="#i-injury"/></svg>Sakatlık ve ceza raporu</h3>
-                <div class="injury-report-list">
-                    <div class="injury-report-card skel-card"><span class="skel skel-w60"></span><span class="skel skel-w40"></span></div>
-                    <div class="injury-report-card skel-card"><span class="skel skel-w60"></span><span class="skel skel-w40"></span></div>
-                    <div class="injury-report-card skel-card"><span class="skel skel-w60"></span><span class="skel skel-w40"></span></div>
+                <h2 class="box-title"><svg class="ico" aria-hidden="true"><use href="#i-injury"/></svg>Sakatlık ve ceza raporu</h2>
+                <div class="box-scroll scroll-thin">
+                    <div class="injury-report-list">
+                        <div class="injury-report-card skel-card"><span class="skel skel-w60"></span><span class="skel skel-w40"></span></div>
+                        <div class="injury-report-card skel-card"><span class="skel skel-w60"></span><span class="skel skel-w40"></span></div>
+                        <div class="injury-report-card skel-card"><span class="skel skel-w60"></span><span class="skel skel-w40"></span></div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- 3. BÖLÜM: PUAN DURUMLARI (TÜM TAKIMLAR + SCROLL) -->
         <section class="page-section standings-split-section" id="puanlar">

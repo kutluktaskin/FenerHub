@@ -178,6 +178,15 @@ table { font-variant-numeric: tabular-nums; }
 .ico-fill { fill: currentColor; stroke: none; }
 
 .muted { color: var(--c-text-3); }
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
 .small { font-size: var(--fs-sm); margin-top: var(--s-3); }
 
 /* Kutu başlığı: ikon + başlık + ince açıklama */
@@ -1014,29 +1023,44 @@ table { font-variant-numeric: tabular-nums; }
 /* ---------- 09 KADRO ---------- */
 .team-overview-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
     gap: var(--s-5);
     align-items: start;
 }
-.team-box { padding: 0 var(--s-5) var(--s-5); }
-.team-overview-grid .team-box { height: 560px; overflow-y: auto; }
-.team-box .box-title {
-    position: sticky;
-    top: 0;
-    z-index: 6;
-    padding: var(--s-5) 0 var(--s-4);
-    background: var(--c-surface-solid);
+/* Kutular sabit yükseklikte; başlık ve filtre sabit, içerik kendi içinde kayar */
+.team-box {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+    height: 600px;
+    padding: var(--s-5);
 }
+.box-scroll { flex: 1; min-height: 0; overflow-y: auto; margin: 0 calc(var(--s-2) * -1); padding: 0 var(--s-2); }
+
+/* Mevki filtresi */
+.squad-filter { display: flex; flex-wrap: wrap; gap: var(--s-1); }
+.squad-filter button {
+    padding: 6px 12px;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-pill);
+    background: none;
+    color: var(--c-text-2);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+}
+.squad-filter button:hover { color: var(--c-text); background: var(--c-hover); }
+.squad-filter button[aria-pressed="true"] { background: var(--c-text); border-color: var(--c-text); color: var(--c-accent-ink); }
 
 .player-stats-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
 .player-stats-table th, .player-stats-table td {
-    padding: 10px 8px;
+    padding: 9px 8px;
     border-bottom: 1px solid var(--c-line);
     text-align: left;
 }
 .player-stats-table th {
     position: sticky;
-    top: 74px;
+    top: 0;
     z-index: 5;
     background: var(--c-surface-solid);
     color: var(--c-text-3);
@@ -1044,22 +1068,120 @@ table { font-variant-numeric: tabular-nums; }
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    white-space: nowrap;
 }
+.player-stats-table .num { width: 64px; text-align: center; }
+.player-stats-table td.num { font-weight: 600; font-size: var(--fs-base); }
+.player-stats-table .is-zero { color: var(--c-text-3); font-weight: 400; }
+.player-stats-table .col-pos { color: var(--c-text-2); white-space: nowrap; }
+.player-stats-table .col-status { width: 1%; white-space: nowrap; }
 .player-stats-table tbody tr { transition: background var(--t-fast); }
 .player-stats-table tbody tr:hover { background: var(--c-hover); }
 
-.stat-badge {
-    display: inline-block;
-    min-width: 30px;
-    padding: 3px 7px;
+/* Sıralanabilir başlık */
+.sort-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 4px;
+    margin: -2px -4px;
+    border: 0;
     border-radius: var(--r-sm);
-    background: rgba(255, 255, 255, 0.07);
-    font-weight: 600;
-    text-align: center;
+    background: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
 }
-.stat-goal { color: var(--c-win); }
-.stat-assist { color: var(--c-navy-tint); }
+.sort-btn:hover { color: var(--c-text); }
+.sort-ico { width: 14px; height: 14px; opacity: 0.6; }
+th[aria-sort="ascending"] .sort-btn, th[aria-sort="descending"] .sort-btn { color: var(--c-text); }
+th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opacity: 1; color: var(--c-accent); }
 
+/* Oyuncu hücresi: avatar (baş harfler + forma numarası) */
+.player-cell { display: flex; align-items: center; gap: var(--s-3); min-width: 0; }
+.player-id { display: flex; flex-direction: column; min-width: 0; }
+.player-id strong { font-weight: 600; }
+.player-pos-sm { display: none; color: var(--c-text-3); font-size: var(--fs-xs); }
+.avatar {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #1f3a73, #142650);
+    box-shadow: inset 0 0 0 1px rgba(143, 176, 255, 0.25);
+    color: var(--c-text);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+.avatar-num {
+    position: absolute;
+    right: -5px;
+    bottom: -4px;
+    min-width: 19px;
+    padding: 1px 4px;
+    border-radius: var(--r-pill);
+    background: var(--c-accent);
+    color: var(--c-accent-ink);
+    font-family: var(--f-display);
+    font-size: 11px;
+    line-height: 1.3;
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--c-surface-solid);
+}
+.avatar-skel { width: 36px; height: 36px; border-radius: 50%; }
+
+/* Sakat/cezalı oyuncu satırı hafif soluk, durum rozeti canlı kalır */
+.player-stats-table tr.is-out td:not(.col-status) { color: var(--c-text-3); }
+.player-stats-table tr.is-out .avatar { filter: grayscale(0.8); opacity: 0.6; }
+
+/* Durum rozeti ve ipucu (tooltip) */
+.status-tip {
+    padding: 3px 9px;
+    border: 1px solid currentColor;
+    border-radius: var(--r-pill);
+    background: none;
+    font-size: var(--fs-xs);
+    cursor: help;
+}
+.status-tip.st-injured { background: var(--c-injury-soft); border-color: rgba(255, 122, 133, 0.4); }
+.status-tip.st-suspended { background: var(--c-susp-soft); border-color: rgba(255, 181, 71, 0.4); }
+.tip-wrap { position: relative; display: inline-flex; }
+.tip {
+    position: absolute;
+    right: calc(100% + 8px);
+    top: 50%;
+    z-index: 20;
+    width: max-content;
+    max-width: 220px;
+    padding: 7px 10px;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-md);
+    background: #182a50;
+    box-shadow: var(--sh-2);
+    color: var(--c-text);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: normal;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(4px, -50%);
+    transition: opacity var(--t-fast), transform var(--t-fast), visibility 0s linear var(--t-fast);
+}
+.tip-wrap:hover .tip, .status-tip:focus + .tip {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(0, -50%);
+    transition: opacity var(--t-fast), transform var(--t-fast);
+}
+
+/* Sakatlık raporu */
 .injury-report-list { display: flex; flex-direction: column; gap: var(--s-3); }
 .injury-report-card {
     display: flex;
@@ -1073,14 +1195,30 @@ table { font-variant-numeric: tabular-nums; }
     background: rgba(0, 0, 0, 0.2);
 }
 .injury-report-card.suspended-card { border-left-color: var(--c-susp); }
-.injury-report-card.skel-card { border-left-color: var(--c-line); align-items: stretch; }
+.injury-report-card.skel-card { border-left-color: var(--c-line); align-items: stretch; flex-direction: column; }
 .ir-name { font-weight: 600; }
 .ir-stats { margin-top: 2px; color: var(--c-text-3); font-size: var(--fs-xs); }
 .ir-detail { margin-top: 2px; color: var(--c-text-2); font-size: var(--fs-xs); }
 
 @media (max-width: 1024px) {
     .team-overview-grid { grid-template-columns: minmax(0, 1fr); }
-    .team-overview-grid .team-box { height: 480px; }
+    .team-box { height: auto; max-height: 640px; }
+    .team-box:last-child { max-height: 420px; }
+}
+/* Dar ekran: mevki ismin altına iner, durum sadece ikon */
+@media (max-width: 640px) {
+    .team-box { padding: var(--s-4); }
+    .player-stats-table .col-pos { display: none; }
+    .player-pos-sm { display: block; }
+    .player-stats-table th, .player-stats-table td { padding: 8px 4px; }
+    .player-stats-table th { font-size: 10px; letter-spacing: 0.02em; }
+    .player-stats-table .num { width: 44px; }
+    .sort-ico { width: 12px; height: 12px; }
+    .player-stats-table .th-label, .status-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .player-stats-table td.num { font-size: var(--fs-sm); }
+    .avatar { width: 32px; height: 32px; }
+    .player-cell { gap: var(--s-2); }
+    .status-tip { padding: 4px 6px; }
 }
 
 /* ---------- 10 PUAN DURUMU ---------- */
