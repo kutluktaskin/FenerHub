@@ -19,7 +19,9 @@ async function apiGet(path) {
 
 // ---------- Puan Durumu ----------
 // Sıra bölgeleri: lig kuralı değişirse burayı güncelle.
-// from/to sıra numarası; last: sondan kaç takım (takım sayısına göre hesaplanır)
+// from/to sıra numarası; last: sondan kaç takım (takım sayısına göre hesaplanır).
+// Renkler style.css'teki --z-* token'ları: ŞL sarı, Avrupa açık lacivert/beyaz, küme düşme kırmızı.
+// Fenerbahçe satırı sarı olduğu için orada şerit lacivert çizilir (küme düşme hariç).
 const ZONES = {
     super_lig: [
         { from: 1, to: 1, color: "var(--z-ucl)",   label: "Şampiyonlar Ligi" },
@@ -29,8 +31,8 @@ const ZONES = {
         { last: 3,        color: "var(--z-rel)",   label: "Küme düşme" },
     ],
     uefa: [
-        { from: 1, to: 8,  color: "var(--z-uecl)", label: "Son 16 turu" },
-        { from: 9, to: 24, color: "var(--z-ucl)",  label: "Play-off turu" },
+        { from: 1, to: 8,  color: "var(--z-ucl)", label: "Son 16 turu" },
+        { from: 9, to: 24, color: "var(--z-uel)", label: "Play-off turu" },
     ],
 };
 
@@ -65,7 +67,9 @@ function renderStandings(tbodyEl, rows, comp) {
         const gd = r.goal_difference > 0 ? `+${r.goal_difference}` : r.goal_difference;
         const zone = zoneOf(comp, r.position, rows.length);
         const fb = r.is_fenerbahce;
-        return `<tr class="${fb ? "fb-row" : ""}"${zone ? ` style="--zone:${zone.color}"` : ""}>
+        // Sarı Fenerbahçe satırında sarı/beyaz şerit görünmez: küme düşme dışında lacivert çizilir
+        const stripe = zone && (fb && !zone.last ? "var(--c-accent-ink)" : zone.color);
+        return `<tr class="${fb ? "fb-row" : ""}"${zone ? ` style="--zone:${stripe}"` : ""}>
             <td class="pos"${zone ? ` title="${esc(zone.label)}"` : ""}>${r.position}</td>
             <td class="team"><span class="team-cell">${fb ? crest("Fenerbahçe", "crest-xs") : ""}<span>${esc(r.team)}</span></span></td>
             <td>${r.played}</td><td>${r.won}</td><td>${r.drawn}</td><td>${r.lost}</td>
@@ -151,7 +155,8 @@ function renderSquad() {
     const tbody = document.querySelector(".player-stats-table tbody");
     if (!tbody || !squadState.players) return;
     const rows = sortedSquad();
-    const num = v => `<span class="${v ? "" : "is-zero"}">${v}</span>`;
+    // Rozetler: maç beyaz-lacivert, gol dolu sarı, asist sarı çerçeve; sıfırlar soluk
+    const badge = (v, kind) => `<span class="stat-badge stat-${kind}${v ? "" : " is-zero"}">${v}</span>`;
 
     tbody.innerHTML = rows.map(p => {
         const out = p.status === "injured" || p.status === "suspended";
@@ -161,9 +166,9 @@ function renderSquad() {
                 <div class="player-id"><strong>${esc(p.name)}</strong><span class="player-pos-sm">${esc(pos)}</span></div>
             </div></td>
             <td class="col-pos">${esc(pos)}</td>
-            <td class="num">${num(p.appearances)}</td>
-            <td class="num">${num(p.goals)}</td>
-            <td class="num">${num(p.assists)}</td>
+            <td class="num">${badge(p.appearances, "match")}</td>
+            <td class="num">${badge(p.goals, "goal")}</td>
+            <td class="num">${badge(p.assists, "assist")}</td>
             <td class="col-status">${statusCell(p)}</td>
         </tr>`;
     }).join("") || `<tr class="empty-row"><td colspan="6">Bu mevkide oyuncu yok.</td></tr>`;
@@ -291,7 +296,8 @@ function crest(name, size = "") {
     if (name === "Fenerbahçe") {
         return `<img class="crest ${size}" src="img/fenerbahce-logo.png" alt="" loading="lazy">`;
     }
-    const [code, bg, fg] = TEAM_BADGE[name] || [monogram(name), "#1d2b4a", "#dbe3f4"];
+    // Kulüp renkleri veri olduğu için sabit; bilinmeyen rakip tema token'larıyla çizilir
+    const [code, bg, fg] = TEAM_BADGE[name] || [monogram(name), "var(--c-navy-600)", "var(--c-text-2)"];
     return `<span class="crest crest-mono ${size}${code.length > 2 ? " is-long" : ""}" style="--crest-bg:${bg};--crest-fg:${fg}" aria-hidden="true">${esc(code)}</span>`;
 }
 

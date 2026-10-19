@@ -7,52 +7,94 @@
    ========================================================================== */
 
 /* ---------- 01 TOKEN'LAR ---------- */
+/* Renk sistemi: Fenerbahçe laciverti ve sarısı.
+   Oran yaklaşık %70 lacivert, %20 çok koyu lacivert, %10 sarı.
+   Sarı büyük alan boyamaz: vurgu, çizgi, rozet ve önemli sayılarda kullanılır.
+   Yeşil/kırmızı sadece anlamlı durumlarda (galibiyet/mağlubiyet, hazır/sakat, canlı). */
 :root {
-    /* Zemin: gece maçı laciverti */
-    --c-bg: #050a16;
-    --c-bg-raise: #0b1529;
-    --c-surface: rgba(10, 20, 40, 0.84);
-    --c-surface-2: rgba(22, 37, 68, 0.66);
-    --c-surface-solid: #0d1a33;
-    --c-hover: rgba(255, 255, 255, 0.05);
-    --c-line: rgba(160, 180, 225, 0.13);
-    --c-line-strong: rgba(160, 180, 225, 0.26);
+    /* Lacivert skalası */
+    --c-navy-950: #040b22;
+    --c-navy-900: #061233;
+    --c-navy-800: #0b1f4b;
+    --c-navy-700: #122a5e;
+    --c-navy-600: #1a3874;
+    --c-navy-500: #26498f;
 
-    /* Metin (koyu zeminde en az 4.5:1 kontrast) */
-    --c-text: #f3f6fc;
-    --c-text-2: #bac5dc;
-    --c-text-3: #8f9cb9;
-
-    /* Vurgu: Fenerbahçe sarısı, az ve bilinçli */
+    /* Sarı */
     --c-accent: #ffd200;
-    --c-accent-ink: #0a1430;
-    --c-accent-soft: rgba(255, 210, 0, 0.1);
-    --c-accent-line: rgba(255, 210, 0, 0.5);
-    /* İkincil vurgu: açık lacivert */
-    --c-navy: #1b3a7a;
-    --c-navy-tint: #8fb0ff;
-    --c-navy-soft: rgba(143, 176, 255, 0.12);
+    --c-accent-bright: #ffed00;
+    --c-accent-ink: #061233;                 /* sarı zemin üstünde yazı her zaman lacivert */
+    --c-accent-soft: color-mix(in srgb, var(--c-accent) 12%, transparent);
+    --c-accent-line: color-mix(in srgb, var(--c-accent) 55%, transparent);
+    --c-accent-glow: color-mix(in srgb, var(--c-accent) 26%, transparent);
 
-    /* Durum renkleri */
+    /* Açık lacivert-beyaz: ikincil vurgu (Avrupa bölgesi, kendi mesajın) */
+    --c-navy-tint: #d6e2ff;
+    --c-navy-soft: color-mix(in srgb, var(--c-navy-tint) 12%, transparent);
+
+    /* Zemin ve yüzeyler */
+    --c-bg: var(--c-navy-900);
+    --c-surface: color-mix(in srgb, var(--c-navy-800) 90%, transparent);
+    --c-surface-2: color-mix(in srgb, var(--c-navy-700) 75%, transparent);
+    --c-surface-solid: var(--c-navy-800);
+    --c-inset: color-mix(in srgb, var(--c-navy-950) 55%, transparent);         /* kart içi kutular */
+    --c-inset-strong: color-mix(in srgb, var(--c-navy-950) 78%, transparent);
+    --c-hover: rgba(255, 255, 255, 0.06);
+    --c-hover-strong: rgba(255, 255, 255, 0.12);
+    --c-zebra: rgba(255, 255, 255, 0.03);
+    --c-line: color-mix(in srgb, var(--c-navy-tint) 15%, transparent);
+    --c-line-strong: color-mix(in srgb, var(--c-navy-tint) 30%, transparent);
+    --c-ring: rgba(255, 255, 255, 0.16);
+    --c-nav-bg: color-mix(in srgb, var(--c-navy-950) 86%, transparent);
+
+    /* Metin (lacivert zeminde hepsi en az 4.5:1; --c-text-3 #0B1F4B üstünde ~7:1) */
+    --c-text: #ffffff;
+    --c-text-2: #cdd7ee;
+    --c-text-3: #9aabd0;
+
+    /* Durum renkleri (sadece anlamlı durumlarda) */
     --c-live: #ff4d5e;
-    --c-live-soft: rgba(255, 77, 94, 0.14);
     --c-win: #34d399;
-    --c-win-soft: rgba(52, 211, 153, 0.13);
-    --c-draw: #a9b6cf;
-    --c-draw-soft: rgba(169, 182, 207, 0.13);
+    --c-draw: #aab4c8;
     --c-loss: #ff6b78;
-    --c-loss-soft: rgba(255, 107, 120, 0.13);
     --c-injury: #ff7a85;
-    --c-injury-soft: rgba(255, 122, 133, 0.13);
     --c-susp: #ffb547;
-    --c-susp-soft: rgba(255, 181, 71, 0.13);
+    --c-fire: #ff9b5e;
+    --c-live-soft: color-mix(in srgb, var(--c-live) 14%, transparent);
+    --c-live-line: color-mix(in srgb, var(--c-live) 55%, transparent);
+    --c-win-soft: color-mix(in srgb, var(--c-win) 14%, transparent);
+    --c-win-line: color-mix(in srgb, var(--c-win) 38%, transparent);
+    --c-draw-soft: color-mix(in srgb, var(--c-draw) 14%, transparent);
+    --c-loss-soft: color-mix(in srgb, var(--c-loss) 14%, transparent);
+    --c-injury-soft: color-mix(in srgb, var(--c-injury) 14%, transparent);
+    --c-injury-line: color-mix(in srgb, var(--c-injury) 40%, transparent);
+    --c-susp-soft: color-mix(in srgb, var(--c-susp) 14%, transparent);
+    --c-susp-line: color-mix(in srgb, var(--c-susp) 40%, transparent);
 
-    /* Puan durumu bölgeleri */
-    --z-ucl: #3b82f6;
-    --z-ucl-q: #7aa7ff;
-    --z-uel: #f59e0b;
-    --z-uecl: #22c55e;
-    --z-rel: #ef4444;
+    /* Puan durumu bölgeleri: ŞL sarı, Avrupa açık lacivert/beyaz, küme düşme kırmızı */
+    --z-ucl: var(--c-accent);
+    --z-ucl-q: #ffe680;
+    --z-uel: #f2f5ff;
+    --z-uecl: #8fa8dc;
+    --z-rel: #ff5a5a;
+
+    /* Kart zemini: lacivertten koyu laciverte, köşede hafif sarı ışıma */
+    --g-card:
+        radial-gradient(110% 55% at 100% 0%, color-mix(in srgb, var(--c-accent) 9%, transparent), transparent 48%),
+        linear-gradient(165deg, color-mix(in srgb, var(--c-navy-700) 95%, transparent) 0%,
+                                color-mix(in srgb, var(--c-navy-800) 95%, transparent) 50%,
+                                color-mix(in srgb, var(--c-navy-900) 97%, transparent) 100%);
+    /* Forma çizgileri: çok düşük opaklıkta dikey sarı şeritler */
+    --tx-stripes: repeating-linear-gradient(90deg, color-mix(in srgb, var(--c-accent) 4%, transparent) 0 16px, transparent 16px 32px);
+    --g-vignette:
+        radial-gradient(ellipse at 50% -10%, color-mix(in srgb, var(--c-navy-500) 45%, transparent), transparent 60%),
+        radial-gradient(ellipse at center, transparent 35%, color-mix(in srgb, var(--c-navy-950) 88%, transparent) 100%);
+    --g-skel: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.12) 37%, rgba(255, 255, 255, 0.05) 63%);
+    --c-pitch-1: #164225;
+    --c-pitch-2: #0a2313;
+    --c-pitch-line: rgba(255, 255, 255, 0.45);
+    --c-pitch-area: rgba(255, 255, 255, 0.15);
+    --c-pitch-rival: var(--c-live);
 
     /* Yazı */
     --f-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
@@ -83,9 +125,11 @@
     --r-pill: 999px;
 
     /* Gölge */
-    --sh-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 14px rgba(0, 0, 0, 0.25);
-    --sh-2: 0 12px 32px rgba(0, 0, 0, 0.45);
-    --sh-3: 0 24px 60px rgba(0, 0, 0, 0.55);
+    --sh-1: 0 1px 2px rgba(2, 6, 20, 0.4), 0 4px 14px rgba(2, 6, 20, 0.3);
+    --sh-2: 0 12px 32px rgba(2, 6, 20, 0.5);
+    --sh-3: 0 24px 60px rgba(2, 6, 20, 0.6);
+    --sh-glow: 0 0 0 1px var(--c-accent-line), 0 16px 44px var(--c-accent-glow);
+    --sh-text: 0 4px 24px rgba(2, 6, 20, 0.6);
 
     /* Hareket */
     --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -203,8 +247,9 @@ table { font-variant-numeric: tabular-nums; }
     height: 34px;
     padding: 8px;
     border-radius: var(--r-md);
-    background: var(--c-navy-soft);
-    color: var(--c-navy-tint);
+    background: var(--c-accent-soft);
+    color: var(--c-accent);
+    box-shadow: inset 0 0 0 1px var(--c-accent-line);
 }
 .box-title small {
     margin-left: auto;
@@ -222,7 +267,7 @@ table { font-variant-numeric: tabular-nums; }
     height: 0.8em;
     width: 70%;
     border-radius: var(--r-sm);
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.12) 37%, rgba(255, 255, 255, 0.05) 63%);
+    background: var(--g-skel);
     background-size: 400% 100%;
     animation: shimmer 1.4s ease infinite;
 }
@@ -256,9 +301,9 @@ table { font-variant-numeric: tabular-nums; }
     animation: pulse 1.6s infinite;
 }
 @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(255, 77, 94, 0.65); }
-    70% { box-shadow: 0 0 0 9px rgba(255, 77, 94, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 77, 94, 0); }
+    0% { box-shadow: 0 0 0 0 var(--c-live-line); }
+    70% { box-shadow: 0 0 0 9px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
 }
 
 /* Rozetler ve durum etiketleri */
@@ -275,23 +320,45 @@ table { font-variant-numeric: tabular-nums; }
     font-size: var(--fs-xs);
     border: 1px solid transparent;
 }
-.tag-injured { background: var(--c-injury-soft); color: var(--c-injury); border-color: rgba(255, 122, 133, 0.35); }
-.tag-suspended { background: var(--c-susp-soft); color: var(--c-susp); border-color: rgba(255, 181, 71, 0.35); }
-.tag-ok { background: var(--c-win-soft); color: var(--c-win); border-color: rgba(52, 211, 153, 0.35); }
+.tag-injured { background: var(--c-injury-soft); color: var(--c-injury); border-color: var(--c-injury-line); }
+.tag-suspended { background: var(--c-susp-soft); color: var(--c-susp); border-color: var(--c-susp-line); }
+.tag-ok { background: var(--c-win-soft); color: var(--c-win); border-color: var(--c-win-line); }
 
 .status { font-size: var(--fs-sm); }
 .st-ok { color: var(--c-win); }
 .st-injured { color: var(--c-injury); }
 .st-suspended { color: var(--c-susp); }
 
-/* Ortak kart yüzeyi */
+/* Ortak kart yüzeyi: lacivert gradient, üst kenarda ince sarı çizgi, köşede sarı ışıma.
+   Hover'da kenarlık sarıya döner ve hafif sarı ışıma çıkar. */
 .recent-match-card, .team-box, .standings-box, .fixtures-full-section, .match-card {
-    background: var(--c-surface);
+    position: relative;
+    background: var(--g-card);
     -webkit-backdrop-filter: var(--blur);
     backdrop-filter: var(--blur);
     border: 1px solid var(--c-line);
     border-radius: var(--r-xl);
-    box-shadow: var(--sh-2);
+    box-shadow: inset 0 2px 0 var(--c-accent-line), var(--sh-2);
+    transition: border-color var(--t), box-shadow var(--t), transform var(--t) var(--ease);
+}
+.recent-match-card:hover, .team-box:hover, .standings-box:hover, .fixtures-full-section:hover, .match-card:hover {
+    border-color: var(--c-accent-line);
+    box-shadow: inset 0 2px 0 var(--c-accent), var(--sh-2), var(--sh-glow);
+}
+/* Bölüm başlıklarının arkasında forma çizgisi dokusu (aşağı doğru kaybolur) */
+.team-box > .box-title::before, .standings-box > .box-title::before, .fx-head::before, .match-card-top::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 104px;
+    z-index: -1;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    background: var(--tx-stripes);
+    -webkit-mask-image: linear-gradient(to bottom, #000, transparent);
+    mask-image: linear-gradient(to bottom, #000, transparent);
+    pointer-events: none;
 }
 
 /* İnce kaydırma çubuğu */
@@ -322,14 +389,14 @@ table { font-variant-numeric: tabular-nums; }
     font-weight: 600;
     transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast), transform var(--t-fast);
 }
-.btn:hover, .open-sim-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(160, 180, 225, 0.4); }
+.btn:hover, .open-sim-btn:hover { background: var(--c-accent-soft); border-color: var(--c-accent-line); color: var(--c-accent); }
 .btn:active, .open-sim-btn:active { transform: scale(0.98); }
 .btn-primary {
     background: var(--c-accent);
     border-color: var(--c-accent);
     color: var(--c-accent-ink);
 }
-.btn-primary:hover { background: #ffdc33; border-color: #ffdc33; }
+.btn-primary:hover { background: var(--c-accent-bright); border-color: var(--c-accent-bright); color: var(--c-accent-ink); }
 
 /* ---------- 04 ARKA PLAN ---------- */
 /* Yükleme ekranı yok: sayfa hemen açılır, arka plan ilk kare çizilince belirir */
@@ -355,9 +422,7 @@ table { font-variant-numeric: tabular-nums; }
     position: absolute;
     inset: 0;
     z-index: 1;
-    background:
-        radial-gradient(ellipse at 50% -10%, rgba(27, 58, 122, 0.45), transparent 60%),
-        radial-gradient(ellipse at center, transparent 35%, rgba(3, 6, 14, 0.85) 100%);
+    background: var(--g-vignette);
 }
 
 /* ---------- 05 MENÜ ---------- */
@@ -370,10 +435,21 @@ table { font-variant-numeric: tabular-nums; }
     align-items: center;
     gap: var(--s-5);
     padding: 0 var(--gutter);
-    background: rgba(5, 10, 22, 0.8);
+    background: var(--c-nav-bg);
     -webkit-backdrop-filter: var(--blur) saturate(140%);
     backdrop-filter: var(--blur) saturate(140%);
     border-bottom: 1px solid var(--c-line);
+}
+/* Menü altında ortası parlayan ince sarı çizgi */
+.navbar::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--c-accent-line), transparent);
+    pointer-events: none;
 }
 
 .logo.fh-logo {
@@ -467,8 +543,8 @@ table { font-variant-numeric: tabular-nums; }
     white-space: nowrap;
     transition: border-color var(--t-fast), background var(--t-fast);
 }
-.nav-next:hover { border-color: rgba(160, 180, 225, 0.45); background: rgba(22, 37, 68, 0.9); }
-.nav-next.is-live { border-color: rgba(255, 77, 94, 0.55); background: var(--c-live-soft); }
+.nav-next:hover { border-color: var(--c-accent-line); background: var(--c-navy-700); }
+.nav-next.is-live { border-color: var(--c-live-line); background: var(--c-live-soft); }
 .nav-next.is-live .nn-label { color: var(--c-live); }
 .nn-label { display: inline-flex; align-items: center; gap: 6px; margin-right: 2px; }
 .nn-box {
@@ -478,10 +554,10 @@ table { font-variant-numeric: tabular-nums; }
     min-width: 36px;
     padding: 2px 5px;
     border-radius: var(--r-md);
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--c-inset-strong);
     line-height: 1.1;
 }
-.nn-box b { font-family: var(--f-display); font-size: 1.05rem; }
+.nn-box b { font-family: var(--f-display); font-size: 1.05rem; color: var(--c-accent); }
 .nn-box i { font-style: normal; font-size: 0.6rem; color: var(--c-text-3); text-transform: uppercase; letter-spacing: 0.05em; }
 .nn-live { font-family: var(--f-display); font-size: 1.05rem; }
 
@@ -594,12 +670,14 @@ table { font-variant-numeric: tabular-nums; }
     text-transform: uppercase;
     letter-spacing: 0.01em;
     color: var(--c-text);
-    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+    text-shadow: var(--sh-text);
 }
 .hero-sub {
     max-width: 60ch;
     color: var(--c-text-2);
 }
+.hero-head::after { content: ""; width: 56px; height: 4px; border-radius: 2px; background: var(--c-accent); }
+.hero-eyebrow { border-color: var(--c-accent-line); }
 .hero-divider {
     width: 48px;
     height: 3px;
@@ -632,9 +710,8 @@ table { font-variant-numeric: tabular-nums; }
     flex-direction: column;
     gap: var(--s-4);
     padding: var(--s-5);
-    transition: border-color var(--t), transform var(--t) var(--ease), box-shadow var(--t);
 }
-.recent-match-card:hover { border-color: var(--c-line-strong); transform: translateY(-2px); box-shadow: var(--sh-3); }
+.recent-match-card:hover { transform: translateY(-3px); }
 .recent-match-card.active-card { border-color: var(--c-accent-line); }
 .recent-match-card .open-sim-btn { margin-top: auto; }
 
@@ -642,15 +719,17 @@ table { font-variant-numeric: tabular-nums; }
     gap: var(--s-5);
     padding: var(--s-6);
     border-color: var(--c-line-strong);
+    /* Hero: forma çizgileri + üstten lacivert ışık + kart gradienti */
     background:
-        radial-gradient(120% 70% at 50% 0%, rgba(27, 58, 122, 0.6), transparent 65%),
-        var(--c-surface);
+        var(--tx-stripes),
+        radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--c-navy-500) 55%, transparent), transparent 65%),
+        var(--g-card);
 }
 
 /* Canlı maç: kırmızı çerçeve ve hafif ışık */
 .recent-match-card.is-live {
-    border-color: rgba(255, 77, 94, 0.55);
-    box-shadow: var(--sh-2), 0 0 40px rgba(255, 77, 94, 0.14);
+    border-color: var(--c-live-line);
+    box-shadow: inset 0 2px 0 var(--c-live), var(--sh-2), 0 0 40px var(--c-live-soft);
 }
 
 /* Rozetler */
@@ -668,9 +747,9 @@ table { font-variant-numeric: tabular-nums; }
 }
 .comp-badge { border: 1px solid var(--c-line-strong); color: var(--c-text-2); }
 .comp-badge .ico { color: var(--c-text-3); }
-.badge-upcoming { background: var(--c-navy-soft); color: var(--c-navy-tint); }
-.badge-today { background: var(--c-navy-soft); color: #c7d8ff; }
-.badge-derby { background: var(--c-accent-soft); color: var(--c-accent); }
+.badge-upcoming { background: var(--c-accent-soft); color: var(--c-accent); }
+.badge-today { background: var(--c-accent); color: var(--c-accent-ink); }
+.badge-derby { background: var(--c-accent); color: var(--c-accent-ink); }
 .badge-live { background: var(--c-live-soft); color: var(--c-live); }
 
 /* Armalar: Fenerbahçe logosu, rakipler kısaltmalı rozet */
@@ -690,7 +769,7 @@ table { font-variant-numeric: tabular-nums; }
     border-radius: 50%;
     background: var(--crest-bg);
     color: var(--crest-fg);
-    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.16), var(--sh-1);
+    box-shadow: inset 0 0 0 2px var(--c-ring), var(--sh-1);
     font-family: var(--f-display);
     font-size: calc(var(--size) * 0.36);
     font-weight: 700;
@@ -729,9 +808,9 @@ table { font-variant-numeric: tabular-nums; }
 .mc-count { display: flex; align-items: flex-start; gap: var(--s-2); }
 .mc-count.is-soon { font-family: var(--f-display); font-size: var(--fs-xl); font-weight: 700; color: var(--c-accent); }
 .mc-unit { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
-.mc-unit b { font-family: var(--f-display); font-size: 3.25rem; font-weight: 600; line-height: 1; }
+.mc-unit b { font-family: var(--f-display); font-size: 3.25rem; font-weight: 600; line-height: 1; color: var(--c-accent); }
 .mc-unit i { margin-top: 6px; font-size: var(--fs-xs); font-style: normal; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-text-3); }
-.mc-sep { font-family: var(--f-display); font-size: 2.6rem; line-height: 1.15; color: var(--c-text-3); }
+.mc-sep { font-family: var(--f-display); font-size: 2.6rem; line-height: 1.15; color: var(--c-accent-line); }
 .mc-state { display: flex; align-items: center; gap: var(--s-2); color: var(--c-text-2); font-size: var(--fs-sm); font-weight: 500; }
 .mc-live-min { color: var(--c-live); font-weight: 700; }
 
@@ -764,7 +843,7 @@ table { font-variant-numeric: tabular-nums; }
     min-width: 34px;
     padding: 2px 8px;
     border-radius: var(--r-sm);
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--c-inset-strong);
     font-family: var(--f-display);
     font-size: 1.4rem;
     text-align: center;
@@ -776,7 +855,7 @@ table { font-variant-numeric: tabular-nums; }
     padding: var(--s-3) var(--s-4);
     border: 1px solid var(--c-line);
     border-radius: var(--r-lg);
-    background: rgba(0, 0, 0, 0.22);
+    background: var(--c-inset);
 }
 .matchday-missing-title {
     display: flex;
@@ -866,7 +945,7 @@ table { font-variant-numeric: tabular-nums; }
     gap: var(--s-1);
     padding: var(--s-1);
     border-radius: var(--r-md);
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--c-inset-strong);
 }
 .tab-btn, .close-sim-btn {
     display: inline-flex;
@@ -882,7 +961,7 @@ table { font-variant-numeric: tabular-nums; }
     transition: background var(--t-fast), color var(--t-fast);
 }
 .tab-btn:hover { color: var(--c-text); background: var(--c-hover); }
-.tab-btn.active { background: var(--c-surface-solid); color: var(--c-text); box-shadow: var(--sh-1); }
+.tab-btn.active { background: var(--c-accent); color: var(--c-accent-ink); box-shadow: var(--sh-1); }
 .close-sim-btn { border: 1px solid var(--c-line-strong); border-radius: var(--r-md); }
 .close-sim-btn:hover { color: var(--c-text); background: var(--c-hover); }
 
@@ -895,7 +974,7 @@ table { font-variant-numeric: tabular-nums; }
     margin-bottom: var(--s-4);
     padding: var(--s-3);
     border-radius: var(--r-lg);
-    background: rgba(0, 0, 0, 0.28);
+    background: var(--c-inset);
     font-family: var(--f-display);
     font-size: var(--fs-lg);
     font-weight: 700;
@@ -904,7 +983,8 @@ table { font-variant-numeric: tabular-nums; }
 .score-box {
     padding: 4px 16px;
     border-radius: var(--r-md);
-    background: rgba(0, 0, 0, 0.45);
+    background: var(--c-inset-strong);
+    color: var(--c-accent);
     font-size: 1.6rem;
 }
 
@@ -912,10 +992,10 @@ table { font-variant-numeric: tabular-nums; }
     display: block;
     width: 100%;
     height: 430px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--c-ring);
     border-radius: var(--r-lg);
-    background: linear-gradient(135deg, #164225, #0a2313);
-    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.7);
+    background: linear-gradient(135deg, var(--c-pitch-1), var(--c-pitch-2));
+    box-shadow: inset 0 0 50px var(--c-inset-strong);
 }
 .tab-content { display: none; }
 .tab-content.active-content { display: block; }
@@ -929,7 +1009,7 @@ table { font-variant-numeric: tabular-nums; }
     margin-top: var(--s-3);
     padding: var(--s-3) var(--s-4);
     border-radius: var(--r-md);
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--c-inset);
     font-size: var(--fs-sm);
 }
 .timeline-bar .ico { margin-right: 6px; }
@@ -941,7 +1021,7 @@ table { font-variant-numeric: tabular-nums; }
 .info-panel {
     padding: var(--s-5);
     border-radius: var(--r-lg);
-    background: rgba(0, 0, 0, 0.25);
+    background: var(--c-inset);
 }
 .panel-title {
     display: flex;
@@ -951,7 +1031,7 @@ table { font-variant-numeric: tabular-nums; }
     font-size: var(--fs-md);
     text-transform: uppercase;
 }
-.panel-title .ico { color: var(--c-navy-tint); }
+.panel-title .ico { color: var(--c-accent); }
 
 .stats-row { margin-bottom: var(--s-4); }
 .stats-label {
@@ -965,7 +1045,7 @@ table { font-variant-numeric: tabular-nums; }
 .stats-bar-bg {
     height: 6px;
     border-radius: var(--r-pill);
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--c-hover-strong);
     overflow: hidden;
 }
 .stats-bar-fb { height: 100%; border-radius: var(--r-pill); background: var(--c-accent); }
@@ -994,6 +1074,33 @@ table { font-variant-numeric: tabular-nums; }
 .lu-name { flex: 1; }
 .lu-pos { color: var(--c-text-3); }
 .lu-subs { margin: var(--s-3) 0 var(--s-1); color: var(--c-text-3); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ---------- Ortak tablo dili (kadro, puan durumu) ---------- */
+.player-stats-table thead th, .standings-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--c-navy-900);
+    color: var(--c-accent);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-bottom: 0;
+    box-shadow: inset 0 -2px 0 var(--c-accent);
+}
+.player-stats-table thead th:first-child, .standings-table thead th:first-child { border-top-left-radius: var(--r-md); }
+.player-stats-table thead th:last-child, .standings-table thead th:last-child { border-top-right-radius: var(--r-md); }
+/* Satırlar: hafif zebra; hover'da solda sarı şerit ve hafif sarı zemin */
+.player-stats-table tbody tr, .standings-table tbody tr { transition: background var(--t-fast); }
+.player-stats-table tbody tr:nth-child(even), .standings-table tbody tr:nth-child(even) { background: var(--c-zebra); }
+.player-stats-table tbody tr:hover, .standings-table tbody tr:hover { background: var(--c-accent-soft); }
+.player-stats-table tbody tr:hover td:first-child, .standings-table tbody tr:hover td:first-child {
+    box-shadow: inset 3px 0 0 var(--c-accent);
+}
+.player-stats-table tbody tr.skel-row:hover, .standings-table tbody tr.skel-row:hover { background: none; }
+.player-stats-table tbody tr.skel-row:hover td:first-child, .standings-table tbody tr.skel-row:hover td:first-child { box-shadow: none; }
 
 /* ---------- 09 KADRO ---------- */
 .team-overview-grid {
@@ -1024,8 +1131,8 @@ table { font-variant-numeric: tabular-nums; }
     font-weight: 600;
     transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
 }
-.squad-filter button:hover { color: var(--c-text); background: var(--c-hover); }
-.squad-filter button[aria-pressed="true"] { background: var(--c-text); border-color: var(--c-text); color: var(--c-accent-ink); }
+.squad-filter button:hover { color: var(--c-accent); border-color: var(--c-accent-line); }
+.squad-filter button[aria-pressed="true"] { background: var(--c-accent); border-color: var(--c-accent); color: var(--c-accent-ink); }
 
 .player-stats-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
 .player-stats-table th, .player-stats-table td {
@@ -1033,25 +1140,27 @@ table { font-variant-numeric: tabular-nums; }
     border-bottom: 1px solid var(--c-line);
     text-align: left;
 }
-.player-stats-table th {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    background: var(--c-surface-solid);
-    color: var(--c-text-3);
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    white-space: nowrap;
-}
 .player-stats-table .num { width: 64px; text-align: center; }
-.player-stats-table td.num { font-weight: 600; font-size: var(--fs-base); }
-.player-stats-table .is-zero { color: var(--c-text-3); font-weight: 400; }
+
+/* Maç / gol / asist rozetleri: maç beyaz-lacivert, gol dolu sarı, asist sarı çerçeve; sıfırlar soluk */
+.stat-badge {
+    display: inline-block;
+    min-width: 32px;
+    padding: 3px 7px;
+    border: 1.5px solid transparent;
+    border-radius: var(--r-sm);
+    font-family: var(--f-display);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+}
+.stat-match { background: var(--c-navy-tint); color: var(--c-accent-ink); }
+.stat-goal { background: var(--c-accent); color: var(--c-accent-ink); }
+.stat-assist { border-color: var(--c-accent); color: var(--c-accent); }
+.stat-badge.is-zero { background: none; border-color: var(--c-line); color: var(--c-text-3); font-weight: 500; }
 .player-stats-table .col-pos { color: var(--c-text-2); white-space: nowrap; }
 .player-stats-table .col-status { width: 1%; white-space: nowrap; }
-.player-stats-table tbody tr { transition: background var(--t-fast); }
-.player-stats-table tbody tr:hover { background: var(--c-hover); }
 
 /* Sıralanabilir başlık */
 .sort-btn {
@@ -1068,10 +1177,10 @@ table { font-variant-numeric: tabular-nums; }
     letter-spacing: inherit;
     text-transform: inherit;
 }
-.sort-btn:hover { color: var(--c-text); }
+.sort-btn:hover { color: var(--c-accent-bright); }
 .sort-ico { width: 14px; height: 14px; opacity: 0.6; }
 th[aria-sort="ascending"] .sort-btn, th[aria-sort="descending"] .sort-btn { color: var(--c-text); }
-th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opacity: 1; color: var(--c-accent); }
+th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opacity: 1; color: var(--c-text); }
 
 /* Oyuncu hücresi: avatar (baş harfler + forma numarası) */
 .player-cell { display: flex; align-items: center; gap: var(--s-3); min-width: 0; }
@@ -1086,8 +1195,8 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: linear-gradient(145deg, #1f3a73, #142650);
-    box-shadow: inset 0 0 0 1px rgba(143, 176, 255, 0.25);
+    background: linear-gradient(145deg, var(--c-navy-500), var(--c-navy-700));
+    box-shadow: inset 0 0 0 1px var(--c-accent-line);
     color: var(--c-text);
     font-size: var(--fs-xs);
     font-weight: 700;
@@ -1113,6 +1222,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 /* Sakat/cezalı oyuncu satırı hafif soluk, durum rozeti canlı kalır */
 .player-stats-table tr.is-out td:not(.col-status) { color: var(--c-text-3); }
 .player-stats-table tr.is-out .avatar { filter: grayscale(0.8); opacity: 0.6; }
+.player-stats-table tr.is-out .stat-badge { filter: grayscale(1); }
 
 /* Durum rozeti ve ipucu (tooltip) */
 .status-tip {
@@ -1123,8 +1233,8 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     font-size: var(--fs-xs);
     cursor: help;
 }
-.status-tip.st-injured { background: var(--c-injury-soft); border-color: rgba(255, 122, 133, 0.4); }
-.status-tip.st-suspended { background: var(--c-susp-soft); border-color: rgba(255, 181, 71, 0.4); }
+.status-tip.st-injured { background: var(--c-injury-soft); border-color: var(--c-injury-line); }
+.status-tip.st-suspended { background: var(--c-susp-soft); border-color: var(--c-susp-line); }
 .tip-wrap { position: relative; display: inline-flex; }
 .tip {
     position: absolute;
@@ -1136,7 +1246,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     padding: 7px 10px;
     border: 1px solid var(--c-line-strong);
     border-radius: var(--r-md);
-    background: #182a50;
+    background: var(--c-navy-700);
     box-shadow: var(--sh-2);
     color: var(--c-text);
     font-size: var(--fs-xs);
@@ -1167,7 +1277,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     border: 1px solid var(--c-line);
     border-left: 3px solid var(--c-injury);
     border-radius: var(--r-md);
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--c-inset);
 }
 .injury-report-card.suspended-card { border-left-color: var(--c-susp); }
 .injury-report-card.skel-card { border-left-color: var(--c-line); align-items: stretch; flex-direction: column; }
@@ -1186,11 +1296,11 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     .player-stats-table .col-pos { display: none; }
     .player-pos-sm { display: block; }
     .player-stats-table th, .player-stats-table td { padding: 8px 4px; }
-    .player-stats-table th { font-size: 10px; letter-spacing: 0.02em; }
+    .player-stats-table thead th { font-size: 10px; letter-spacing: 0.02em; }
+    .stat-badge { min-width: 28px; padding: 2px 5px; font-size: 0.9rem; }
     .player-stats-table .num { width: 44px; }
     .sort-ico { width: 12px; height: 12px; }
     .player-stats-table .th-label, .status-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-    .player-stats-table td.num { font-size: var(--fs-sm); }
     .avatar { width: 32px; height: 32px; }
     .player-cell { gap: var(--s-2); }
     .status-tip { padding: 4px 6px; }
@@ -1212,42 +1322,32 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     border-bottom: 1px solid var(--c-line);
     text-align: center;
 }
-.standings-table th {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    background: var(--c-surface-solid);
-    color: var(--c-text-3);
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    letter-spacing: 0.06em;
-}
 .standings-table abbr { text-decoration: none; cursor: help; }
-.standings-table .team { width: 100%; text-align: left; }
+.standings-table td { color: var(--c-text-2); }
+.standings-table .team { width: 100%; text-align: left; color: var(--c-text); font-weight: 500; }
 .team-cell { display: inline-flex; align-items: center; gap: var(--s-2); }
-.standings-table .gd { color: var(--c-text-2); }
-.standings-table .pts { font-weight: 700; font-size: var(--fs-base); }
-.standings-table tbody tr { transition: background var(--t-fast); }
-.standings-table tbody tr:hover { background: var(--c-hover); }
+/* Puan sütunu: kalın ve diğerlerinden bir ton parlak */
+.standings-table td.pts { color: var(--c-text); font-family: var(--f-display); font-size: 1.15rem; font-weight: 700; }
 
 /* Sıra numarasının solunda bölge rengi */
 .standings-table td.pos { position: relative; width: 40px; color: var(--c-text-2); font-weight: 600; }
 .standings-table td.pos::before {
     content: "";
     position: absolute;
-    left: 0;
+    left: 5px;
     top: 7px;
     bottom: 7px;
-    width: 3px;
+    width: 4px;
     border-radius: 2px;
     background: var(--zone, transparent);
 }
 
-/* Fenerbahçe satırı: belirgin ama sade */
-.standings-table tr.fb-row { background: rgba(255, 210, 0, 0.07); }
-.standings-table tr.fb-row:hover { background: rgba(255, 210, 0, 0.11); }
-.standings-table tr.fb-row td { color: var(--c-text); font-weight: 700; }
-.standings-table tr.fb-row .pts { color: var(--c-accent); }
+/* Fenerbahçe satırı: sarı zemin, lacivert kalın yazı (ilk bakışta bulunur) */
+.standings-table tbody tr.fb-row,
+.standings-table tbody tr.fb-row:nth-child(even),
+.standings-table tbody tr.fb-row:hover { background: var(--c-accent); }
+.standings-table tr.fb-row td { color: var(--c-accent-ink); font-weight: 800; }
+.standings-table tbody tr.fb-row:hover td:first-child { box-shadow: inset 3px 0 0 var(--c-accent-ink); }
 .crest-xs { --size: 18px; }
 
 /* Bölge açıklaması */
@@ -1302,11 +1402,15 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    padding: var(--s-3) 0 var(--s-2);
-    background: var(--c-surface-solid);
+    margin: 0 calc(var(--s-2) * -1) var(--s-3);
+    padding: var(--s-2) var(--s-3);
+    border-radius: var(--r-md) var(--r-md) 0 0;
+    background: var(--c-navy-900);
+    box-shadow: inset 0 -2px 0 var(--c-accent);
+    color: var(--c-accent);
     font-size: var(--fs-md);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
 }
 .fx-month-title span {
     font-family: var(--f-body);
@@ -1331,10 +1435,10 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     padding: var(--s-3) var(--s-4);
     border: 1px solid var(--c-line);
     border-radius: var(--r-lg);
-    background: rgba(255, 255, 255, 0.035);
-    transition: border-color var(--t), background var(--t), transform var(--t) var(--ease);
+    background: linear-gradient(160deg, var(--c-surface-2), var(--c-inset));
+    transition: border-color var(--t), box-shadow var(--t), transform var(--t) var(--ease);
 }
-.fx-card:hover { border-color: var(--c-line-strong); background: rgba(255, 255, 255, 0.06); transform: translateY(-1px); }
+.fx-card:hover { border-color: var(--c-accent-line); box-shadow: 0 10px 28px var(--c-accent-glow); transform: translateY(-2px); }
 .fx-card.skel-card { display: flex; min-height: 76px; }
 
 .fx-date {
@@ -1345,7 +1449,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     border-right: 1px solid var(--c-line);
     line-height: 1.1;
 }
-.fx-date b { font-family: var(--f-display); font-size: 1.6rem; font-weight: 700; }
+.fx-date b { font-family: var(--f-display); font-size: 1.6rem; font-weight: 700; color: var(--c-accent); }
 .fx-date span { color: var(--c-text-3); font-size: var(--fs-xs); font-weight: 600; text-transform: uppercase; }
 
 .fx-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -1386,17 +1490,19 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .res-badge.draw { background: var(--c-draw-soft); color: var(--c-draw); }
 .res-badge.loss { background: var(--c-loss-soft); color: var(--c-loss); }
 
-/* Oynanmış maç: sonucun rengi solda ince şerit */
-.fx-card.is-played { box-shadow: inset 3px 0 0 var(--res-color); }
+/* Oynanmış maç: sonucun rengi solda şerit (galibiyet yeşil, beraberlik gri, mağlubiyet kırmızı) */
+.fx-card.is-played { box-shadow: inset 4px 0 0 var(--res-color); }
+.fx-card.is-played:hover { box-shadow: inset 4px 0 0 var(--res-color), 0 10px 28px var(--c-accent-glow); }
 .fx-card.is-played.win { --res-color: var(--c-win); }
 .fx-card.is-played.draw { --res-color: var(--c-draw); }
 .fx-card.is-played.loss { --res-color: var(--c-loss); }
 
 /* Gelecek maçlar: zeminsiz, kesikli çerçeve; sıradaki maç vurgulu */
-.fx-card.is-upcoming { background: transparent; border-style: dashed; }
+.fx-card.is-upcoming { background: var(--c-inset); border-style: dashed; }
 .fx-card.is-upcoming:hover { border-style: solid; }
-.fx-card.is-next { border-style: solid; border-color: var(--c-accent-line); background: var(--c-accent-soft); }
-.fx-card.is-live { border-color: rgba(255, 77, 94, 0.55); background: var(--c-live-soft); }
+/* Sıradaki maç: sarı çerçeve ve hafif ışıma */
+.fx-card.is-next { border: 2px solid var(--c-accent); background: var(--c-accent-soft); box-shadow: 0 0 24px var(--c-accent-glow); }
+.fx-card.is-live { border-color: var(--c-live-line); background: var(--c-live-soft); }
 
 @media (max-width: 520px) {
     .fixtures-full-section { padding: var(--s-4); }
@@ -1433,7 +1539,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     box-shadow: var(--sh-2);
     transition: padding var(--t-fast) var(--ease), box-shadow var(--t-fast);
 }
-.fchat-tab:hover { padding-right: 14px; box-shadow: var(--sh-3); }
+.fchat-tab:hover { padding-right: 14px; background: var(--c-accent-bright); box-shadow: var(--sh-3), 0 0 24px var(--c-accent-glow); }
 .fchat-tab .ico { transform: rotate(90deg); }
 .fchat.open .fchat-tab { display: none; }
 
@@ -1448,10 +1554,10 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     overflow: hidden;
     border: 1px solid var(--c-line-strong);
     border-radius: var(--r-xl);
-    background: rgba(6, 12, 26, 0.95);
+    background: var(--g-card), var(--c-navy-900);
+    box-shadow: inset 0 2px 0 var(--c-accent-line), var(--sh-3);
     -webkit-backdrop-filter: var(--blur);
     backdrop-filter: var(--blur);
-    box-shadow: var(--sh-3);
 }
 .fchat.open .fchat-panel { display: flex; animation: sectionIn 0.3s var(--ease); }
 
@@ -1463,7 +1569,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     gap: var(--s-3);
     padding: var(--s-4) var(--s-4) var(--s-5);
     overflow: hidden;
-    background: linear-gradient(135deg, #15306a 0%, #0b1a3c 60%, rgba(6, 12, 26, 0) 100%);
+    background: var(--tx-stripes), linear-gradient(135deg, var(--c-navy-600) 0%, var(--c-navy-800) 60%, transparent 100%);
     border-bottom: 1px solid var(--c-line);
 }
 .fchat-head::after {
@@ -1476,7 +1582,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     font-weight: 700;
     line-height: 1;
     color: transparent;
-    -webkit-text-stroke: 1.5px rgba(255, 210, 0, 0.28);
+    -webkit-text-stroke: 1.5px var(--c-accent-line);
     pointer-events: none;
 }
 .fchat-title { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; gap: 2px; }
@@ -1500,7 +1606,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     color: var(--c-text-3);
     font-size: var(--fs-xs);
 }
-.fchat-online .live-pulse { width: 7px; height: 7px; background: var(--c-win); animation: none; box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18); }
+.fchat-online .live-pulse { width: 7px; height: 7px; background: var(--c-win); animation: none; box-shadow: 0 0 0 3px var(--c-win-soft); }
 .fchat-online b { color: var(--c-text); }
 .fchat-close {
     position: relative;
@@ -1511,11 +1617,11 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     height: 34px;
     border: 0;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--c-hover);
     color: var(--c-text-2);
     transition: background var(--t-fast), color var(--t-fast);
 }
-.fchat-close:hover { background: rgba(255, 255, 255, 0.16); color: var(--c-text); }
+.fchat-close:hover { background: var(--c-accent); color: var(--c-accent-ink); }
 
 /* Oda seçici: eşit genişlikte segmentler, aktif oda beyaz */
 .fchat-rooms {
@@ -1527,7 +1633,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     padding: 4px;
     border: 1px solid var(--c-line);
     border-radius: var(--r-md);
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--c-inset-strong);
 }
 .fchat-rooms button {
     display: inline-flex;
@@ -1546,7 +1652,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 }
 .fchat-rooms button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fchat-rooms button:hover { color: var(--c-text); background: var(--c-hover); }
-.fchat-rooms button.on { background: var(--c-text); color: var(--c-accent-ink); box-shadow: var(--sh-1); }
+.fchat-rooms button.on { background: var(--c-accent); color: var(--c-accent-ink); box-shadow: var(--sh-1); }
 
 /* Mesaj akışı */
 .fchat-feed-wrap { position: relative; flex: 1; min-height: 0; display: flex; }
@@ -1597,15 +1703,16 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     padding: var(--s-2) var(--s-3);
     border: 1px solid var(--c-line);
     border-radius: 16px 16px 16px 4px;
-    background: rgba(255, 255, 255, 0.055);
+    background: var(--c-surface-2);
 }
+/* Kendi mesajın: açık lacivert balon, sarı ince kenar */
 .fc2-msg.is-mine .fc2-main {
-    border-color: rgba(143, 176, 255, 0.32);
+    border-color: var(--c-accent-line);
     border-radius: 16px 16px 4px 16px;
-    background: rgba(70, 110, 210, 0.22);
+    background: var(--c-navy-600);
 }
 .fc2-msg.flash .fc2-main { animation: fc2flash 1.2s ease; }
-@keyframes fc2flash { 40% { box-shadow: 0 0 0 2px var(--c-navy-tint); } }
+@keyframes fc2flash { 40% { box-shadow: 0 0 0 2px var(--c-accent); } }
 
 .fc2-head { display: flex; align-items: baseline; gap: var(--s-3); }
 .fc2-nick { font-size: var(--fs-sm); font-weight: 700; color: var(--c-text); }
@@ -1613,8 +1720,8 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .fc2-you {
     padding: 0 6px;
     border-radius: var(--r-pill);
-    background: rgba(143, 176, 255, 0.2);
-    color: var(--c-navy-tint);
+    background: var(--c-accent);
+    color: var(--c-accent-ink);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -1629,14 +1736,14 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     gap: 1px;
     margin: 6px 0 4px;
     padding: 5px 9px;
-    border-left: 2px solid var(--c-navy-tint);
+    border-left: 2px solid var(--c-accent);
     border-radius: var(--r-sm);
-    background: rgba(0, 0, 0, 0.28);
+    background: var(--c-inset);
     color: var(--c-text-3);
     font-size: var(--fs-xs);
     cursor: pointer;
 }
-.fc2-quote:hover { background: rgba(0, 0, 0, 0.4); }
+.fc2-quote:hover { background: var(--c-inset-strong); }
 .fc2-quote b { color: var(--c-text-2); font-weight: 600; }
 .fc2-quote-body { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .fc2-quote .gone { font-style: italic; }
@@ -1654,7 +1761,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     padding: 0 8px;
     border: 1px solid var(--c-line);
     border-radius: var(--r-pill);
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--c-inset);
     color: var(--c-text-3);
     font-size: var(--fs-xs);
     font-weight: 600;
@@ -1662,8 +1769,8 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 }
 .fc2-acts .ico { width: 14px; height: 14px; }
 .fc2-acts .fc2-act { width: 26px; padding: 0; justify-content: center; }
-.fc2-acts button:hover { background: rgba(255, 255, 255, 0.1); color: var(--c-text); }
-.fc2-acts [data-type="fire"]:hover { color: #ff9b5e; border-color: rgba(255, 155, 94, 0.5); }
+.fc2-acts button:hover { background: var(--c-hover-strong); color: var(--c-text); }
+.fc2-acts [data-type="fire"]:hover { color: var(--c-fire); border-color: color-mix(in srgb, var(--c-fire) 50%, transparent); }
 .fc2-acts [data-type="heart"]:hover { color: var(--c-accent); border-color: var(--c-accent-line); }
 .fc2-acts .fc2-del:hover { background: var(--c-loss-soft); border-color: var(--c-loss); color: var(--c-loss); }
 
@@ -1674,13 +1781,13 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     gap: var(--s-2);
     padding: var(--s-3) var(--s-4) var(--s-4);
     border-top: 1px solid var(--c-line);
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--c-inset);
 }
 .fchat-compose input, .fchat-compose textarea {
     padding: 9px 12px;
     border: 1px solid var(--c-line-strong);
     border-radius: var(--r-md);
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--c-inset-strong);
     color: var(--c-text);
     font-size: var(--fs-sm);
     resize: none;
@@ -1688,8 +1795,8 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 }
 .fchat-compose input { align-self: flex-start; width: 60%; padding: 6px 10px; font-size: var(--fs-xs); }
 .fchat-compose input::placeholder, .fchat-compose textarea::placeholder { color: var(--c-text-3); }
-.fchat-compose input:focus, .fchat-compose textarea:focus { outline: none; border-color: var(--c-navy-tint); }
-.fchat-compose input:focus-visible, .fchat-compose textarea:focus-visible { box-shadow: 0 0 0 1px var(--c-navy-tint); }
+.fchat-compose input:focus, .fchat-compose textarea:focus { outline: none; border-color: var(--c-accent); }
+.fchat-compose input:focus-visible, .fchat-compose textarea:focus-visible { box-shadow: 0 0 0 1px var(--c-accent); }
 .fchat-row { display: flex; gap: var(--s-2); }
 .fchat-row textarea { flex: 1; }
 .fchat-row button {
@@ -1702,7 +1809,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     color: var(--c-accent-ink);
     transition: background var(--t-fast), transform var(--t-fast);
 }
-.fchat-row button:hover { background: #ffdc33; }
+.fchat-row button:hover { background: var(--c-accent-bright); }
 .fchat-row button:active { transform: scale(0.95); }
 
 .fc2-reply-bar {
@@ -1710,9 +1817,9 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     align-items: center;
     gap: var(--s-2);
     padding: 6px 10px;
-    border-left: 2px solid var(--c-navy-tint);
+    border-left: 2px solid var(--c-accent);
     border-radius: var(--r-sm);
-    background: var(--c-navy-soft);
+    background: var(--c-accent-soft);
     font-size: var(--fs-xs);
 }
 .fc2-reply-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -1740,7 +1847,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
         font-size: var(--fs-base);
         writing-mode: horizontal-tb;
         transform: none;
-        box-shadow: var(--sh-3), 0 0 0 4px rgba(5, 10, 22, 0.6);
+        box-shadow: var(--sh-3), 0 0 0 4px var(--c-nav-bg);
     }
     .fchat-tab:hover { padding-right: 16px; }
     .fchat-tab .ico { transform: none; }
@@ -1756,7 +1863,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     flex-direction: column;
     gap: var(--s-2);
     padding: var(--s-5) 0 var(--s-7);
-    border-top: 1px solid var(--c-line);
+    border-top: 2px solid var(--c-accent-line);
     color: var(--c-text-3);
     font-size: var(--fs-sm);
 }

@@ -305,14 +305,36 @@ function updateSimulation() {
     ball.y += (ball.targetY - ball.y) * 0.12;
 }
 
+// Saha renkleri style.css token'larından okunur (kanvas var() anlamaz).
+// Gizli bir öğeye uygulanıp çözümlenmiş rgb değeri alınır; ilk çizimde bir kez yapılır.
+let pitchColors = null;
+function readPitchColors() {
+    const probe = document.createElement('span');
+    probe.style.display = 'none';
+    document.body.append(probe);
+    const read = name => {
+        probe.style.color = `var(${name})`;
+        return getComputedStyle(probe).color;
+    };
+    const c = {
+        line: read('--c-pitch-line'), area: read('--c-pitch-area'),
+        fb: read('--c-accent'), rival: read('--c-pitch-rival'),
+        outline: read('--c-navy-950'), ball: read('--c-text'),
+    };
+    probe.remove();
+    return c;
+}
+
 function drawPitch() {
     const w = pitchCanvas.width;
     const h = pitchCanvas.height;
     if (!w || !h) return;
+    if (!pitchColors) pitchColors = readPitchColors();
+    const col = pitchColors;
 
     pCtx.clearRect(0, 0, w, h);
 
-    pCtx.strokeStyle = "rgba(255, 255, 255, 0.45)";
+    pCtx.strokeStyle = col.line;
     pCtx.lineWidth = 2;
 
     pCtx.beginPath();
@@ -327,7 +349,7 @@ function drawPitch() {
     pCtx.strokeRect(0, h / 2 - 90, 105, 180);
     pCtx.strokeRect(w - 105, h / 2 - 90, 105, 180);
 
-    pCtx.fillStyle = "rgba(255, 255, 255, 0.15)";
+    pCtx.fillStyle = col.area;
     pCtx.strokeRect(0, h / 2 - 42, 26, 84);
     pCtx.fillRect(0, h / 2 - 42, 26, 84);
 
@@ -337,18 +359,18 @@ function drawPitch() {
     players.forEach(p => {
         pCtx.beginPath();
         pCtx.arc(p.x, p.y, 9, 0, Math.PI * 2);
-        pCtx.fillStyle = p.team === 'fb' ? '#fcd116' : '#ff3333';
+        pCtx.fillStyle = p.team === 'fb' ? col.fb : col.rival;
         pCtx.fill();
         pCtx.lineWidth = 2;
-        pCtx.strokeStyle = '#001538';
+        pCtx.strokeStyle = col.outline;
         pCtx.stroke();
     });
 
     pCtx.beginPath();
     pCtx.arc(ball.x, ball.y, 5.5, 0, Math.PI * 2);
-    pCtx.fillStyle = '#ffffff';
+    pCtx.fillStyle = col.ball;
     pCtx.fill();
-    pCtx.strokeStyle = '#000';
+    pCtx.strokeStyle = col.outline;
     pCtx.stroke();
 }
 
