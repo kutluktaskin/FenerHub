@@ -5,3 +5,8 @@ scripts/*.out.json
 # SQLite dosyaları yerel geliştirme içindir; Render Neon Postgres kullanır (DATABASE_URL)
 *.db
 *.db.bak*
+
+# Gizli bilgiler (API anahtarı, veritabanı adresi): asla repoya girmez
+.env
+.env.*
+!.env.example
