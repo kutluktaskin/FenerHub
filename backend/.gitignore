@@ -1,3 +1,7 @@
 # Keşif/deneme scriptleri ve çıktıları (API anahtarıyla çalışır, repoya girmez)
 scripts/probe_*
 scripts/*.out.json
+
+# SQLite dosyaları yerel geliştirme içindir; Render Neon Postgres kullanır (DATABASE_URL)
+*.db
+*.db.bak*
