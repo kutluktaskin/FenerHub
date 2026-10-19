@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
@@ -22,7 +23,47 @@ def serialize_absence(a: models.Absence) -> dict:
     }
 
 
+# ---------- Takım renkleri ve API id'leri ----------
+# Veritabanında yok; sync'in kaydettiği pages_fb sayfalarındaki teamColors alanından okunur
+# (istek atmaz). Dosyalar değişince yeniden okunur.
+PAGES_DIR = Path(__file__).resolve().parents[2] / "pages_fb"
+_team_cache = {"stamp": None, "teams": {}}
+
+
+def team_info() -> dict:
+    files = sorted(PAGES_DIR.glob("*.json"))
+    stamp = tuple((f.name, f.stat().st_mtime) for f in files)
+    if stamp == _team_cache["stamp"]:
+        return _team_cache["teams"]
+    try:
+        from sync import ALIASES   # API adı -> veritabanındaki ad
+    except Exception:
+        ALIASES = {}
+    teams = {}
+    for f in files:
+        try:
+            events = json.loads(f.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for e in events:
+            for side in ("homeTeam", "awayTeam"):
+                t = e.get(side) or {}
+                if not t.get("name"):
+                    continue
+                colors = t.get("teamColors") or {}
+                teams[ALIASES.get(t["name"], t["name"])] = {
+                    "api_id": t.get("id"),
+                    "color": colors.get("primary"),
+                    "color2": colors.get("secondary"),
+                }
+    _team_cache.update(stamp=stamp, teams=teams)
+    return teams
+
+
 def serialize_match(m: models.Match, with_absences: bool = False) -> dict:
+    teams = team_info()
+    home = teams.get(m.home_team.name, {})
+    away = teams.get(m.away_team.name, {})
     data = {
         "id": m.id,
         "api_id": m.api_id,
@@ -38,6 +79,13 @@ def serialize_match(m: models.Match, with_absences: bool = False) -> dict:
         "status_code": m.status_code,
         "period_start": m.period_start,
         "period_initial": m.period_initial,
+        # Kart renkleri ve logo eşlemesi için (bilinmiyorsa None)
+        "home_api_id": home.get("api_id"),
+        "away_api_id": away.get("api_id"),
+        "home_color": home.get("color"),
+        "home_color2": home.get("color2"),
+        "away_color": away.get("color"),
+        "away_color2": away.get("color2"),
     }
     if with_absences:
         data["absences"] = [serialize_absence(a) for a in m.absences]

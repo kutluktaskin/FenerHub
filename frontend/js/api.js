@@ -372,13 +372,55 @@ function monogram(name) {
     return up((words[0] || name).slice(0, 3));
 }
 
+// ---------- Takım bilgisi: API id, kulüp renkleri, logo ----------
+// /api/matches cevabındaki home_api_id / home_color alanlarından doldurulur.
+const teamInfo = {};
+// download_logos.py'nin indirdiği logolar (img/teams/index.json); yoksa boş küme
+let teamLogos = new Set();
+const logosReady = fetch("img/teams/index.json")
+    .then(r => (r.ok ? r.json() : []))
+    .then(ids => { teamLogos = new Set(ids); })
+    .catch(() => {});
+
+function rememberTeams(matches) {
+    matches.forEach(m => {
+        if (m.home_api_id) teamInfo[m.home] = { id: m.home_api_id, c1: m.home_color, c2: m.home_color2 };
+        if (m.away_api_id) teamInfo[m.away] = { id: m.away_api_id, c1: m.away_color, c2: m.away_color2 };
+    });
+}
+
+const hexRGB = h => /^#[0-9a-f]{6}$/i.test(h || "") ? [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)) : null;
+const chroma = rgb => Math.max(...rgb) - Math.min(...rgb);
+function relLum(rgb) {
+    const [r, g, b] = rgb.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+// Kartı boyamak için takımın en canlı rengi (beyaz/siyah/gri ise null)
+function teamAccent(name) {
+    const t = teamInfo[name];
+    const cands = [t && t.c1, t && t.c2, TEAM_BADGE[name] && TEAM_BADGE[name][1]].filter(hexRGB);
+    const best = cands.sort((a, b) => chroma(hexRGB(b)) - chroma(hexRGB(a)))[0];
+    return best && chroma(hexRGB(best)) > 60 ? best : null;
+}
+window.teamAccent = teamAccent;   // forum.js maç odası sekmesi kullanır
+
 function crest(name, size = "") {
     if (name === "Fenerbahçe") {
         return `<img class="crest ${size}" src="img/fenerbahce-logo.png" alt="" loading="lazy">`;
     }
-    // Kulüp renkleri veri olduğu için sabit; bilinmeyen rakip tema token'larıyla çizilir
-    const [code, bg, fg] = TEAM_BADGE[name] || [monogram(name), "var(--c-navy-600)", "var(--c-text-2)"];
-    return `<span class="crest crest-mono ${size}${code.length > 2 ? " is-long" : ""}" style="--crest-bg:${bg};--crest-fg:${fg}" aria-hidden="true">${esc(code)}</span>`;
+    const t = teamInfo[name];
+    if (t && teamLogos.has(t.id)) {
+        return `<img class="crest ${size}" src="img/teams/${t.id}.png" alt="" loading="lazy">`;
+    }
+    // Logo yoksa: kulübün ana rengiyle daire, ikincil renkte halka, okunur kısaltma
+    const code = (TEAM_BADGE[name] || [monogram(name)])[0];
+    const bg = (t && hexRGB(t.c1) && t.c1) || (TEAM_BADGE[name] && TEAM_BADGE[name][1]);
+    const ring = (t && hexRGB(t.c2) && t.c2) || (TEAM_BADGE[name] && TEAM_BADGE[name][2]) || "var(--c-ring)";
+    const style = bg
+        ? `--crest-bg:${bg};--crest-fg:${relLum(hexRGB(bg)) > 0.35 ? "var(--c-accent-ink)" : "#ffffff"};--crest-ring:${ring}`
+        : "--crest-bg:var(--c-navy-600);--crest-fg:var(--c-text);--crest-ring:var(--c-ring)";
+    return `<span class="crest crest-mono ${size}${code.length > 2 ? " is-long" : ""}" style="${style}" aria-hidden="true">${esc(code)}</span>`;
 }
 
 function liveMinute(m) {
@@ -412,11 +454,10 @@ function badgeInfo(m) {
         const mn = liveMinute(m);
         return { cls: "badge-live", ic: "radio", text: `Canlı${mn ? " · " + mn : ""}`, special: true };
     }
-    if (m.match_date === localISODate(new Date())) {
-        return { cls: "badge-today", ic: "clock", text: "Bugün", special: true };
-    }
-    if (DERBY_RIVALS.includes(rivalOf(m))) {
-        return { cls: "badge-derby", ic: "flame", text: "Derbi", special: true };
+    const k = kickoffDate(m);
+    const left = k ? k - Date.now() : Infinity;
+    if (left > 0 && left < 24 * 3600 * 1000) {
+        return { cls: "badge-matchday", ic: "clock", text: "Maç günü", special: true };
     }
     return { cls: "badge-upcoming", ic: "calendar", text: "Sıradaki maç", special: false };
 }
@@ -515,8 +556,24 @@ function renderMatchCard(card, m, key) {
     card.classList.toggle("is-live", live);
     card.setAttribute("aria-label", `${m.home} - ${m.away}, ${COMPETITION_LABEL[m.competition] ?? ""}`);
 
+    // Kart zemini: Fenerbahçe tarafı lacivert, rakip tarafı rakibin koyulaştırılmış rengi
+    const accent = teamAccent(rivalOf(m));
+    if (accent) {
+        // Açık renkli rakipte (sarı, turuncu) karışım azalır ki yazılar okunur kalsın
+        const light = relLum(hexRGB(accent)) > 0.3;
+        card.style.setProperty("--rival", accent);
+        card.style.setProperty("--rival-mix", light ? "20%" : "30%");
+        card.style.setProperty("--rival-glow-mix", light ? "8%" : "16%");
+    } else {
+        ["--rival", "--rival-mix", "--rival-glow-mix"].forEach(v => card.style.removeProperty(v));
+    }
+    card.classList.toggle("has-rival", !!accent);
+    card.classList.toggle("fb-away", !fbHome);
+
+    const derby = DERBY_RIVALS.includes(rivalOf(m));
     const top = `<div class="mc-top">
-        <span class="comp-badge">${icon(m.competition === "uefa" ? "star" : "trophy")}${esc(COMPETITION_SHORT[m.competition] ?? "")}</span>
+        <span class="comp-badge comp-${esc(m.competition)}">${icon(m.competition === "uefa" ? "star" : "trophy")}${esc(COMPETITION_SHORT[m.competition] ?? "")}</span>
+        ${derby ? `<span class="match-badge badge-derby">${icon("flame")}Derbi</span>` : ""}
         ${hero || st.special ? `<span class="match-badge ${st.cls}">${icon(st.ic)}${esc(st.text)}</span>` : ""}
     </div>`;
 
@@ -534,9 +591,11 @@ function renderMatchCard(card, m, key) {
                 <div class="mc-mid">${mid}</div>
                 <div class="mc-team">${crest(m.away, "crest-lg")}<span class="mc-name">${esc(m.away)}</span></div>
             </div>
+            <div class="mc-strip" id="heroStrip" hidden></div>
             <p class="mc-meta">${icon(fbHome ? "home" : "plane")}${fbHome ? HOME_STADIUM : "Deplasman"}</p>
             ${absencesHTML(m)}
             <button type="button" class="btn btn-primary open-sim-btn" onclick="openSimulation('${key}')">${icon("zap")}${label}</button>`;
+        renderHeroStrip();
         return;
     }
 
@@ -551,6 +610,58 @@ function renderMatchCard(card, m, key) {
         <button type="button" class="btn open-sim-btn" onclick="openSimulation('${key}')">${icon("zap")}${label}</button>`;
 }
 
+// Hero şeridi: geri sayım ile stat arasında Fenerbahçe'nin son 5 maçı ve "maça kalan" çubuğu.
+// Rakibin formu için ek API isteği gerekeceğinden sadece Fenerbahçe'nin formu gösterilir.
+let fixtureList = null;    // renderFixtures saklar
+
+function heroProgress(m) {
+    if (!fixtureList) return null;
+    const played = fixtureList.filter(x => x.status === "finished" && x.match_date);
+    const prev = played[played.length - 1];
+    const k = kickoffDate(m), p = prev && kickoffDate(prev);
+    if (!k || !p || k <= p) return null;
+    return Math.min(1, Math.max(0, (Date.now() - p) / (k - p)));
+}
+
+function renderHeroStrip() {
+    const el = document.getElementById("heroStrip");
+    const m = navMatch;
+    if (!el) return;
+    if (!m || !fixtureList) { el.hidden = true; return; }
+    const last = fixtureList.filter(x => x.status === "finished" && x.home_score !== null && x.home_score !== undefined).slice(-5);
+    const pct = m.status === "live" ? null : heroProgress(m);   // canlıda sadece form
+    el.innerHTML = `
+        <div class="strip-block">
+            <span class="strip-label">Fenerbahçe formu</span>
+            <ol class="form-dots" aria-label="Son ${last.length} maç, eskiden yeniye">
+                ${last.map(x => {
+                    const r = resultOf(x);
+                    return `<li class="${r}" title="${esc(`${x.home} ${x.home_score}-${x.away_score} ${x.away}`)}">${RESULT[r].letter}</li>`;
+                }).join("")}
+            </ol>
+        </div>
+        ${pct === null ? "" : `<div class="strip-block strip-progress">
+            <span class="strip-label">Maça kalan</span>
+            <span class="prog-track" role="progressbar" aria-label="Önceki maçtan bu maça geçen süre" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct * 100)}">
+                <i style="transform:scaleX(${pct.toFixed(4)})"></i>
+            </span>
+            <span class="prog-val">%${Math.round(pct * 100)}</span>
+        </div>`}`;
+    el.hidden = false;
+}
+
+function tickHeroProgress(card, m) {
+    const pct = heroProgress(m);
+    const bar = card.querySelector(".prog-track");
+    if (pct === null || !bar) return;
+    bar.firstElementChild.style.transform = `scaleX(${pct.toFixed(4)})`;
+    const v = Math.round(pct * 100);
+    if (bar.getAttribute("aria-valuenow") !== String(v)) {
+        bar.setAttribute("aria-valuenow", v);
+        card.querySelector(".prog-val").textContent = `%${v}`;
+    }
+}
+
 // Hero karttaki sayaç ve canlı dakika her saniye güncellenir (tüm kart yeniden çizilmez)
 function tickHeroCard() {
     const card = document.querySelector(".recent-match-card.is-hero");
@@ -563,6 +674,7 @@ function tickHeroCard() {
     }
     const count = card.querySelector(".mc-count");
     if (count) tickCountdown(count, m);
+    tickHeroProgress(card, m);
 }
 
 // ---------- Bento: son form ve kadro özeti ----------
@@ -674,6 +786,8 @@ async function loadUpcomingMatches() {
     if (!cards.length) return;
     try {
         const matches = await apiGet("/api/matches/upcoming");
+        rememberTeams(matches);
+        await logosReady;
 
         const prev = navMatch;
         const next = matches[0] || null;
@@ -779,6 +893,8 @@ function renderFixtures(container, matches) {
     </section>`).join("");
 
     renderForm(list);
+    fixtureList = list;
+    renderHeroStrip();
 
     // Sezon özeti: oynanan maçların G/B/M dağılımı
     const played = list.filter(m => m.status === "finished" && m.home_score !== null);
@@ -805,7 +921,10 @@ async function loadFixtures() {
     const container = document.querySelector(".fixtures-grid");
     if (!container) return;
     try {
-        renderFixtures(container, await apiGet("/api/matches"));
+        const all = await apiGet("/api/matches");
+        rememberTeams(all);
+        await logosReady;
+        renderFixtures(container, all);
         console.log("Fikstür API'den yüklendi");
     } catch (err) {
         console.warn("Fikstür API'sine ulaşılamadı:", err);

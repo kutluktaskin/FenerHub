@@ -71,6 +71,12 @@
     --c-susp-soft: color-mix(in srgb, var(--c-susp) 14%, transparent);
     --c-susp-line: color-mix(in srgb, var(--c-susp) 40%, transparent);
 
+    /* Turnuva ve durum rozetleri */
+    --c-league-red: #c8102e;      /* Süper Lig: beyaz yazı 5.9:1 */
+    --c-silver: #dbe2ef;          /* Şampiyonlar Ligi gümüşü */
+    --c-derby-1: #ffb020;
+    --c-derby-2: #ff5a1f;         /* derbi: lacivert yazı 5.9:1 */
+
     /* 12. Adam takma ad renkleri: sarı, altın-turuncu, beyaz, açık lacivert */
     --nick-1: var(--c-accent);
     --nick-2: #ffab40;
@@ -857,11 +863,67 @@ table { font-variant-numeric: tabular-nums; }
 }
 @keyframes hero-border { to { --hero-angle: 360deg; } }
 
+/* Maç kartı renkleri: Fenerbahçe tarafı lacivert, rakip tarafı rakibin koyulaştırılmış rengi.
+   --rival JS'ten gelir (API teamColors). Karışım oklab'da: ton dönmez (sarı+lacivert yeşile kaymaz). */
+.recent-match-card.has-rival {
+    --rival-dark: color-mix(in oklab, var(--rival) var(--rival-mix, 30%), var(--c-navy-950));
+    --rival-glow: color-mix(in oklab, var(--rival) var(--rival-glow-mix, 16%), transparent);
+    --c-text-3: #b8c5e2;      /* renkli zeminde soluk metin bir ton açık: en kötü köşede de AA */
+    background:
+        radial-gradient(75% 90% at 100% 100%, var(--rival-glow), transparent 70%),
+        linear-gradient(125deg, var(--c-navy-700) 0%, var(--c-navy-900) 52%, var(--rival-dark) 100%);
+}
+.recent-match-card.has-rival.fb-away {
+    background:
+        radial-gradient(75% 90% at 0% 0%, var(--rival-glow), transparent 70%),
+        linear-gradient(125deg, var(--rival-dark) 0%, var(--c-navy-900) 48%, var(--c-navy-700) 100%);
+}
+/* Hero: yatay skor tahtası; rakip tarafı sağda (deplasmanda solda), stat ışıkları korunur */
+.recent-match-card.is-hero.has-rival {
+    background:
+        conic-gradient(from 163deg at 20% -14%, transparent 0deg, var(--c-beam) 6deg, transparent 13deg),
+        conic-gradient(from 184deg at 80% -14%, transparent 0deg, var(--c-beam) 6deg, transparent 13deg),
+        radial-gradient(45% 70% at 100% 45%, var(--rival-glow), transparent 75%),
+        linear-gradient(105deg, var(--c-navy-700) 0%, var(--c-navy-900) 50%, var(--rival-dark) 100%);
+}
+.recent-match-card.is-hero.has-rival.fb-away {
+    background:
+        conic-gradient(from 163deg at 20% -14%, transparent 0deg, var(--c-beam) 6deg, transparent 13deg),
+        conic-gradient(from 184deg at 80% -14%, transparent 0deg, var(--c-beam) 6deg, transparent 13deg),
+        radial-gradient(45% 70% at 0% 45%, var(--rival-glow), transparent 75%),
+        linear-gradient(105deg, var(--rival-dark) 0%, var(--c-navy-900) 50%, var(--c-navy-700) 100%);
+}
+
+/* Yan kartlarda ikincil buton: rakip renginde ince çerçeve, sarı ana butonla yarışmaz */
+.recent-match-card:not(.is-hero) .open-sim-btn {
+    border: 1.5px solid color-mix(in oklab, var(--rival, var(--c-accent)) 60%, #ffffff);
+    background: color-mix(in oklab, var(--rival, var(--c-navy-500)) 14%, transparent);
+    color: var(--c-text);
+}
+.recent-match-card:not(.is-hero) .open-sim-btn:hover {
+    background: color-mix(in oklab, var(--rival, var(--c-navy-500)) 30%, transparent);
+    border-color: color-mix(in oklab, var(--rival, var(--c-accent)) 40%, #ffffff);
+    color: var(--c-text);
+}
+
 /* Canlı maç: kırmızı çerçeve ve hafif ışık */
 .recent-match-card.is-live {
     border-color: var(--c-live-line);
-    box-shadow: inset 0 2px 0 var(--c-live), var(--sh-2), 0 0 40px var(--c-live-soft);
+    box-shadow: inset 0 3px 0 var(--c-live), var(--sh-2), 0 0 40px var(--c-live-soft);
 }
+.recent-match-card.is-live::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(80% 55% at 50% 0%, color-mix(in oklab, var(--c-live) 24%, transparent), transparent 70%);
+    pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+    .recent-match-card.is-live::before { animation: live-glow 2.4s ease-in-out infinite alternate; }
+}
+@keyframes live-glow { from { opacity: 0.55; } to { opacity: 1; } }
 
 /* Rozetler */
 .mc-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
@@ -877,11 +939,38 @@ table { font-variant-numeric: tabular-nums; }
     white-space: nowrap;
 }
 .comp-badge { border: 1px solid var(--c-line-strong); color: var(--c-text-2); }
-.comp-badge .ico { color: var(--c-text-3); }
+.comp-badge .ico { color: currentColor; }
+/* Süper Lig kırmızısı, Şampiyonlar Ligi lacivert-gümüş ve yıldızlı */
+.comp-badge.comp-super_lig { background: var(--c-league-red); border-color: var(--c-league-red); color: #ffffff; }
+.comp-badge.comp-uefa {
+    background: linear-gradient(135deg, var(--c-navy-900), var(--c-navy-600));
+    border-color: var(--c-silver);
+    color: var(--c-silver);
+}
 .badge-upcoming { background: var(--c-accent-soft); color: var(--c-accent); }
-.badge-today { background: var(--c-accent); color: var(--c-accent-ink); }
-.badge-derby { background: var(--c-accent); color: var(--c-accent-ink); }
-.badge-live { background: var(--c-live-soft); color: var(--c-live); }
+/* Derbi: turuncu-kırmızı alevli rozet, lacivert yazı */
+.badge-derby { background: linear-gradient(120deg, var(--c-derby-1), var(--c-derby-2)); color: var(--c-accent-ink); }
+/* Maç günü (<24 saat) ve canlı: nabız atan halka (transform + opacity) */
+.badge-matchday { position: relative; background: var(--c-accent); color: var(--c-accent-ink); }
+.badge-live { position: relative; background: var(--c-live); color: var(--c-accent-ink); }
+.badge-matchday::after, .badge-live::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 0 2px currentColor;
+    opacity: 0;
+    pointer-events: none;
+}
+.badge-matchday::after { box-shadow: 0 0 0 2px var(--c-accent); }
+.badge-live::after { box-shadow: 0 0 0 2px var(--c-live); }
+@media (prefers-reduced-motion: no-preference) {
+    .badge-matchday::after, .badge-live::after { animation: badge-pulse 1.8s var(--ease) infinite; }
+}
+@keyframes badge-pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.35, 1.6); opacity: 0; }
+}
 
 /* Armalar: Fenerbahçe logosu, rakipler kısaltmalı rozet */
 .crest {
@@ -900,7 +989,7 @@ table { font-variant-numeric: tabular-nums; }
     border-radius: 50%;
     background: var(--crest-bg);
     color: var(--crest-fg);
-    box-shadow: inset 0 0 0 2px var(--c-ring), var(--sh-1);
+    box-shadow: inset 0 0 0 calc(var(--size) * 0.07) var(--crest-ring, var(--c-ring)), var(--sh-1);
     font-family: var(--f-display);
     font-size: calc(var(--size) * 0.36);
     font-weight: 700;
@@ -917,7 +1006,45 @@ table { font-variant-numeric: tabular-nums; }
     gap: var(--s-4);
 }
 /* Hero iki satır yüksekliğinde: boşluk skor tahtasının çevresine dağılır */
-.is-hero .mc-board { flex: 1; padding: var(--s-4) 0; }
+.is-hero .mc-board { flex: 1; padding: var(--s-2) 0; }
+
+/* Geri sayım ile stat arasındaki şerit: Fenerbahçe formu + maça kalan çubuğu */
+.mc-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-3) var(--s-6);
+    padding: var(--s-3) var(--s-4);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-lg);
+    background: var(--c-inset);
+}
+.strip-block { display: flex; align-items: center; gap: var(--s-3); }
+.strip-label { color: var(--c-text-3); font-size: var(--fs-xs); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.form-dots { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.form-dots li {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    color: var(--c-accent-ink);
+    font-family: var(--f-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+.form-dots .win { background: var(--c-win); }
+.form-dots .draw { background: var(--c-draw); }
+.form-dots .loss { background: var(--c-loss); }
+.form-dots li:last-child { box-shadow: 0 0 0 2px var(--c-navy-900), 0 0 0 4px var(--c-accent); }
+.prog-track { width: 140px; height: 8px; overflow: hidden; border-radius: var(--r-pill); background: var(--c-inset-strong); }
+.prog-track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--c-accent-line), var(--c-accent)); transform-origin: left; }
+.prog-val { font-family: var(--f-display); font-size: 1.15rem; font-weight: 700; color: var(--c-accent); }
+@container matches (width < 640px) {
+    .mc-strip { gap: var(--s-2) var(--s-4); }
+    .prog-track { width: 96px; }
+}
 .mc-team {
     display: flex;
     flex-direction: column;
