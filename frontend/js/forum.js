@@ -22,8 +22,7 @@ window.toggleForum = function () {
   ];
   const SHORT = { "Fenerbahçe": "FB", "Galatasaray": "GS", "Beşiktaş": "BJK", "Trabzonspor": "TS" };
   const MAX_DOM = 200;
-  const SHOW_DELETE_ALL = true;
-  console.log("forum.js v7 yüklendi");
+  console.log("12. Adam (forum.js v8) yüklendi");
   let tabKey = "genel", room = "genel", nextMatch = null, ws, stick = true, replyTo = null;
   
   const mine = new Set();
@@ -139,11 +138,10 @@ window.toggleForum = function () {
       const acts = document.createElement("div");
       acts.className = "fc2-acts";
       
-      // Sadece emojiler ve sayaçlar (Metinsiz buton yapısı)
+      // Backend sadece fire ve heart tepkilerini kabul ediyor
       [
         ["fire", `🔥 ${p.fire || 0}`, "Ateş Ver"],
-        ["heart", `💛 ${p.heart || 0}`, "Beğen"],
-        ["star", `⭐ ${p.star || 0}`, "Yıldızla"]
+        ["heart", `💛 ${p.heart || 0}`, "Beğen"]
       ].forEach(([type, label, title]) => {
         const b = mkBtn("fc2-react", label, title, () => react(p.id, type));
         b.dataset.type = type;
@@ -152,7 +150,8 @@ window.toggleForum = function () {
 
       acts.append(mkBtn("fc2-act", "💬", "Yanıtla", () => setReply(p)));
       
-      if (isMine || SHOW_DELETE_ALL) {
+      // Backend başkasının mesajını silmeye izin vermez (403)
+      if (isMine) {
         acts.append(mkBtn("fc2-act fc2-del", "🗑", "Sil", (e) => removePost(p.id, e)));
       }
       main.append(acts);
@@ -300,10 +299,8 @@ window.toggleForum = function () {
         if (el) {
           const f = el.querySelector('[data-type="fire"]');
           const h = el.querySelector('[data-type="heart"]');
-          const s = el.querySelector('[data-type="star"]');
           if (f) f.textContent = `🔥 ${m.fire || 0}`;
           if (h) h.textContent = `💛 ${m.heart || 0}`;
-          if (s) s.textContent = `⭐ ${m.star || 0}`;
         }
       }
     };

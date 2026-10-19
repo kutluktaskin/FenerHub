@@ -1298,7 +1298,7 @@ body.tabs-on .page-section.active { animation: sectionIn 0.4s ease; }
     .forum-compose button { padding: 12px; }
 }
 
-/* ===== SAĞ SABİT SOHBET PANELİ ===== */
+/* ===== 12. ADAM: SAĞ SABİT FORUM PANELİ ===== */
 .fchat { position: fixed; z-index: 900; }
 
 .fchat-panel {
@@ -1530,7 +1530,10 @@ body.tabs-on .page-section.active { animation: sectionIn 0.4s ease; }
 #forumRooms { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
 #forumRooms button { white-space: nowrap; flex-shrink: 0; }
 
-/* ---- Taraftar sohbeti: avatar kaldırıldı, silme butonu ---- */
+/* ---- 12. Adam: başlık, avatar kaldırıldı, silme butonu ---- */
+.fchat-title { display: flex; flex-direction: column; }
+.fchat-name { margin: 0; color: #fff; font-size: 1.15em; letter-spacing: 2px; }
+.fchat-sub { color: #cfd6e6; font-size: 0.78em; margin-top: 2px; }
 .fc2-av { display: none !important; }
 .fc2-msg { display: block !important; }
 .fc2-main { width: 100%; }

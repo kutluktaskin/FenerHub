@@ -30,7 +30,7 @@
             <button style="--d:2" onclick="openSimulation('alanya')">Canlı Simülasyon</button>
             <button style="--d:3" onclick="scrollToSection('puanlar')">Puan Durumu</button>
             <button style="--d:4" onclick="scrollToSection('fikstur')">Fikstür</button>
-            <button style="--d:5" onclick="toggleForum()">Forum</button>
+            <button style="--d:5" onclick="toggleForum()">12. Adam</button>
         </div>
         <div class="nav-right">
             <img src="img/fenerbahce-logo.png" alt="Fenerbahçe" class="fb-crest" onerror="this.style.display='none'">
@@ -430,12 +430,13 @@
     </div>
 
     <aside class="fchat" id="fchat">
-    <button class="fchat-tab" onclick="toggleForum()">💬 Forum</button>
+    <button class="fchat-tab" onclick="toggleForum()">12. Adam</button>
 
-    <div class="fchat-panel">
+    <div class="fchat-panel" role="dialog" aria-labelledby="fchatTitle">
         <div class="fchat-head">
-            <div>
-                <b>💬 Taraftar Sohbeti</b>
+            <div class="fchat-title">
+                <h2 class="fchat-name" id="fchatTitle">12. ADAM</h2>
+                <span class="fchat-sub">Tribünün sesi</span>
                 <span class="fchat-online"><i class="live-pulse"></i><b id="forumOnline">0</b> çevrimiçi</span>
             </div>
             <button class="fchat-close" onclick="toggleForum()" aria-label="Kapat">✕</button>
