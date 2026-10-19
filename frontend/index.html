@@ -30,6 +30,7 @@
             <button style="--d:2" onclick="openSimulation('alanya')">Canlı Simülasyon</button>
             <button style="--d:3" onclick="scrollToSection('puanlar')">Puan Durumu</button>
             <button style="--d:4" onclick="scrollToSection('fikstur')">Fikstür</button>
+            <button style="--d:5" onclick="toggleForum()">Forum</button>
         </div>
         <div class="nav-right">
             <img src="img/fenerbahce-logo.png" alt="Fenerbahçe" class="fb-crest" onerror="this.style.display='none'">
@@ -167,16 +168,11 @@
                         </div>
                     </div>
 
-                                        <div id="statsTab" class="tab-content">
-    <div class="info-panel">
-        <h3 ...>📊 Karşılaşma İstatistikleri</h3>
-        <div id="statsBody">...</div>
-    </div>
-</div>
-
-<div id="lineupTab" class="tab-content">
-    ...
-</div>
+                                                          <div id="statsTab" class="tab-content">
+                        <div class="info-panel">
+                            <h3 style="color:var(--primary-color); margin-top:0;">📊 Karşılaşma İstatistikleri</h3>
+                            <div id="statsBody"></div>
+                        </div>
                     </div>
 
                     <div id="lineupTab" class="tab-content">
@@ -187,13 +183,9 @@
                             </div>
                         </div>
                     </div>
-                            </div>
-                           
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+                </div> <!-- match-card -->
+            </div> <!-- simulasyonWrapper -->
 
         </section>
         <!-- ✅ Yakın Maçlar burada biter -->
@@ -397,7 +389,7 @@
         <section class="page-section fixtures-full-section" id="fikstur">
             <h2 style="color: var(--primary-color); margin-top: 0; text-transform: uppercase; font-size: 1.4em;">🗓️ Fenerbahçe Sezon Fikstürü (2026/2027)</h2>
             <p style="font-size: 0.9em; color: #aaa; margin-bottom: 15px;">Tüm saatler Türkiye Saati (TSİ) olarak gösterilmektedir.</p>
-
+        
             <div class="fixtures-grid">
                 <div class="fixture-item"><div class="fixture-date">20/10 Sal</div><div class="fixture-teams">Fenerbahçe - Alanyaspor</div><div class="fixture-time">19:45</div></div>
                 <div class="fixture-item"><div class="fixture-date">26/10 Pzt</div><div class="fixture-teams">Fenerbahçe - Slavia Prag</div><div class="fixture-time">21:30</div></div>
@@ -437,11 +429,43 @@
 
     </div>
 
+    <aside class="fchat" id="fchat">
+    <button class="fchat-tab" onclick="toggleForum()">💬 Forum</button>
+
+    <div class="fchat-panel">
+        <div class="fchat-head">
+            <div>
+                <b>💬 Taraftar Sohbeti</b>
+                <span class="fchat-online"><i class="live-pulse"></i><b id="forumOnline">0</b> çevrimiçi</span>
+            </div>
+            <button class="fchat-close" onclick="toggleForum()" aria-label="Kapat">✕</button>
+        </div>
+
+        <div class="fchat-rooms" id="forumRooms"></div>
+
+        <div class="fchat-feed-wrap">
+            <div class="fchat-feed" id="forumFeed"></div>
+            <button class="fchat-new" id="forumNew" hidden>↓ Yeni mesajlar</button>
+        </div>
+
+        <div class="fchat-error" id="forumError"></div>
+
+        <div class="fchat-compose">
+            <input id="forumNick" maxlength="20" placeholder="Takma adın">
+            <div class="fchat-row">
+                <textarea id="forumText" maxlength="500" rows="1" placeholder="Mesaj yaz..."></textarea>
+                <button id="forumSend" aria-label="Gönder">➤</button>
+            </div>
+        </div>
+    </div>
+</aside>
+
     <!-- Harici JS Dosyaları -->
     <script src="js/background.js"></script>
     <script src="js/matchEngine.js"></script>
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
     <script src="js/tabs.js"></script>
+    <script src="js/forum.js"></script>
 </body>
 </html>

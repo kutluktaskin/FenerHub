@@ -1200,4 +1200,344 @@ body.tabs-on .page-section.active { animation: sectionIn 0.4s ease; }
 .fb-crest {
     margin: 0 auto;             /* iki yandan eşit boşluk = tam orta */
     padding: 0 10px;            /* çok daralırsa yapışmasın */
+} 
+
+/* ===== FENERHUB LOGO: BEYAZ + PROFESYONEL ===== */
+.logo.fh-logo {
+    position: relative;
+    padding-bottom: 6px;
+    letter-spacing: 3px;
 }
+
+/* FENER harfleri beyaz */
+.fh-word span {
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+    animation: fhDrop 0.5s ease forwards, fhWaveWhite 3s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.09s), calc(1.2s + var(--i) * 0.12s);
+}
+
+@keyframes fhWaveWhite {
+    0%, 60%, 100% { color: #ffffff; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45); }
+    30% { color: #fff6b0; text-shadow: 0 0 14px rgba(252, 209, 22, 0.9); }
+}
+
+/* HUB: sarı rozet + ince beyaz çerçeve */
+.fh-badge {
+    margin-left: 10px;
+    padding: 1px 12px;
+    color: #0a1a3f;
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 14px rgba(252, 209, 22, 0.35);
+}
+
+/* Logonun altında solan beyaz çizgi */
+.logo.fh-logo::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(90deg, #ffffff, rgba(255, 255, 255, 0));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fh-word span { animation: none; opacity: 1; transform: none; }
+}
+
+
+
+.forum-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.forum-head h2 { margin: 0; color: var(--primary-color); text-transform: uppercase; font-size: 1.3em; letter-spacing: 1px; }
+.forum-online { display: flex; align-items: center; gap: 8px; color: #cfd6e6; font-size: 0.9em; }
+.forum-online .live-pulse { width: 9px; height: 9px; }
+
+.forum-rooms { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+.forum-rooms button {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(252,209,22,0.25);
+    color: #fff; padding: 8px 14px; border-radius: 999px; font-weight: bold; cursor: pointer;
+    transition: all .25s;
+}
+.forum-rooms button:hover { border-color: var(--primary-color); }
+.forum-rooms button.on { background: var(--primary-color); color: #000; }
+
+.forum-compose { display: grid; grid-template-columns: 180px 1fr auto; gap: 10px; align-items: stretch; }
+.forum-compose input, .forum-compose textarea {
+    background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; border-radius: 10px; padding: 10px 12px; font-family: inherit; resize: none;
+}
+.forum-compose input:focus, .forum-compose textarea:focus { outline: none; border-color: var(--primary-color); }
+.forum-compose button {
+    background: var(--primary-color); color: #000; font-weight: bold; border: none;
+    border-radius: 10px; padding: 0 22px; cursor: pointer;
+}
+.forum-error { color: #ff6b6b; font-size: 0.85em; min-height: 18px; margin-top: 8px; }
+
+.forum-feed { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; max-height: 520px; overflow-y: auto; padding-right: 6px; color: #bbb; }
+.forum-feed::-webkit-scrollbar { width: 6px; }
+.forum-feed::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 10px; }
+
+.forum-post {
+    background: rgba(0,0,0,0.45); border-left: 3px solid var(--primary-color);
+    border-radius: 10px; padding: 12px 14px; animation: sectionIn .35s ease;
+}
+.forum-post-head { display: flex; justify-content: space-between; font-size: 0.85em; }
+.forum-post-head strong { color: var(--primary-color); }
+.forum-post-head span { color: #8f9ab3; }
+.forum-post p { margin: 8px 0; color: #fff; line-height: 1.5; word-break: break-word; }
+.forum-actions { display: flex; gap: 8px; }
+.forum-actions button {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+    color: #fff; border-radius: 999px; padding: 4px 12px; cursor: pointer; font-size: 0.82em;
+}
+.forum-actions button:hover { border-color: var(--primary-color); }
+
+@media (max-width: 700px) {
+    .forum-compose { grid-template-columns: 1fr; }
+    .forum-compose button { padding: 12px; }
+}
+
+/* ===== SAĞ SABİT SOHBET PANELİ ===== */
+.fchat { position: fixed; z-index: 900; }
+
+.fchat-panel {
+    display: none;
+    position: fixed;
+    top: calc(var(--nav-height) + 12px);
+    right: 14px;
+    bottom: 14px;
+    width: 340px;
+    flex-direction: column;
+    background: rgba(0, 16, 46, 0.88);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9);
+    overflow: hidden;
+}
+.fchat.open .fchat-panel { display: flex; animation: sectionIn 0.35s ease; }
+
+/* Kapalıyken sağ kenarda duran küçük sekme */
+.fchat-tab {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--primary-color);
+    color: #000;
+    font-weight: bold;
+    border: none;
+    padding: 12px 10px;
+    border-radius: 12px 0 0 12px;
+    cursor: pointer;
+    writing-mode: vertical-rl;
+    box-shadow: 0 0 18px rgba(252, 209, 22, 0.45);
+}
+.fchat.open .fchat-tab { display: none; }
+
+.fchat-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.fchat-head b { color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; font-size: 0.92em; }
+.fchat-online { display: flex; align-items: center; gap: 6px; color: #cfd6e6; font-size: 0.78em; margin-top: 4px; }
+.fchat-online .live-pulse { width: 8px; height: 8px; }
+.fchat-online b { color: #fff; letter-spacing: 0; text-transform: none; font-size: 1em; }
+.fchat-close {
+    background: rgba(255, 255, 255, 0.08); border: none; color: #fff;
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+}
+.fchat-close:hover { background: #ff4d4d; }
+
+/* Oda butonları: yatay kaydırılır */
+.fchat-rooms {
+    display: flex; gap: 6px; padding: 10px 12px;
+    overflow-x: auto; scrollbar-width: none;
+}
+.fchat-rooms::-webkit-scrollbar { display: none; }
+.fchat-rooms button {
+    flex: 0 0 auto; white-space: nowrap;
+    background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(252, 209, 22, 0.25);
+    color: #fff; padding: 6px 12px; border-radius: 999px;
+    font-size: 0.78em; font-weight: bold; cursor: pointer; transition: all 0.25s;
+}
+.fchat-rooms button:hover { border-color: var(--primary-color); }
+.fchat-rooms button.on { background: var(--primary-color); color: #000; }
+
+/* Mesaj akışı: yeni mesaj altta */
+.fchat-feed-wrap { position: relative; flex: 1; min-height: 0; display: flex; }
+.fchat-feed {
+    flex: 1; overflow-y: auto; padding: 8px 12px;
+    display: flex; flex-direction: column; gap: 8px;
+    scrollbar-width: thin; scrollbar-color: #fcd116 transparent;
+}
+.fchat-feed::-webkit-scrollbar { width: 5px; }
+.fchat-feed::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 10px; }
+.fchat-empty { color: #8f9ab3; font-size: 0.85em; text-align: center; margin: auto; padding: 20px; }
+
+.fchat-msg {
+    background: rgba(0, 0, 0, 0.45);
+    border-left: 3px solid var(--primary-color);
+    border-radius: 10px; padding: 8px 11px;
+    animation: sectionIn 0.3s ease;
+}
+.fchat-msg-head { display: flex; justify-content: space-between; font-size: 0.78em; }
+.fchat-msg-head strong { color: var(--primary-color); }
+.fchat-time { color: #8f9ab3; }
+.fchat-msg p { margin: 4px 0 6px; color: #fff; font-size: 0.88em; line-height: 1.45; word-break: break-word; }
+.fchat-acts { display: flex; gap: 6px; }
+.fchat-acts button {
+    background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff; border-radius: 999px; padding: 2px 9px; font-size: 0.74em; cursor: pointer;
+}
+.fchat-acts button:hover { border-color: var(--primary-color); }
+
+.fchat-new {
+    position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+    background: var(--primary-color); color: #000; font-weight: bold; font-size: 0.8em;
+    border: none; border-radius: 999px; padding: 7px 16px; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+.fchat-new[hidden] { display: none; }
+
+.fchat-error { color: #ff6b6b; font-size: 0.78em; padding: 0 14px; min-height: 16px; }
+
+.fchat-compose { padding: 8px 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+.fchat-compose input, .fchat-compose textarea {
+    background: rgba(0, 0, 0, 0.55); border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff; border-radius: 10px; padding: 9px 11px; font-family: inherit; font-size: 0.88em; resize: none;
+}
+.fchat-compose input:focus, .fchat-compose textarea:focus { outline: none; border-color: var(--primary-color); }
+.fchat-row { display: flex; gap: 8px; }
+.fchat-row textarea { flex: 1; }
+.fchat-row button {
+    background: var(--primary-color); color: #000; font-weight: bold;
+    border: none; border-radius: 10px; width: 44px; cursor: pointer;
+}
+
+/* Panel açıkken sayfa içeriği panelin soluna sığsın */
+@media (min-width: 1100px) {
+    body.fchat-open { padding-right: 370px; }
+    body.fchat-open .page-container { width: min(1360px, calc(94vw - 370px)); }
+}
+
+/* Mobil: alttan açılan panel */
+@media (max-width: 1099px) {
+    .fchat-panel { left: 10px; right: 10px; top: auto; bottom: 10px; width: auto; height: 70vh; }
+}
+
+/* ===== FORUM SEKME TIKLAMA DÜZELTMESİ ===== */
+.fchat { z-index: 99990; pointer-events: none; }
+
+.fchat-tab,
+.fchat-panel { pointer-events: auto; }
+
+.fchat-tab {
+    z-index: 99991;
+    cursor: pointer;
+}
+
+/* ===== Forum: mesaj kartları ===== */
+.fc2-msg {
+  display: flex; gap: 10px;
+  padding: 10px 12px; margin: 0 0 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background .2s, border-color .2s;
+}
+.fc2-msg:hover { background: rgba(255, 255, 255, 0.07); }
+.fc2-msg.is-mine { border-color: rgba(252, 209, 22, 0.35); background: rgba(252, 209, 22, 0.05); }
+.fc2-msg.flash { animation: fc2flash 1.2s ease; }
+@keyframes fc2flash {
+  0%, 100% { box-shadow: none; }
+  40% { box-shadow: 0 0 0 2px rgba(252, 209, 22, 0.8); }
+}
+
+.fc2-av {
+  flex: 0 0 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-weight: 800; font-size: 14px; color: #fff;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.fc2-main { flex: 1; min-width: 0; }
+.fc2-head { display: flex; align-items: center; gap: 8px; }
+.fc2-nick { color: #fcd116; font-weight: 700; font-size: 13px; }
+.fc2-you {
+  font-size: 10px; font-weight: 700; letter-spacing: .5px;
+  padding: 1px 6px; border-radius: 999px;
+  background: rgba(252, 209, 22, 0.18); color: #fcd116;
+}
+.fc2-time { margin-left: auto; font-size: 11px; color: #7f8db0; }
+
+.fc2-quote {
+  display: flex; flex-direction: column; gap: 2px;
+  margin: 6px 0 4px; padding: 5px 9px;
+  border-left: 3px solid #fcd116;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  font-size: 12px; color: #aab6d3;
+  cursor: pointer;
+}
+.fc2-quote:hover { background: rgba(0, 0, 0, 0.38); }
+.fc2-quote b { color: #d9c566; font-weight: 600; }
+.fc2-quote .gone { font-style: italic; color: #6b7896; }
+
+.fc2-body {
+  margin: 4px 0 0; color: #e8ecf7;
+  font-size: 14px; line-height: 1.45; word-break: break-word;
+}
+.fc2-msg.is-deleted { opacity: .65; }
+.fc2-msg.is-deleted .fc2-body { font-style: italic; color: #6b7896; }
+
+.fc2-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.fc2-acts button {
+  font: inherit; font-size: 12px; cursor: pointer;
+  padding: 3px 9px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cfd6ea;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.fc2-acts button:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(252, 209, 22, 0.5); color: #fff; }
+.fc2-acts .fc2-del:hover { background: rgba(255, 80, 80, 0.18); border-color: #ff6b6b; color: #ff9a9a; }
+
+/* ===== Yanıt çubuğu ===== */
+.fc2-reply-bar {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 6px; padding: 6px 10px;
+  border-left: 3px solid #fcd116;
+  border-radius: 8px;
+  background: rgba(252, 209, 22, 0.08);
+  font-size: 12px; color: #cfd6ea;
+}
+.fc2-reply-bar[hidden] { display: none; }
+.fc2-reply-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.fc2-reply-text b { color: #fcd116; font-weight: 600; }
+.fc2-reply-text span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #9aa7c7; }
+.fc2-reply-x {
+  background: none; border: 0; color: #9aa7c7;
+  cursor: pointer; font-size: 14px; padding: 2px 6px;
+}
+.fc2-reply-x:hover { color: #fff; }
+
+/* Sekmeler taşmasın */
+#forumRooms { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+#forumRooms button { white-space: nowrap; flex-shrink: 0; }
+
+/* ---- Taraftar sohbeti: avatar kaldırıldı, silme butonu ---- */
+.fc2-av { display: none !important; }
+.fc2-msg { display: block !important; }
+.fc2-main { width: 100%; }
+
+.fc2-del {
+  color: #ff6b6b !important;
+  opacity: .75;
+}
+.fc2-del:hover { opacity: 1; }
+

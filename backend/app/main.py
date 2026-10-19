@@ -42,3 +42,4 @@ app.include_router(absences.router)
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
+
