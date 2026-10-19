@@ -45,7 +45,7 @@ document.addEventListener("keydown", e => {
   const NICK_COLORS = ["var(--nick-1)", "var(--nick-2)", "var(--nick-3)", "var(--nick-4)"];
   const nickColor = n => NICK_COLORS[[...n].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % NICK_COLORS.length];
   const MAX_DOM = 200;
-  console.log("12. Adam (forum.js v8) yüklendi");
+  console.log("12. Adam (forum.js v9) yüklendi");
   let tabKey = "genel", room = "genel", nextMatch = null, ws, stick = true, replyTo = null;
   
   const mine = new Set();
@@ -88,6 +88,26 @@ document.addEventListener("keydown", e => {
     n.className = "fchat-empty";
     n.textContent = text;
     feed.append(n);
+  }
+
+  // Boş oda: tribün sessiz; çipe basınca tezahürat mesaj kutusuna yazılır (gönderilmez)
+  const CHANTS = ["Haydi Fener!", "Sarı Lacivert!", "Bugün bizim günümüz"];
+  function emptyRoom() {
+    feed.textContent = "";
+    const box = document.createElement("div");
+    box.className = "fchat-empty fchat-empty-room";
+    box.innerHTML = `<span class="empty-art" aria-hidden="true">${icon("megaphone")}</span>
+      <p class="empty-title">Tribün sessiz…</p>
+      <p class="empty-sub">İlk tezahüratı sen başlat!</p>
+      <div class="chant-chips" role="group" aria-label="Hazır tezahüratlar"></div>`;
+    const chips = box.querySelector(".chant-chips");
+    CHANTS.forEach(t => chips.append(mkBtn("chant-chip", esc(t), null, () => {
+      const ta = $("forumText");
+      ta.value = t;
+      updateCount();
+      ta.focus();
+    })));
+    feed.append(box);
   }
 
   // html: sadece sabit ikon + sayı (kullanıcı metni buraya girmez)
@@ -199,7 +219,7 @@ document.addEventListener("keydown", e => {
       s.classList.add("gone");
     });
     if (replyTo && replyTo.id === id) clearReply();
-    if (!feed.querySelector(".fc2-msg")) info("Bu odada henüz mesaj yok. İlk yazan sen ol!");
+    if (!feed.querySelector(".fc2-msg")) emptyRoom();
   }
 
   function jumpTo(id) {
@@ -250,7 +270,7 @@ document.addEventListener("keydown", e => {
       if (!r.ok) throw new Error();
       const posts = (await r.json()).reverse().filter(p => !p.deleted);
       feed.textContent = "";
-      if (!posts.length) info("Bu odada henüz mesaj yok. İlk yazan sen ol!");
+      if (!posts.length) emptyRoom();
       posts.forEach(p => feed.append(postEl(p)));
       scrollBottom();
     } catch {
@@ -264,7 +284,7 @@ document.addEventListener("keydown", e => {
     const nick = $("forumNick").value.trim(), body = $("forumText").value.trim();
     if (!room) { err.textContent = "Bu sekmede şu an oda yok."; return; }
     if (nick.length < 2 || !body) { err.textContent = "Takma ad (min 2 harf) ve mesaj gerekli."; return; }
-    try { localStorage.setItem("fhNick", nick); } catch (e) {}
+    applyNick(nick);
     try {
       const r = await fetch(`${API}/api/forum/posts`, {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -280,6 +300,7 @@ document.addEventListener("keydown", e => {
       saveMine();
       p.mine = true;
       $("forumText").value = "";
+      updateCount();
       clearReply();
       const ex = feed.querySelector(`.fc2-msg[data-id="${p.id}"]`);
       if (ex) ex.replaceWith(postEl(p));
@@ -320,7 +341,7 @@ document.addEventListener("keydown", e => {
     try { ws = new WebSocket(WS_URL); } catch { return; }
     ws.onmessage = e => {
       const m = JSON.parse(e.data);
-      if (m.type === "online") $("forumOnline").textContent = m.count;
+      if (m.type === "online") setOnline(m.count);
       if (m.type === "post" && m.post.room === room) addPost(m.post);
       if (m.type === "delete") markDeleted(m.id);
       if (m.type === "react") {
@@ -336,6 +357,15 @@ document.addEventListener("keydown", e => {
     ws.onclose = () => setTimeout(connect, 2000);
   }
 
+  function setOnline(count) {
+    const el = $("forumOnline");
+    if (!el || el.textContent === String(count)) return;
+    el.textContent = count;
+    el.classList.remove("bump");
+    void el.offsetWidth;          // animasyonu yeniden başlat
+    el.classList.add("bump");
+  }
+
   const roomFor = key => key === "mac" ? (nextMatch && nextMatch.room) : key;
 
   async function refreshMatch() {
@@ -346,11 +376,48 @@ document.addEventListener("keydown", e => {
       const btn = $("forumRooms").querySelector('[data-key="mac"]');
       const label = nextMatch ? (SHORT[nextMatch.opponent] || nextMatch.opponent) : "Gelecek Maç";
       if (btn) {
-        btn.innerHTML = icon("ball") + `<span>${esc(label)}</span>`;
+        const live = nextMatch && typeof navMatch !== "undefined" && navMatch && navMatch.status === "live" &&
+          [navMatch.home, navMatch.away].includes(nextMatch.opponent);
+        btn.innerHTML = icon("ball") + `<span>${esc(label)}</span>` +
+          (live ? `<i class="room-live" role="img" aria-label="canlı"></i>` : "");
         btn.title = nextMatch ? `Maç odası: ${nextMatch.home} - ${nextMatch.away}` : "Gelecek maç odası";
+        // api.js teamAccent: rakibin en canlı rengi; zemin açıksa yazı lacivert, koyuysa beyaz
+        const color = nextMatch && window.teamAccent ? window.teamAccent(nextMatch.opponent) : null;
+        if (color) {
+          btn.style.setProperty("--room-color", color);
+          btn.style.setProperty("--room-ink", typeof relLum === "function" && relLum(hexRGB(color)) > 0.3 ? "var(--c-accent-ink)" : "#ffffff");
+        }
       }
       if (changed && tabKey === "mac") { room = roomFor("mac"); clearReply(); load(); }
     } catch {}
+  }
+
+  // ---- Takma ad: bir kez girilir, localStorage'da saklanır, başlıkta "ad ✎" etiketi ----
+  const savedNick = () => { try { return localStorage.getItem("fhNick") || ""; } catch (e) { return ""; } };
+  function applyNick(nick) {
+    try { localStorage.setItem("fhNick", nick); } catch (e) {}
+    $("forumNick").value = nick;
+    const chip = $("nickChip");
+    chip.innerHTML = `<span>${esc(nick)}</span>${icon("pencil")}`;
+    chip.setAttribute("aria-label", `Takma ad: ${nick}. Düzenle`);
+    chip.hidden = false;
+    $("forumCompose").classList.add("has-nick");
+  }
+  function commitNick() {
+    const v = $("forumNick").value.trim();
+    if (v.length >= 2) applyNick(v);
+    else if (savedNick()) applyNick(savedNick());   // geçersizse eskisine dön
+  }
+
+  // ---- Mesaj kutusu: 500 karakter sayacı ve içeriğe göre büyüme (en fazla ~5 satır) ----
+  function updateCount() {
+    const ta = $("forumText"), out = $("forumCount");
+    const n = ta.value.length;
+    out.textContent = `${n}/500`;
+    out.classList.toggle("is-warn", n >= 450 && n < 500);
+    out.classList.toggle("is-max", n >= 500);
+    ta.style.height = "auto";
+    ta.style.height = Math.min(ta.scrollHeight, 120) + "px";
   }
 
   function init() {
@@ -361,7 +428,7 @@ document.addEventListener("keydown", e => {
     replyBar.className = "fc2-reply-bar";
     replyBar.hidden = true;
     const nickEl = $("forumNick");
-    nickEl.parentNode.insertBefore(replyBar, nickEl);
+    $("forumText").closest(".fchat-row").before(replyBar);
 
     const roomsEl = $("forumRooms");
     // Oda seçici: sekme (tab) olarak işaretlenir, aktif oda aria-selected
@@ -395,6 +462,24 @@ document.addEventListener("keydown", e => {
     let nick = "";
     try { nick = localStorage.getItem("fhNick") || ""; } catch (e) {}
     nickEl.value = nick;
+    if (nick.length >= 2) applyNick(nick);
+
+    // Başlıktaki etikete basınca takma ad düzenlenir; Enter kaydeder, Esc vazgeçer
+    $("nickChip").onclick = () => {
+      $("forumCompose").classList.remove("has-nick");
+      nickEl.focus();
+      nickEl.select();
+    };
+    nickEl.addEventListener("keydown", e => {
+      if (e.key === "Enter") { e.preventDefault(); commitNick(); $("forumText").focus(); }
+      if (e.key === "Escape" && savedNick()) { e.stopPropagation(); nickEl.value = savedNick(); applyNick(savedNick()); }
+    });
+    nickEl.addEventListener("blur", commitNick);
+
+    const ta = $("forumText");
+    ta.addEventListener("input", updateCount);
+    updateCount();
+
     $("forumSend").onclick = (e) => send(e);
     $("forumText").addEventListener("keydown", e => {
       if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(e); }
@@ -412,6 +497,7 @@ document.addEventListener("keydown", e => {
     if (wantOpen) window.toggleForum({ focus: false });
 
     refreshMatch();
+    setTimeout(refreshMatch, 5000);      // takım renkleri (api.js) gelince oda rengini uygula
     setInterval(refreshMatch, 60 * 1000);
     load(); connect();
   }

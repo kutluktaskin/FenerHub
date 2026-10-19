@@ -285,6 +285,7 @@
                     <span class="fchat-sub">Tribünün sesi</span>
                 </div>
                 <span class="fchat-online" title="Şu an bağlı taraftar"><i class="live-pulse"></i><b id="forumOnline">0</b> çevrimiçi</span>
+                <button type="button" class="nick-chip" id="nickChip" hidden></button>
                 <button type="button" class="fchat-close" onclick="toggleForum()" aria-label="Paneli kapat"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button>
             </div>
 
@@ -297,11 +298,19 @@
 
             <div class="fchat-error" id="forumError" role="status"></div>
 
-            <div class="fchat-compose">
-                <input id="forumNick" maxlength="20" placeholder="Takma adın" aria-label="Takma ad" autocomplete="nickname">
+            <div class="fchat-compose" id="forumCompose">
+                <!-- Takma ad bir kez girilir, hatırlanır; sonra başlıktaki etiketten düzenlenir -->
+                <div class="nick-setup" id="nickSetup">
+                    <label for="forumNick">Tribündeki adın</label>
+                    <input id="forumNick" maxlength="20" placeholder="Takma adını yaz (2-20 harf)" autocomplete="nickname">
+                </div>
                 <div class="fchat-row">
-                    <textarea id="forumText" maxlength="500" rows="1" placeholder="Tribüne bir şey yaz..." aria-label="Mesaj"></textarea>
+                    <textarea id="forumText" maxlength="500" rows="1" placeholder="Tribüne bir şey yaz..." aria-label="Mesaj" aria-describedby="forumHint"></textarea>
                     <button type="button" id="forumSend" aria-label="Gönder"><svg class="ico" aria-hidden="true"><use href="#i-send"/></svg></button>
+                </div>
+                <div class="compose-meta">
+                    <span id="forumHint">Enter gönderir · Shift+Enter yeni satır</span>
+                    <span class="char-count" id="forumCount" aria-hidden="true">0/500</span>
                 </div>
             </div>
         </div>

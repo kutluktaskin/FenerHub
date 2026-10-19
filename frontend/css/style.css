@@ -2198,7 +2198,29 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     font-weight: 600;
 }
 .fchat-online .live-pulse { width: 8px; height: 8px; background: var(--c-navy-900); animation: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-navy-900) 20%, transparent); }
-.fchat-online b { color: var(--c-accent-ink); }
+.fchat-online b { display: inline-block; color: var(--c-accent-ink); }
+@media (prefers-reduced-motion: no-preference) {
+    .fchat-online b.bump { animation: digit-in 0.4s var(--ease); }
+}
+.nick-chip {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 140px;
+    height: 34px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--c-navy-900);
+    color: var(--c-accent);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+}
+.nick-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nick-chip .ico { width: 14px; height: 14px; flex-shrink: 0; }
+.nick-chip:hover { background: var(--c-navy-700); }
 .fchat-close {
     position: relative;
     z-index: 1;
@@ -2244,6 +2266,18 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .fchat-rooms button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fchat-rooms button:hover { color: var(--c-text); background: var(--c-hover); }
 .fchat-rooms button.on { background: var(--c-accent); color: var(--c-accent-ink); box-shadow: var(--sh-1); }
+/* Her odanın kendi rengi: pasifken altta ince çizgi, aktifken dolu zemin */
+.fchat-rooms [data-key="genel"] { --room-color: var(--c-accent); --room-ink: var(--c-accent-ink); }
+.fchat-rooms [data-key="transfer"] { --room-color: var(--c-silver); --room-ink: var(--c-accent-ink); }
+.fchat-rooms [data-key="mac"] { --room-color: var(--c-navy-tint); --room-ink: var(--c-accent-ink); }
+.fchat-rooms button:not(.on) { box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--room-color) 70%, transparent); }
+.fchat-rooms button.on { background: var(--room-color); color: var(--room-ink); }
+/* Maç canlıysa sekmede kırmızı nokta */
+.room-live { width: 7px; height: 7px; flex-shrink: 0; border-radius: 50%; background: var(--c-live); box-shadow: 0 0 0 2px var(--c-navy-900); }
+@media (prefers-reduced-motion: no-preference) {
+    .room-live { animation: room-live 1.4s ease-in-out infinite alternate; }
+}
+@keyframes room-live { from { opacity: 0.45; } to { opacity: 1; } }
 
 /* Mesaj akışı */
 .fchat-feed-wrap { position: relative; flex: 1; min-height: 0; display: flex; }
@@ -2259,6 +2293,33 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 }
 .fchat-rooms { view-transition-name: forum-rooms; }
 .fchat-empty { margin: auto; padding: var(--s-5); color: var(--c-text-3); font-size: var(--fs-sm); text-align: center; }
+.fchat-empty-room { display: flex; flex-direction: column; align-items: center; gap: var(--s-2); }
+.empty-art {
+    display: grid;
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    margin-bottom: var(--s-2);
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, color-mix(in oklab, var(--c-accent) 22%, transparent), transparent 70%), var(--c-navy-700);
+    box-shadow: 0 0 0 2px var(--c-accent-line), 0 0 32px var(--c-accent-glow);
+    color: var(--c-accent);
+}
+.empty-art .ico { width: 34px; height: 34px; transform: rotate(-12deg); }
+.empty-title { font-family: var(--f-display); font-size: var(--fs-lg); font-weight: 700; text-transform: uppercase; color: var(--c-text); }
+.empty-sub { color: var(--c-text-2); }
+.chant-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s-2); margin-top: var(--s-3); }
+.chant-chip {
+    padding: 6px 12px;
+    border: 1px solid var(--c-accent-line);
+    border-radius: var(--r-pill);
+    background: var(--c-accent-soft);
+    color: var(--c-accent);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    transition: background var(--t-fast), color var(--t-fast);
+}
+.chant-chip:hover { background: var(--c-accent); color: var(--c-accent-ink); }
 .fchat-time { color: var(--c-text-3); }
 
 .fchat-new {
@@ -2299,20 +2360,24 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     border-radius: 16px 16px 16px 4px;
     background: linear-gradient(160deg, var(--c-navy-600), var(--c-navy-700));
 }
-/* Kendi mesajın: açık lacivert balon, sarı ince kenar */
+/* Kendi mesajın: sağda sarı balon, lacivert yazı (12.7:1) */
 .fc2-msg.is-mine .fc2-main {
-    border-color: var(--c-accent-line);
+    border-color: var(--c-accent);
     border-radius: 16px 16px 4px 16px;
-    background:
-        linear-gradient(160deg, color-mix(in srgb, var(--c-accent) 20%, transparent), color-mix(in srgb, var(--c-accent) 8%, transparent)),
-        var(--c-navy-700);
+    background: linear-gradient(160deg, var(--c-accent-bright), var(--c-accent));
+    color: var(--c-accent-ink);
 }
+.fc2-msg.is-mine .fc2-body,
+.fc2-msg.is-mine .fc2-nick,
+.fc2-msg.is-mine .fc2-time { color: var(--c-accent-ink); }
+.fc2-msg.is-mine .fc2-you { background: var(--c-accent-ink); color: var(--c-accent); }
+.fc2-msg.is-mine .fc2-quote { border-left-color: var(--c-accent-ink); background: color-mix(in oklab, var(--c-accent-ink) 12%, transparent); color: var(--c-accent-ink); }
+.fc2-msg.is-mine .fc2-quote b { color: var(--c-accent-ink); }
 .fc2-msg.flash .fc2-main { animation: fc2flash 1.2s ease; }
 @keyframes fc2flash { 40% { box-shadow: 0 0 0 2px var(--c-accent); } }
 
 .fc2-head { display: flex; align-items: baseline; gap: var(--s-3); }
 .fc2-nick { font-size: var(--fs-sm); font-weight: 700; color: var(--c-text); letter-spacing: 0.01em; }
-.fc2-msg.is-mine .fc2-nick { color: var(--c-accent); }
 .fc2-right-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .fc2-you {
     padding: 0 6px;
@@ -2390,7 +2455,15 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     resize: none;
     transition: border-color var(--t-fast);
 }
-.fchat-compose input { align-self: flex-start; width: 60%; padding: 6px 10px; font-size: var(--fs-xs); }
+.nick-setup { display: flex; flex-direction: column; gap: 4px; }
+.nick-setup label { color: var(--c-accent); font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.fchat-compose .nick-setup input { width: 100%; }
+.fchat-compose.has-nick .nick-setup { display: none; }
+.fchat-row textarea { min-height: 40px; max-height: 120px; line-height: 1.45; }
+.compose-meta { display: flex; justify-content: space-between; gap: var(--s-2); color: var(--c-text-3); font-size: 11px; }
+.char-count { font-variant-numeric: tabular-nums; font-weight: 600; }
+.char-count.is-warn { color: var(--c-accent); }
+.char-count.is-max { color: var(--c-loss); }
 .fchat-compose input::placeholder, .fchat-compose textarea::placeholder { color: var(--c-text-3); }
 .fchat-compose input:focus, .fchat-compose textarea:focus { outline: none; border-color: var(--c-accent); }
 .fchat-compose input:focus-visible, .fchat-compose textarea:focus-visible { box-shadow: 0 0 0 1px var(--c-accent); }
