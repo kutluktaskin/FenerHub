@@ -17,24 +17,68 @@ async function apiGet(path) {
     return res.json();
 }
 
-function renderStandings(tbodyEl, rows) {
+// ---------- Puan Durumu ----------
+// Sıra bölgeleri: lig kuralı değişirse burayı güncelle.
+// from/to sıra numarası; last: sondan kaç takım (takım sayısına göre hesaplanır)
+const ZONES = {
+    super_lig: [
+        { from: 1, to: 1, color: "var(--z-ucl)",   label: "Şampiyonlar Ligi" },
+        { from: 2, to: 2, color: "var(--z-ucl-q)", label: "Şampiyonlar Ligi elemeleri" },
+        { from: 3, to: 3, color: "var(--z-uel)",   label: "Avrupa Ligi" },
+        { from: 4, to: 4, color: "var(--z-uecl)",  label: "Konferans Ligi elemeleri" },
+        { last: 3,        color: "var(--z-rel)",   label: "Küme düşme" },
+    ],
+    uefa: [
+        { from: 1, to: 8,  color: "var(--z-uecl)", label: "Son 16 turu" },
+        { from: 9, to: 24, color: "var(--z-ucl)",  label: "Play-off turu" },
+    ],
+};
+
+function zoneOf(comp, pos, total) {
+    return (ZONES[comp] || []).find(z =>
+        z.last ? pos > total - z.last : pos >= z.from && pos <= z.to);
+}
+
+function renderZoneLegend(comp) {
+    const ul = document.querySelector(`.zone-legend[data-comp="${comp}"]`);
+    if (!ul || ul.childElementCount) return;
+    ul.innerHTML = (ZONES[comp] || []).map(z =>
+        `<li><i style="--zone:${z.color}"></i>${esc(z.label)}</li>`).join("");
+}
+
+// Fenerbahçe satırını tablonun ortasına getirir (sadece ilk yüklemede; kullanıcının kaydırmasını bozmaz)
+function scrollToFbRow(tbodyEl) {
+    const box = tbodyEl.closest(".table-scroll-container");
+    const row = tbodyEl.querySelector(".fb-row");
+    if (!box || !row || box.dataset.autoScrolled) return;
+    box.dataset.autoScrolled = "1";
+    const offset = row.getBoundingClientRect().top - box.getBoundingClientRect().top;
+    box.scrollTop += offset - box.clientHeight / 2 + row.offsetHeight / 2;
+}
+
+function renderStandings(tbodyEl, rows, comp) {
     if (!rows || rows.length === 0) {
         tbodyEl.innerHTML = `<tr class="empty-row"><td colspan="8">${icon("info")}Puan durumu henüz yayımlanmadı.</td></tr>`;
         return;
     }
     tbodyEl.innerHTML = rows.map(r => {
         const gd = r.goal_difference > 0 ? `+${r.goal_difference}` : r.goal_difference;
-        return `<tr class="${r.is_fenerbahce ? "fb-row" : ""}">
-            <td>${r.position}</td><td>${esc(r.team)}</td><td>${r.played}</td>
-            <td>${r.won}</td><td>${r.drawn}</td><td>${r.lost}</td>
-            <td>${gd}</td><td>${r.points}</td>
+        const zone = zoneOf(comp, r.position, rows.length);
+        const fb = r.is_fenerbahce;
+        return `<tr class="${fb ? "fb-row" : ""}"${zone ? ` style="--zone:${zone.color}"` : ""}>
+            <td class="pos"${zone ? ` title="${esc(zone.label)}"` : ""}>${r.position}</td>
+            <td class="team"><span class="team-cell">${fb ? crest("Fenerbahçe", "crest-xs") : ""}<span>${esc(r.team)}</span></span></td>
+            <td>${r.played}</td><td>${r.won}</td><td>${r.drawn}</td><td>${r.lost}</td>
+            <td class="gd">${gd}</td><td class="pts">${r.points}</td>
         </tr>`;
     }).join("");
+    renderZoneLegend(comp);
+    scrollToFbRow(tbodyEl);
 }
 
 async function loadStandings() {
-    const tables = document.querySelectorAll("#puanlar .standings-table tbody");
-    const [superLig, uefa] = tables;
+    const tables = document.querySelectorAll("#puanlar .standings-table");
+    const body = comp => document.querySelector(`#puanlar .standings-table[data-comp="${comp}"] tbody`);
 
     try {
         const [sl, eu] = await Promise.all([
@@ -42,13 +86,13 @@ async function loadStandings() {
             apiGet("/api/standings/uefa"),
         ]);
 
-        if (superLig) renderStandings(superLig, sl);
-        if (uefa) renderStandings(uefa, eu);
+        if (body("super_lig")) renderStandings(body("super_lig"), sl, "super_lig");
+        if (body("uefa")) renderStandings(body("uefa"), eu, "uefa");
 
         console.log("Puan durumu API'den yüklendi");
     } catch (err) {
         console.error("Puan durumu yüklenemedi:", err);
-        tables.forEach(t => showLoadError(t, 8));
+        tables.forEach(t => showLoadError(t.tBodies[0], 8));
     }
 }
 

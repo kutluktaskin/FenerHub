@@ -1226,9 +1226,10 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--s-5);
+    align-items: start;
 }
-.standings-box { padding: var(--s-5); }
-.table-scroll-container { max-height: 460px; overflow-y: auto; margin-top: var(--s-4); }
+.standings-box { display: flex; flex-direction: column; gap: var(--s-4); padding: var(--s-5); }
+.table-scroll-container { max-height: 480px; overflow-y: auto; }
 
 .standings-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
 .standings-table th, .standings-table td {
@@ -1236,7 +1237,6 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     border-bottom: 1px solid var(--c-line);
     text-align: center;
 }
-.standings-table th:nth-child(2), .standings-table td:nth-child(2) { text-align: left; }
 .standings-table th {
     position: sticky;
     top: 0;
@@ -1247,10 +1247,48 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     font-weight: 600;
     letter-spacing: 0.06em;
 }
-.standings-table td:last-child { font-weight: 700; }
+.standings-table abbr { text-decoration: none; cursor: help; }
+.standings-table .team { width: 100%; text-align: left; }
+.team-cell { display: inline-flex; align-items: center; gap: var(--s-2); }
+.standings-table .gd { color: var(--c-text-2); }
+.standings-table .pts { font-weight: 700; font-size: var(--fs-base); }
+.standings-table tbody tr { transition: background var(--t-fast); }
 .standings-table tbody tr:hover { background: var(--c-hover); }
-.standings-table tr.fb-row { background: var(--c-accent-soft); font-weight: 600; }
-.standings-table tr.fb-row td:first-child { box-shadow: inset 3px 0 0 var(--c-accent); }
+
+/* Sıra numarasının solunda bölge rengi */
+.standings-table td.pos { position: relative; width: 40px; color: var(--c-text-2); font-weight: 600; }
+.standings-table td.pos::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 7px;
+    bottom: 7px;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--zone, transparent);
+}
+
+/* Fenerbahçe satırı: belirgin ama sade */
+.standings-table tr.fb-row { background: rgba(255, 210, 0, 0.07); }
+.standings-table tr.fb-row:hover { background: rgba(255, 210, 0, 0.11); }
+.standings-table tr.fb-row td { color: var(--c-text); font-weight: 700; }
+.standings-table tr.fb-row .pts { color: var(--c-accent); }
+.crest-xs { --size: 18px; }
+
+/* Bölge açıklaması */
+.zone-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--c-text-3);
+    font-size: var(--fs-xs);
+}
+.zone-legend:empty { display: none; }
+.zone-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.zone-legend i { width: 10px; height: 10px; border-radius: 3px; background: var(--zone); }
 
 @media (max-width: 1024px) {
     .standings-split-section { grid-template-columns: minmax(0, 1fr); }

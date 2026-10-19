@@ -179,15 +179,16 @@
         </section>
 
         <!-- 3. BÖLÜM: PUAN DURUMLARI (TÜM TAKIMLAR + SCROLL) -->
-        <section class="page-section standings-split-section" id="puanlar">
+        <section class="page-section standings-split-section" id="puanlar" aria-label="Puan durumu">
 
             <!-- Sol Yarı: Trendyol Süper Lig (Tüm Takımlar) -->
             <div class="standings-box">
                 <h2 class="box-title"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg>Trendyol Süper Lig</h2>
                 <div class="table-scroll-container">
-                    <table class="standings-table">
+                    <table class="standings-table" data-comp="super_lig">
+                        <caption class="sr-only">Trendyol Süper Lig puan durumu</caption>
                         <thead>
-                            <tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr>
+                            <tr><th scope="col" class="pos">#</th><th scope="col" class="team">Takım</th><th scope="col"><abbr title="Oynanan maç">O</abbr></th><th scope="col"><abbr title="Galibiyet">G</abbr></th><th scope="col"><abbr title="Beraberlik">B</abbr></th><th scope="col"><abbr title="Mağlubiyet">M</abbr></th><th scope="col"><abbr title="Averaj">AV</abbr></th><th scope="col"><abbr title="Puan">P</abbr></th></tr>
                         </thead>
                         <tbody>
                             <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
@@ -203,15 +204,17 @@
                         </tbody>
                     </table>
                 </div>
+                <ul class="zone-legend" data-comp="super_lig" aria-label="Sıra renkleri"></ul>
             </div>
 
             <!-- Sağ Yarı: UEFA Şampiyonlar Ligi / Avrupa -->
             <div class="standings-box">
                 <h2 class="box-title"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg>UEFA Şampiyonlar Ligi</h2>
                 <div class="table-scroll-container">
-                    <table class="standings-table">
+                    <table class="standings-table" data-comp="uefa">
+                        <caption class="sr-only">UEFA Şampiyonlar Ligi puan durumu</caption>
                         <thead>
-                            <tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr>
+                            <tr><th scope="col" class="pos">#</th><th scope="col" class="team">Takım</th><th scope="col"><abbr title="Oynanan maç">O</abbr></th><th scope="col"><abbr title="Galibiyet">G</abbr></th><th scope="col"><abbr title="Beraberlik">B</abbr></th><th scope="col"><abbr title="Mağlubiyet">M</abbr></th><th scope="col"><abbr title="Averaj">AV</abbr></th><th scope="col"><abbr title="Puan">P</abbr></th></tr>
                         </thead>
                         <tbody>
                             <tr class="skel-row"><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td><td><span class="skel"></span></td></tr>
@@ -227,6 +230,7 @@
                         </tbody>
                     </table>
                 </div>
+                <ul class="zone-legend" data-comp="uefa" aria-label="Sıra renkleri"></ul>
             </div>
 
         </section>
