@@ -73,6 +73,18 @@
     document.addEventListener("toggle", e => {
       if (e.target.matches && e.target.matches(".fx-pop") && e.newState === "open") placePopover(e.target);
     }, true);
+    // data-hover: fareyle üzerine gelince de açılır (dokunmatik ve klavyede tıklama/Enter yeterli)
+    document.addEventListener("pointerover", e => {
+      const btn = e.pointerType === "mouse" && e.target.closest && e.target.closest("[popovertarget][data-hover]");
+      const pop = btn && document.getElementById(btn.getAttribute("popovertarget"));
+      if (pop && !pop.matches(":popover-open")) pop.showPopover();
+    });
+    document.addEventListener("pointerout", e => {
+      const btn = e.pointerType === "mouse" && e.target.closest && e.target.closest("[popovertarget][data-hover]");
+      if (!btn || btn.contains(e.relatedTarget)) return;
+      const pop = document.getElementById(btn.getAttribute("popovertarget"));
+      if (pop && pop.matches(":popover-open")) pop.hidePopover();
+    });
     // Sabit konumlu popover kaydırmada butondan kopmasın: kaydırınca kapanır
     window.addEventListener("scroll", () => {
       document.querySelectorAll(".fx-pop:popover-open").forEach(p => p.hidePopover());

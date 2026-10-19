@@ -133,8 +133,8 @@ function statusCell(p) {
         .filter(Boolean).join(" · ") || "Ayrıntı bilinmiyor";
     const tid = `sq-tip-${p.id}`;
     return `<span class="tip-wrap">
-        <button type="button" class="status status-tip ${s.cls}" aria-describedby="${tid}">${icon(s.ic)}<span class="status-text">${s.text}</span></button>
-        <span class="tip" role="tooltip" id="${tid}">${esc(detail)}</span>
+        <button type="button" class="status status-tip ${s.cls}" popovertarget="${tid}" data-hover aria-describedby="${tid}">${icon(s.ic)}<span class="status-text">${s.text}</span></button>
+        <span class="tip fx-pop" popover id="${tid}" role="tooltip"><b>${esc(p.name)}</b>${esc(detail)}</span>
     </span>`;
 }
 
@@ -161,11 +161,11 @@ function renderSquad() {
     tbody.innerHTML = rows.map(p => {
         const out = p.status === "injured" || p.status === "suspended";
         const pos = POSITION_TR[p.position] ?? p.position ?? "-";
-        return `<tr class="${out ? "is-out" : ""}">
+        return `<tr class="${out ? "is-out" : ""}" data-pos="${esc(p.position ?? "")}">
             <td><div class="player-cell">${playerAvatar(p)}
                 <div class="player-id"><strong>${esc(p.name)}</strong><span class="player-pos-sm">${esc(pos)}</span></div>
             </div></td>
-            <td class="col-pos">${esc(pos)}</td>
+            <td class="col-pos"><span class="pos-tag">${esc(pos)}</span></td>
             <td class="num">${badge(p.appearances, "match")}</td>
             <td class="num">${badge(p.goals, "goal")}</td>
             <td class="num">${badge(p.assists, "assist")}</td>
@@ -187,9 +187,11 @@ function initSquadControls() {
     document.querySelectorAll(".squad-filter [data-pos]").forEach(btn => {
         btn.addEventListener("click", () => {
             squadState.pos = btn.dataset.pos;
-            document.querySelectorAll(".squad-filter [data-pos]")
-                .forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
-            renderSquad();
+            fx.transition(() => {
+                document.querySelectorAll(".squad-filter [data-pos]")
+                    .forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+                renderSquad();
+            });
         });
     });
     // Başlığa basınca: çoktan aza → azdan çoka → varsayılan sıra
@@ -199,7 +201,7 @@ function initSquadControls() {
             if (squadState.sort !== key) Object.assign(squadState, { sort: key, dir: "desc" });
             else if (squadState.dir === "desc") squadState.dir = "asc";
             else squadState.sort = null;
-            renderSquad();
+            fx.transition(renderSquad);
         });
     });
 }

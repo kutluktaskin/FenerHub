@@ -71,6 +71,12 @@
     --c-susp-soft: color-mix(in srgb, var(--c-susp) 14%, transparent);
     --c-susp-line: color-mix(in srgb, var(--c-susp) 40%, transparent);
 
+    /* Mevki renkleri: Kaleci altın-turuncu, Defans açık lacivert, Orta Saha beyaz, Forvet sarı */
+    --pos-g: #ffab40;
+    --pos-d: #8fb3ff;
+    --pos-m: #f4f7ff;
+    --pos-f: var(--c-accent);
+
     /* Puan durumu bölgeleri: ŞL sarı, Avrupa açık lacivert/beyaz, küme düşme kırmızı */
     --z-ucl: var(--c-accent);
     --z-ucl-q: #ffe680;
@@ -366,7 +372,7 @@ table { font-variant-numeric: tabular-nums; }
     box-shadow: inset 0 2px 0 var(--c-accent), var(--sh-2), var(--sh-glow);
 }
 /* Bölüm başlıklarının arkasında forma çizgisi dokusu (aşağı doğru kaybolur) */
-.team-box > .box-title::before, .standings-box > .box-title::before, .fx-head::before, .match-card-top::before {
+.standings-box > .box-title::before, .fx-head::before, .match-card-top::before {
     content: "";
     position: absolute;
     left: 0;
@@ -1280,6 +1286,7 @@ table { font-variant-numeric: tabular-nums; }
 .player-stats-table tbody tr, .standings-table tbody tr { transition: background var(--t-fast); }
 .player-stats-table tbody tr:nth-child(even), .standings-table tbody tr:nth-child(even) { background: var(--c-zebra); }
 .player-stats-table tbody tr:hover, .standings-table tbody tr:hover { background: var(--c-accent-soft); }
+.player-stats-table tbody tr[data-pos]:hover td:first-child { box-shadow: inset 3px 0 0 var(--pos-color); }
 .player-stats-table tbody tr:hover td:first-child, .standings-table tbody tr:hover td:first-child {
     box-shadow: inset 3px 0 0 var(--c-accent);
 }
@@ -1303,6 +1310,30 @@ table { font-variant-numeric: tabular-nums; }
 }
 .box-scroll { flex: 1; min-height: 0; overflow-y: auto; margin: 0 calc(var(--s-2) * -1); padding: 0 var(--s-2); }
 .squad-box .box-scroll { margin: 0; padding: 0; border-radius: var(--r-md); }
+/* Kadro kutusu filtreyle küçülür; uzun listede en fazla 640 px, sonrası kendi içinde kayar */
+.team-box.squad-box { height: auto; max-height: 640px; }
+.squad-box .box-scroll { flex: 0 1 auto; }
+
+/* Forma bandı: sarı-lacivert dikey çizgili başlık, lacivert yazı */
+.squad-box > .box-title {
+    margin: calc(var(--s-5) * -1) calc(var(--s-5) * -1) 0;
+    padding: var(--s-4) var(--s-5);
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    background: repeating-linear-gradient(90deg,
+        var(--c-accent) 0 22px,
+        color-mix(in srgb, var(--c-accent) 86%, var(--c-navy-900)) 22px 44px);
+    color: var(--c-accent-ink);
+    box-shadow: inset 0 -3px 0 var(--c-navy-900);
+}
+.squad-box > .box-title .ico { background: var(--c-accent-ink); color: var(--c-accent); box-shadow: none; }
+.squad-box > .box-title small { color: var(--c-accent-ink); font-weight: 700; }
+
+/* Mevki rengi: satır, filtre butonu ve başlık çizgisi aynı değişkeni kullanır */
+[data-pos="G"] { --pos-color: var(--pos-g); }
+[data-pos="D"] { --pos-color: var(--pos-d); }
+[data-pos="M"] { --pos-color: var(--pos-m); }
+[data-pos="F"] { --pos-color: var(--pos-f); }
+[data-pos="all"] { --pos-color: var(--c-accent); }
 
 /* Mevki filtresi */
 .squad-filter { display: flex; flex-wrap: wrap; gap: var(--s-1); }
@@ -1316,8 +1347,29 @@ table { font-variant-numeric: tabular-nums; }
     font-weight: 600;
     transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
 }
-.squad-filter button:hover { color: var(--c-accent); border-color: var(--c-accent-line); }
-.squad-filter button[aria-pressed="true"] { background: var(--c-accent); border-color: var(--c-accent); color: var(--c-accent-ink); }
+.squad-filter button { border-color: color-mix(in srgb, var(--pos-color) 45%, transparent); }
+.squad-filter button::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: var(--pos-color);
+    vertical-align: 1px;
+}
+.squad-filter [data-pos="all"]::before { display: none; }
+.squad-filter button:hover { color: var(--c-text); border-color: var(--pos-color); background: color-mix(in srgb, var(--pos-color) 12%, transparent); }
+.squad-filter button[aria-pressed="true"] { background: var(--pos-color); border-color: var(--pos-color); color: var(--c-accent-ink); }
+.squad-filter button[aria-pressed="true"]::before { background: var(--c-accent-ink); }
+
+/* :has(): tablo başlığının alt çizgisi seçili mevkinin renginde */
+.squad-box:has([data-pos="G"][aria-pressed="true"]) thead th { box-shadow: inset 0 -2px 0 var(--pos-g); }
+.squad-box:has([data-pos="D"][aria-pressed="true"]) thead th { box-shadow: inset 0 -2px 0 var(--pos-d); }
+.squad-box:has([data-pos="M"][aria-pressed="true"]) thead th { box-shadow: inset 0 -2px 0 var(--pos-m); }
+
+/* Filtre ve sıralama geçişinde sadece liste yumuşakça değişir */
+.squad-box .box-scroll { view-transition-name: squad-list; }
 
 .player-stats-table { width: 100%; font-size: var(--fs-sm); }
 .player-stats-table th, .player-stats-table td {
@@ -1344,7 +1396,10 @@ table { font-variant-numeric: tabular-nums; }
 .stat-goal { background: var(--c-accent); color: var(--c-accent-ink); }
 .stat-assist { border-color: var(--c-accent); color: var(--c-accent); }
 .stat-badge.is-zero { background: none; border-color: var(--c-line); color: var(--c-text-3); font-weight: 500; }
-.player-stats-table .col-pos { color: var(--c-text-2); white-space: nowrap; }
+.player-stats-table .col-pos { white-space: nowrap; }
+.pos-tag { display: inline-flex; align-items: center; gap: 6px; color: var(--pos-color, var(--c-text-2)); font-weight: 600; }
+.pos-tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.player-pos-sm { color: var(--pos-color, var(--c-text-3)); }
 .player-stats-table .col-status { width: 1%; white-space: nowrap; }
 
 /* Sıralanabilir başlık */
@@ -1371,7 +1426,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .player-cell { display: flex; align-items: center; gap: var(--s-3); min-width: 0; }
 .player-id { display: flex; flex-direction: column; min-width: 0; }
 .player-id strong { font-weight: 600; }
-.player-pos-sm { display: none; color: var(--c-text-3); font-size: var(--fs-xs); }
+.player-pos-sm { display: none; font-size: var(--fs-xs); font-weight: 600; }
 .avatar {
     position: relative;
     display: grid;
@@ -1381,7 +1436,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     height: 36px;
     border-radius: 50%;
     background: linear-gradient(145deg, var(--c-navy-500), var(--c-navy-700));
-    box-shadow: inset 0 0 0 1px var(--c-accent-line);
+    box-shadow: 0 0 0 2px var(--pos-color, var(--c-accent-line));
     color: var(--c-text);
     font-size: var(--fs-xs);
     font-weight: 700;
@@ -1404,8 +1459,12 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 }
 .avatar-skel { width: 36px; height: 36px; border-radius: 50%; }
 
-/* Sakat/cezalı oyuncu satırı hafif soluk, durum rozeti canlı kalır */
-.player-stats-table tr.is-out td:not(.col-status) { color: var(--c-text-3); }
+/* Sakat/cezalı oyuncu satırı hafif soluk, durum rozeti canlı kalır.
+   :has() durumu doğrudan rozetten okur; desteklemeyen tarayıcıda is-out sınıfı aynı işi yapar. */
+.player-stats-table tr.is-out td:not(.col-status),
+.player-stats-table tr:has(.status-tip) td:not(.col-status) { color: var(--c-text-3); }
+.player-stats-table tr:has(.st-injured) { background: color-mix(in srgb, var(--c-injury) 7%, transparent); }
+.player-stats-table tr:has(.st-suspended) { background: color-mix(in srgb, var(--c-susp) 7%, transparent); }
 .player-stats-table tr.is-out .avatar { filter: grayscale(0.8); opacity: 0.6; }
 .player-stats-table tr.is-out .stat-badge { filter: grayscale(1); }
 
@@ -1421,7 +1480,8 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .status-tip.st-injured { background: var(--c-injury-soft); border-color: var(--c-injury-line); }
 .status-tip.st-suspended { background: var(--c-susp-soft); border-color: var(--c-susp-line); }
 .tip-wrap { position: relative; display: inline-flex; }
-.tip {
+.fx-pop.tip b { display: block; margin-bottom: 2px; color: var(--c-accent); }
+.no-popover .tip {
     position: absolute;
     right: calc(100% + 8px);
     top: 50%;
@@ -1444,7 +1504,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     transform: translate(4px, -50%);
     transition: opacity var(--t-fast), transform var(--t-fast), visibility 0s linear var(--t-fast);
 }
-.tip-wrap:hover .tip, .status-tip:focus + .tip {
+.no-popover .tip-wrap:hover .tip, .no-popover .status-tip:focus + .tip {
     opacity: 1;
     visibility: visible;
     transform: translate(0, -50%);
