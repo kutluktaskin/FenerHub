@@ -372,7 +372,7 @@ table { font-variant-numeric: tabular-nums; }
     box-shadow: inset 0 2px 0 var(--c-accent), var(--sh-2), var(--sh-glow);
 }
 /* Bölüm başlıklarının arkasında forma çizgisi dokusu (aşağı doğru kaybolur) */
-.standings-box > .box-title::before, .fx-head::before, .match-card-top::before {
+.fx-head::before, .match-card-top::before {
     content: "";
     position: absolute;
     left: 0;
@@ -1630,6 +1630,63 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 }
 
 /* ---------- 10 PUAN DURUMU ---------- */
+/* Açık tema: sayfadaki tek açık renkli büyük alan. Token'lar bu kartın içinde yerel olarak
+   ezilir; tablo, satır, hover ve açıklama kuralları kendiliğinden açık temaya uyar.
+   Kontrast (krem zemin #fbf8ef üstünde): metin 15:1, ikincil 9:1, soluk 6:1. */
+.standings-box {
+    --c-text: var(--c-navy-900);
+    --c-text-2: #33415f;
+    --c-text-3: #55617d;
+    --c-line: rgba(6, 18, 51, 0.12);
+    --c-line-strong: rgba(6, 18, 51, 0.24);
+    --c-zebra: rgba(6, 18, 51, 0.035);
+    --c-hover: rgba(6, 18, 51, 0.05);
+    --c-accent-soft: rgba(255, 210, 0, 0.22);
+    /* Krem zeminde görünür bölge tonları (+ ince lacivert kenar ile en az 3:1) */
+    --z-ucl: #f2c200;
+    --z-ucl-q: #f7dc6a;
+    --z-uel: var(--c-navy-500);
+    --z-uecl: #8fa8dc;
+    --z-rel: #e5383b;
+    color: var(--c-text);
+    background:
+        radial-gradient(100% 60% at 100% 0%, rgba(255, 210, 0, 0.16), transparent 55%),
+        linear-gradient(180deg, #fffdf6 0%, #f6f1e3 100%);
+    border-color: rgba(255, 210, 0, 0.55);
+    box-shadow: inset 0 3px 0 var(--c-accent), var(--sh-2);
+}
+.standings-box:hover { border-color: var(--c-accent); box-shadow: inset 0 3px 0 var(--c-accent), var(--sh-2), var(--sh-glow); }
+.standings-box .box-title .ico { background: var(--c-navy-900); color: var(--c-accent); box-shadow: none; }
+.standings-box .table-scroll-container { scrollbar-color: rgba(6, 18, 51, 0.3) transparent; }
+.standings-box .table-scroll-container::-webkit-scrollbar-thumb { background: rgba(6, 18, 51, 0.3); }
+.standings-table td.pos::before { box-shadow: 0 0 0 1px rgba(6, 18, 51, 0.35); }
+.standings-table tbody tr:not(:has(td.pos[title])) td.pos::before { box-shadow: none; }
+.zone-legend i { box-shadow: 0 0 0 1px rgba(6, 18, 51, 0.35); }
+
+/* Başlıktaki bilgi butonu (popover açar) */
+.box-head { display: flex; align-items: center; gap: var(--s-3); }
+.box-head .box-title { flex: 1; min-width: 0; }
+.info-btn {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin-left: auto;
+    border: 1px solid var(--c-line-strong);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--c-text-2);
+    transition: background var(--t-fast), color var(--t-fast);
+}
+.info-btn:hover, .info-btn[aria-expanded="true"] { background: var(--c-navy-900); color: var(--c-accent); }
+.info-btn .ico { width: 16px; height: 16px; padding: 0; background: none; box-shadow: none; color: inherit; }
+
+/* Popover açık kartın içinde ama kendi zemini lacivert: metin token'ları koyu temaya döner */
+.zone-pop { --c-text: #ffffff; --c-text-2: #cdd7ee; --c-text-3: #9aabd0; color: var(--c-text); }
+.zone-pop b { display: block; margin: 0 0 6px; color: var(--c-accent); font-size: var(--fs-xs); letter-spacing: 0.06em; text-transform: uppercase; }
+.zone-pop .zone-legend { flex-direction: column; gap: 6px; margin-bottom: var(--s-3); color: var(--c-text); }
+.zone-pop p { color: var(--c-text-2); font-size: var(--fs-xs); }
+.no-popover .info-btn, .no-popover .zone-pop { display: none; }   /* açıklama tablonun altında zaten var */
 .standings-split-section {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1647,10 +1704,11 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 }
 .standings-table abbr { text-decoration: none; cursor: help; }
 .standings-table td { color: var(--c-text-2); }
-.standings-table .team { width: 100%; text-align: left; color: var(--c-text); font-weight: 500; }
+.standings-table .team { width: 100%; text-align: left; }
+.standings-table td.team { color: var(--c-text); font-weight: 500; }
 .team-cell { display: inline-flex; align-items: center; gap: var(--s-2); }
 /* Puan sütunu: kalın ve diğerlerinden bir ton parlak */
-.standings-table td.pts { color: var(--c-text); font-family: var(--f-display); font-size: 1.15rem; font-weight: 700; }
+.standings-table td.pts { color: var(--c-text); font-family: var(--f-display); font-size: 1.2rem; font-weight: 800; }
 
 /* Sıra numarasının solunda bölge rengi */
 .standings-table td.pos { position: relative; width: 40px; color: var(--c-text-2); font-weight: 600; }

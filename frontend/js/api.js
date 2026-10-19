@@ -46,6 +46,15 @@ function renderZoneLegend(comp) {
     if (!ul || ul.childElementCount) return;
     ul.innerHTML = (ZONES[comp] || []).map(z =>
         `<li><i style="--zone:${z.color}"></i>${esc(z.label)}</li>`).join("");
+
+    // Başlıktaki "i" butonunun popover'ı: bölgeler + kısaltmalar
+    const pop = document.querySelector(`.zone-pop[data-comp="${comp}"]`);
+    if (pop) {
+        pop.innerHTML = `<b>Sıra renkleri</b>
+            <ul class="zone-legend">${ul.innerHTML}</ul>
+            <b>Kısaltmalar</b>
+            <p>O oynanan · G galibiyet · B beraberlik · M mağlubiyet · AV averaj · P puan</p>`;
+    }
 }
 
 // Fenerbahçe satırını tablonun ortasına getirir (sadece ilk yüklemede; kullanıcının kaydırmasını bozmaz)
@@ -73,11 +82,13 @@ function renderStandings(tbodyEl, rows, comp) {
             <td class="pos"${zone ? ` title="${esc(zone.label)}"` : ""}>${r.position}</td>
             <td class="team"><span class="team-cell">${fb ? crest("Fenerbahçe", "crest-xs") : ""}<span>${esc(r.team)}</span></span></td>
             <td>${r.played}</td><td>${r.won}</td><td>${r.drawn}</td><td>${r.lost}</td>
-            <td class="gd">${gd}</td><td class="pts">${r.points}</td>
+            <td class="gd">${gd}</td><td class="pts"${fb && !tbodyEl.dataset.counted ? ` data-count="${r.points}"` : ""}>${r.points}</td>
         </tr>`;
     }).join("");
     renderZoneLegend(comp);
     scrollToFbRow(tbodyEl);
+    // Fenerbahçe'nin puanı ilk görünüşte sayarak gelir (yenilemelerde doğrudan yazılır)
+    if (window.fx && !tbodyEl.dataset.counted) { fx.observeCounts(tbodyEl); tbodyEl.dataset.counted = "1"; }
 }
 
 async function loadStandings() {
