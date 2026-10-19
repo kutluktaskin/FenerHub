@@ -176,9 +176,9 @@ async def react(pid: int, r: ReactIn):
     await hub.broadcast({"type": "react", **dict(row)})
     return dict(row)
 
-@router.websocket("/ws/forum")
+@app.websocket("/ws/forum")
 async def ws_forum(ws: WebSocket):
-    # Bağlantıyı dış kaynaklardan gelen isteklere (Vercel'e) izin vererek kabul et
+    # Origin kontrolüne takılmadan bağlantıyı doğrudan kabul et
     await ws.accept()
     await hub.add(ws)
     try:
