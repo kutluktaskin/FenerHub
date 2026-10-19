@@ -22,3 +22,5 @@ standings_uefa.json
 backend/detail_cache/
 backend/detail_*.json
 backend/events_all.json
+# Arka plan karelerinin sıkıştırılmadan önceki hâli (yerel yedek, GitHub'a gitmez)
+frames_orijinal_yedek/

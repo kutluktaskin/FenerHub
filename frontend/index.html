@@ -4,24 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FENERHUB | Fenerbahçe Canlı Maç Merkezi</title>
-    <!-- GSAP Kütüphaneleri -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <!-- Fontlar: başlık Barlow Condensed, metin Inter -->
+    <!-- GSAP: defer ile sayfa çizimini bekletmez; aşağıdaki betikler de defer, sıra korunur -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Fontlar: başlık Barlow Condensed, metin Inter.
+         Çizimi bekletmez: sayfa yedek fontla hemen açılır, fontlar gelince yerine geçer -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"></noscript>
+    <!-- Arka planın ilk karesi erkenden insin (background.js aynı dosyayı kullanır) -->
+    <link rel="preload" as="image" href="frames/frame_0001.jpg" fetchpriority="high">
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <script src="js/ui.js"></script>
     <a class="skip-link" href="#icerik">İçeriğe geç</a>
-
-    <div id="preloader">
-        <div class="spinner"></div>
-        <p class="preloader-text">Maç merkezi yükleniyor</p>
-    </div>
 
     <!-- SABİT ÜST MENÜ -->
     <nav class="navbar" aria-label="Ana menü">
@@ -297,11 +296,11 @@
     </aside>
 
     <!-- Harici JS Dosyaları -->
-    <script src="js/background.js"></script>
-    <script src="js/matchEngine.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/nav.js"></script>
-    <script src="js/forum.js"></script>
+    <script defer src="js/background.js"></script>
+    <script defer src="js/matchEngine.js"></script>
+    <script defer src="js/api.js"></script>
+    <script defer src="js/main.js"></script>
+    <script defer src="js/nav.js"></script>
+    <script defer src="js/forum.js"></script>
 </body>
 </html>

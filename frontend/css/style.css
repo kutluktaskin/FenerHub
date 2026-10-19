@@ -331,36 +331,8 @@ table { font-variant-numeric: tabular-nums; }
 }
 .btn-primary:hover { background: #ffdc33; border-color: #ffdc33; }
 
-/* ---------- 04 ÖN YÜKLEME VE ARKA PLAN ---------- */
-#preloader {
-    position: fixed;
-    inset: 0;
-    z-index: 99999;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--s-4);
-    background: var(--c-bg);
-}
-.spinner {
-    width: 44px;
-    height: 44px;
-    border: 3px solid rgba(255, 210, 0, 0.18);
-    border-top-color: var(--c-accent);
-    border-radius: 50%;
-    animation: spin 0.9s linear infinite;
-}
-.preloader-text {
-    font-family: var(--f-display);
-    font-size: var(--fs-md);
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--c-text-2);
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
+/* ---------- 04 ARKA PLAN ---------- */
+/* Yükleme ekranı yok: sayfa hemen açılır, arka plan ilk kare çizilince belirir */
 .canvas-container {
     position: fixed;
     inset: 0;
@@ -374,7 +346,10 @@ table { font-variant-numeric: tabular-nums; }
     width: 100vw;
     height: 100vh;
     filter: blur(3px) brightness(0.5) saturate(0.9);
+    opacity: 0;
+    transition: opacity 0.8s ease;
 }
+#bogaCanvas.is-ready { opacity: 1; }
 /* Kenarları karartır, üstten lacivert ışık */
 .vignette-overlay {
     position: absolute;
