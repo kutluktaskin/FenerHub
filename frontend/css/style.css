@@ -71,6 +71,12 @@
     --c-susp-soft: color-mix(in srgb, var(--c-susp) 14%, transparent);
     --c-susp-line: color-mix(in srgb, var(--c-susp) 40%, transparent);
 
+    /* 12. Adam takma ad renkleri: sarı, altın-turuncu, beyaz, açık lacivert */
+    --nick-1: var(--c-accent);
+    --nick-2: #ffab40;
+    --nick-3: #ffffff;
+    --nick-4: #9cbcff;
+
     /* Mevki renkleri: Kaleci altın-turuncu, Defans açık lacivert, Orta Saha beyaz, Forvet sarı */
     --pos-g: #ffab40;
     --pos-d: #8fb3ff;
@@ -2007,7 +2013,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     border: 1px solid var(--c-line-strong);
     border-radius: var(--r-xl);
     background: var(--g-card), var(--c-navy-900);
-    box-shadow: inset 0 2px 0 var(--c-accent-line), var(--sh-3);
+    box-shadow: var(--sh-3), 0 0 0 1px var(--c-accent-line);
     -webkit-backdrop-filter: var(--blur);
     backdrop-filter: var(--blur);
 }
@@ -2021,8 +2027,11 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     gap: var(--s-3);
     padding: var(--s-4) var(--s-4) var(--s-5);
     overflow: hidden;
-    background: var(--tx-stripes), linear-gradient(135deg, var(--c-navy-600) 0%, var(--c-navy-800) 60%, transparent 100%);
-    border-bottom: 1px solid var(--c-line);
+    background:
+        repeating-linear-gradient(90deg, transparent 0 22px, color-mix(in srgb, var(--c-navy-900) 6%, transparent) 22px 44px),
+        linear-gradient(135deg, var(--c-accent-bright) 0%, var(--c-accent) 70%);
+    border-bottom: 3px solid var(--c-navy-900);
+    color: var(--c-accent-ink);
 }
 .fchat-head::after {
     content: "12";
@@ -2034,19 +2043,21 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     font-weight: 700;
     line-height: 1;
     color: transparent;
-    -webkit-text-stroke: 1.5px var(--c-accent-line);
+    -webkit-text-stroke: 2px color-mix(in srgb, var(--c-navy-900) 28%, transparent);
     pointer-events: none;
 }
 .fchat-title { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; gap: 2px; }
 .fchat-name { font-size: 1.85rem; letter-spacing: 0.03em; }
+.fchat-name { color: var(--c-accent-ink); }
 .fchat-sub {
     display: inline-flex;
     align-items: center;
     gap: var(--s-2);
-    color: var(--c-text-2);
+    color: var(--c-accent-ink);
     font-size: var(--fs-sm);
+    font-weight: 600;
 }
-.fchat-sub::before { content: ""; width: 16px; height: 2px; border-radius: 2px; background: var(--c-accent); }
+.fchat-sub::before { content: ""; width: 16px; height: 2px; border-radius: 2px; background: var(--c-accent-ink); }
 .fchat-online {
     position: absolute;
     left: var(--s-4);
@@ -2055,11 +2066,12 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: var(--c-text-3);
+    color: var(--c-accent-ink);
     font-size: var(--fs-xs);
+    font-weight: 600;
 }
-.fchat-online .live-pulse { width: 7px; height: 7px; background: var(--c-win); animation: none; box-shadow: 0 0 0 3px var(--c-win-soft); }
-.fchat-online b { color: var(--c-text); }
+.fchat-online .live-pulse { width: 8px; height: 8px; background: var(--c-navy-900); animation: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-navy-900) 20%, transparent); }
+.fchat-online b { color: var(--c-accent-ink); }
 .fchat-close {
     position: relative;
     z-index: 1;
@@ -2069,11 +2081,11 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     height: 34px;
     border: 0;
     border-radius: 50%;
-    background: var(--c-hover);
-    color: var(--c-text-2);
+    background: color-mix(in srgb, var(--c-navy-900) 12%, transparent);
+    color: var(--c-accent-ink);
     transition: background var(--t-fast), color var(--t-fast);
 }
-.fchat-close:hover { background: var(--c-accent); color: var(--c-accent-ink); }
+.fchat-close:hover { background: var(--c-navy-900); color: var(--c-accent); }
 
 /* Oda seçici: eşit genişlikte segmentler, aktif oda beyaz */
 .fchat-rooms {
@@ -2115,7 +2127,10 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     gap: var(--s-3);
     padding: var(--s-3) var(--s-4);
     overflow-y: auto;
+    background: radial-gradient(120% 45% at 50% 105%, color-mix(in srgb, var(--c-accent) 10%, transparent), transparent 70%);
+    view-transition-name: forum-feed;
 }
+.fchat-rooms { view-transition-name: forum-rooms; }
 .fchat-empty { margin: auto; padding: var(--s-5); color: var(--c-text-3); font-size: var(--fs-sm); text-align: center; }
 .fchat-time { color: var(--c-text-3); }
 
@@ -2155,19 +2170,22 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     padding: var(--s-2) var(--s-3);
     border: 1px solid var(--c-line);
     border-radius: 16px 16px 16px 4px;
-    background: var(--c-surface-2);
+    background: linear-gradient(160deg, var(--c-navy-600), var(--c-navy-700));
 }
 /* Kendi mesajın: açık lacivert balon, sarı ince kenar */
 .fc2-msg.is-mine .fc2-main {
     border-color: var(--c-accent-line);
     border-radius: 16px 16px 4px 16px;
-    background: var(--c-navy-600);
+    background:
+        linear-gradient(160deg, color-mix(in srgb, var(--c-accent) 20%, transparent), color-mix(in srgb, var(--c-accent) 8%, transparent)),
+        var(--c-navy-700);
 }
 .fc2-msg.flash .fc2-main { animation: fc2flash 1.2s ease; }
 @keyframes fc2flash { 40% { box-shadow: 0 0 0 2px var(--c-accent); } }
 
 .fc2-head { display: flex; align-items: baseline; gap: var(--s-3); }
-.fc2-nick { font-size: var(--fs-sm); font-weight: 700; color: var(--c-text); }
+.fc2-nick { font-size: var(--fs-sm); font-weight: 700; color: var(--c-text); letter-spacing: 0.01em; }
+.fc2-msg.is-mine .fc2-nick { color: var(--c-accent); }
 .fc2-right-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .fc2-you {
     padding: 0 6px;

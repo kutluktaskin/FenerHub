@@ -41,7 +41,8 @@ document.addEventListener("keydown", e => {
   ];
   const SHORT = { "Fenerbahçe": "FB", "Galatasaray": "GS", "Beşiktaş": "BJK", "Beşiktaş JK": "BJK", "Trabzonspor": "TS" };
   // Başkalarının takma adları için okunaklı, sabit renkler (aynı ad hep aynı renk)
-  const NICK_COLORS = ["#8fb0ff", "#7fd7c4", "#f5a97f", "#c9a7ff", "#ffd27a", "#9fd88f", "#ff9fb2"];
+  // Palet içi tonlar (style.css --nick-* token'ları): sarı, altın-turuncu, beyaz, açık lacivert
+  const NICK_COLORS = ["var(--nick-1)", "var(--nick-2)", "var(--nick-3)", "var(--nick-4)"];
   const nickColor = n => NICK_COLORS[[...n].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % NICK_COLORS.length];
   const MAX_DOM = 200;
   console.log("12. Adam (forum.js v8) yüklendi");
@@ -377,12 +378,16 @@ document.addEventListener("keydown", e => {
       b.onclick = () => {
         tabKey = key;
         room = roomFor(key);
-        roomsEl.querySelectorAll("button").forEach(x => {
-          x.classList.toggle("on", x === b);
-          x.setAttribute("aria-selected", String(x === b));
-        });
-        clearReply();
-        load();
+        // Oda geçişi View Transitions ile (yoksa anında); yükleme beklenmez, sadece geçiş anı canlandırılır
+        const swap = () => {
+          roomsEl.querySelectorAll("button").forEach(x => {
+            x.classList.toggle("on", x === b);
+            x.setAttribute("aria-selected", String(x === b));
+          });
+          clearReply();
+          load();
+        };
+        if (window.fx) fx.transition(swap); else swap();
       };
       roomsEl.append(b);
     });
