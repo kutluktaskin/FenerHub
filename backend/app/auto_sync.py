@@ -21,8 +21,10 @@ LAST_IDLE = 21600
 INCIDENTS_EVERY = 300
 STATS_EVERY = 900
 LINEUPS_EVERY = 900
+STANDINGS_EVERY = sync.STANDINGS_MAX_AGE  # 30 dk
 
 backoff = {}
+standings_at = 0
 
 
 def due(path, every):
@@ -85,6 +87,20 @@ def refresh_matches(full):
         db.close()
 
 
+def refresh_standings():
+    # Önbellek tazeyse istek atmaz; yine de tabloyu önbellekten doldurur
+    tables = sync.fetch_standings()
+    db = SessionLocal()
+    try:
+        sync.sync_standings(db, tables)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
 def fetch_kind(api_id, kind):
     data = sync.api_get(f"/match/{api_id}/{kind}")
     os.makedirs(CACHE, exist_ok=True)
@@ -119,6 +135,12 @@ def tick():
     if due(next_p, MATCHES_LIVE if live else MATCHES_IDLE):
         full = due(last_p, LAST_LIVE if live else LAST_IDLE)
         guard("matches", lambda: refresh_matches(full))
+
+    # puan durumu: 30 dakikada bir
+    global standings_at
+    if time.time() - standings_at >= STANDINGS_EVERY:
+        standings_at = time.time()
+        guard("standings", refresh_standings)
 
     for m in ms:
         aid = m["id"]

@@ -43,13 +43,14 @@ STATS_START_YEAR = 2026
 STATS_TOURNAMENTS = {"Trendyol Süper Lig", "UEFA Champions League"}
 STATS_CACHE = "player_stats_cache.json"
 STATS_MAX_AGE = 6 * 3600  # saniye
-# Puan durumu ayarları
+# Puan durumu ayarları: (uniqueTournamentId, seasonId).
+# pages_fb maç verisinde bu sezona ait id varsa o kullanılır, yoksa bunlar.
 STANDINGS = {
     "super_lig": (52, 98080),
     "uefa": (7, 96518),
 }
 STANDINGS_CACHE = "standings_cache.json"
-STANDINGS_MAX_AGE = 3600  # saniye
+STANDINGS_MAX_AGE = 1800  # saniye (30 dk)
 
 def api_get(path):
     headers = {"x-api-key": os.environ["SPORTS_API_KEY"], "User-Agent": "curl/8"}
@@ -164,8 +165,74 @@ def fetch_player_stats(items):
     print(f"Oyuncu istatistikleri API'den çekildi: {len(stats)} oyuncu")
     return stats
 
+def standings_ids():
+    """Kayıtlı pages_fb sayfalarından bu sezonun turnuva/sezon id'lerini bulur
+    (istek atmaz). Bulamazsa STANDINGS'teki değerler kalır."""
+    ids = dict(STANDINGS)
+    for name in ("next_0", "next_1", "last_0"):
+        fn = f"pages_fb/{name}.json"
+        if not os.path.exists(fn):
+            continue
+        try:
+            with open(fn, encoding="utf-8") as f:
+                events = json.load(f)
+        except ValueError:
+            continue
+        for e in events:
+            comp, _ = competition_of(e)
+            if not comp or e.get("startTimestamp", 0) < SEASON_START:
+                continue
+            tid = ((e.get("tournament") or {}).get("uniqueTournament") or {}).get("id")
+            sid = (e.get("season") or {}).get("id")
+            if tid and sid:
+                ids[comp] = (tid, sid)
+    return ids
+
+
+def standing_row(position, team, played, won, drawn, lost, gf, ga, points):
+    return {
+        "position": position,
+        "team": ALIASES.get(team, team),
+        "played": played,
+        "won": won,
+        "drawn": drawn,
+        "lost": lost,
+        "goals_for": gf,
+        "goals_against": ga,
+        "goal_diff": gf - ga,
+        "points": points,
+    }
+
+
+def parse_standings(data):
+    """İki cevap biçimini de okur:
+    - düz: {"standings": [{teamName, played, won, drawn, lost, goalsFor, goalsAgainst, points}]}
+    - iç içe: {"data": {"standings": [{"rows": [{team: {name}, matches, wins, draws,
+      losses, scoresFor, scoresAgainst, points}]}]}}"""
+    flat = data.get("standings")
+    if isinstance(flat, list) and flat and "teamName" in flat[0]:
+        rows = [
+            standing_row(r.get("position") or i + 1, r["teamName"], r["played"], r["won"],
+                         r["drawn"], r["lost"], r["goalsFor"], r["goalsAgainst"], r["points"])
+            for i, r in enumerate(flat)
+        ]
+    else:
+        groups = (data.get("data") or {}).get("standings") or []
+        # Ev/deplasman tabloları da gelebilir; sadece genel tabloyu al
+        groups = [g for g in groups if g.get("type", "total") == "total"] or groups
+        rows = []
+        for g in groups:
+            for i, r in enumerate(g.get("rows") or []):
+                rows.append(standing_row(
+                    r.get("position") or i + 1, r["team"]["name"], r["matches"], r["wins"],
+                    r["draws"], r["losses"], r["scoresFor"], r["scoresAgainst"], r["points"]))
+    if not rows:
+        raise ValueError("boş puan durumu")
+    return sorted(rows, key=lambda r: r["position"])
+
+
 def fetch_standings():
-    """{'super_lig': [...], 'uefa': [...]} döndürür. Önbellek 1 saatten tazeyse
+    """{'super_lig': [...], 'uefa': [...]} döndürür. Önbellek 30 dakikadan tazeyse
     (ya da --offline ise) API'ye istek atmaz."""
     cache = {}
     if os.path.exists(STANDINGS_CACHE):
@@ -180,25 +247,11 @@ def fetch_standings():
 
     tables = {}
     all_ok = True
-    for key, (tid, sid) in STANDINGS.items():
+    for key, (tid, sid) in standings_ids().items():
         try:
             data = api_get(f"/tournament/{tid}/season/{sid}/standings")
-            rows = []
-            for r in data.get("standings") or []:
-                rows.append({
-                    "position": r["position"],
-                    "team": ALIASES.get(r["teamName"], r["teamName"]),
-                    "played": r["played"],
-                    "won": r["won"],
-                    "drawn": r["drawn"],
-                    "lost": r["lost"],
-                    "goals_for": r["goalsFor"],
-                    "goals_against": r["goalsAgainst"],
-                    "goal_diff": r["goalsFor"] - r["goalsAgainst"],
-                    "points": r["points"],
-                })
-            tables[key] = rows
-        except (requests.exceptions.RequestException, KeyError, ValueError) as err:
+            tables[key] = parse_standings(data)
+        except (requests.exceptions.RequestException, KeyError, TypeError, ValueError) as err:
             print(f"!! {key} puan durumu alınamadı ({err}). Eski değer korunuyor.")
             all_ok = False
             if key in old:
@@ -310,6 +363,41 @@ def sync_squad(db, items):
     return team
 
 
+def sync_standings(db, tables):
+    """fetch_standings() çıktısını standings tablosuna yazar. Tabloda olup yeni
+    listede olmayan takımlar (o turnuva/sezon için) silinir."""
+    for comp, rows in tables.items():
+        if not rows:
+            continue
+        seen = set()
+        for r in rows:
+            team = upsert_team(db, {"name": r["team"]})
+            seen.add(team.id)
+            fields = dict(
+                position=r["position"], played=r["played"], won=r["won"],
+                drawn=r["drawn"], lost=r["lost"],
+                goal_difference=r["goal_diff"], points=r["points"],
+            )
+            row = (
+                db.query(models.Standing)
+                .filter_by(competition=comp, season=STATS_SEASON, team_id=team.id)
+                .first()
+            )
+            if row:
+                for k, v in fields.items():
+                    setattr(row, k, v)
+            else:
+                db.add(models.Standing(competition=comp, season=STATS_SEASON, team_id=team.id, **fields))
+        (
+            db.query(models.Standing)
+            .filter(models.Standing.competition == comp,
+                    models.Standing.season == STATS_SEASON,
+                    models.Standing.team_id.not_in(seen))
+            .delete(synchronize_session=False)
+        )
+        print(f"Puan durumu ({comp}): {len(rows)} takım yazıldı")
+
+
 def remove_excluded(db):
     """Hariç tutulan oyuncuları ve onlara bağlı sakatlık/istatistik kayıtlarını siler."""
     for name in EXCLUDE_PLAYERS:
@@ -351,10 +439,11 @@ def main():
     events = fetch_events()
     squad = fetch_squad()
     stats = fetch_player_stats(squad)
-    fetch_standings()
+    standings = fetch_standings()
     db = SessionLocal()
     try:
         sync_matches(db, events)
+        sync_standings(db, standings)
         team = sync_squad(db, squad)
         db.flush()
         remove_excluded(db)
