@@ -15,8 +15,11 @@
 
 ## Aşama 1: Acil hata, gerçek kullanıcı IP'si
 - [ ] Render proxy arkasında çalıştığı için request.client.host tüm kullanıcılarda aynı IP'yi döndürüyor olabilir. Bu durumda forumdaki "4 saniye bekle" kontrolü herkesi birlikte kilitliyor. Doğrula.
-- [ ] uvicorn'u --proxy-headers --forwarded-allow-ips="*" ile başlat (Render start komutunda değişmesi gerekiyorsa söyle) ya da X-Forwarded-For'u güvenli şekilde oku.
-- [ ] last_post sözlüğü sonsuza kadar büyümesin, eski kayıtlar temizlensin.
+  - Bekliyor: main'de geçici, maskeli `ip-teşhis` logu açık (app/net.py `diagnose`). Render > Logs'taki satırlar gelince doğrulanıp log kaldırılacak; gelmezse Aşama 2'de kaldırılır.
+- [x] uvicorn'u --proxy-headers --forwarded-allow-ips="*" ile başlat (Render start komutunda değişmesi gerekiyorsa söyle) ya da X-Forwarded-For'u güvenli şekilde oku.
+  - `app/net.py client_ip()`: XFF sağdan okunur, özel ağ + Cloudflare atlanır (`*` en soldakini aldığı için sahtelenebilirdi). Render'da ayar değişmedi.
+- [x] last_post sözlüğü sonsuza kadar büyümesin, eski kayıtlar temizlensin.
+  - Dakikada bir 60 sn'den eski kayıtlar silinir, 10.000 üst sınır. Testler: `backend/tests/test_client_ip.py` (`python -m pytest`).
 
 ## Aşama 2: Kalıcı veritabanı (PostgreSQL)
 - [ ] SQLite Render'da her deploy'da siliniyor. Ücretsiz bir Postgres'e geç (Neon ya da Supabase, hangisini önerdiğini gerekçesiyle söyle). Hesabı ben açacağım, adım adım yaz.
