@@ -99,23 +99,23 @@
 - [ ] docs/ altına kısa bir "Teknik kararlar" notu: neden WebSocket proxy, neden Postgres, istek bütçesi nasıl yönetildi.
 - [ ] .env.example güncel olsun.
 
-## Aşama 11: Yapay zekâ (Claude API)
-Ortak kurallar (her madde için):
-- `ANTHROPIC_API_KEY` sadece Render ortam değişkeninde; tarayıcı modele doğrudan bağlanmaz, her istek FastAPI üzerinden geçer. `.env.example`'a eklenir.
-- Model: çok sayıda kısa iş (moderasyon, anlatıcı) için Claude Haiku 5.5; kalite isteyen iş (maç raporu, sohbet botu) için Claude Sonnet 5.5. Model adları tek bir ayar dosyasında.
-- Üretilen her metin veritabanında önbelleğe alınır (aynı istek için tekrar ücret ödenmez). Kişi/IP başına günlük sınır. Anthropic panelinde aylık harcama limiti ayarlanır (adım adım yaz).
-- Rakamlar her zaman veritabanından gelir; model sadece metni kurar. Üretilen içerikte "Yapay zekâ ile hazırlandı" etiketi.
-- API hatasında ya da limit dolunca site çalışmaya devam eder: özellik sessizce gizlenir.
+## Aşama 11: Akıllı içerik (ücretsiz)
+Ücretli yapay zekâ API'si kullanılmaz. İçerik kural, şablon ve istatistik modeliyle üretilir; tamamen
+ücretsiz ve uydurma yapmaz. (Önceki "Claude API" planı ücret nedeniyle değiştirildi; sohbet botu ve
+günün tribün özeti çıkarıldı, forum moderasyonu Aşama 6'da kalıyor.)
+Ortak kurallar:
+- Rakamlar her zaman veritabanından gelir; şablon sadece cümleyi kurar. Aynı olaya her seferinde aynı
+  kalıp gelmesin diye her durum için birden fazla cümle kalıbı olur.
+- Üretilen metin bir kez üretilip veritabanında saklanır (maç başına), her sayfa açılışında yeniden üretilmez.
+- Yeni API isteği gerekirse günlük bütçeye (%60) dahildir; mümkünse Aşama 3'te kaydedilen veriler kullanılır.
+- Şablon ve model kodu birim testli (sabit girdiden beklenen metin/tahmin).
 
-- [ ] Altyapı: `app/ai.py` (istemci, model ayarı, önbellek tablosu + Alembic migration, günlük sınır, hata yönetimi), testlerde gerçek API çağrılmaz (sahte istemci).
-- [ ] Maç önü analizi: son 5 maç formu, aradaki maçlar, eksikler ve puan durumundan 4-5 paragraf Türkçe önizleme. Maç günü bir kez üretilir, maç kartında "Maç önü" sekmesi.
-- [ ] Maç sonu raporu: olaylar, istatistikler, şut haritası ve oyuncu puanlarından rapor. Maç bitince bir kez üretilir (Aşama 3'teki maç özeti verisiyle).
-- [ ] Forum moderasyonu: her mesaj kaydedilmeden önce hızlı modelle kontrol (hakaret, nefret söylemi, spam, kişisel bilgi). Şüpheli mesaj gizlenir ve işaretlenir; model ulaşılamazsa mevcut kelime filtresi devam eder. Aşama 6'daki küfür filtresiyle birlikte çalışır.
-- [ ] Canlı maç anlatıcısı: her gol/kart/değişiklik/VAR olayına kısa, heyecanlı spiker cümlesi; `/ws/live` ile simülasyon bandına ve alt satıra gider. Olay başına bir kez üretilir.
-- [ ] 12. Adam asistanı (sohbet botu): taraftar sorusunu sitenin kendi verisinden cevaplar (araç çağrısı / tool use ile kadro, maç, puan, sakatlık uçları). Veride olmayanı uydurmaz, "bilmiyorum" der. Kişi başı günlük soru sınırı, Türkçe, forum panelinde ayrı sekme.
-- [ ] Yapay zekâya karşı tahmin: Aşama 5'teki skor tahmin oyununa yapay zekâ da oyuncu olarak katılır (maç önü verisinden tahmin, maç başlamadan kilitlenir). Liderlik tablosunda "Taraftarlar vs Yapay zekâ".
-- [ ] Günün tribün özeti: genel ve transfer odalarındaki günün mesajlarından 3 cümlelik özet, günde bir kez (gece) üretilir. Kişisel bilgi ve takma ad içermez.
-- [ ] Maçın oyuncusu kartı: Aşama 5'teki oylama bitince kazanan için kısa, esprili tanıtım yazısı (gerçek istatistiklerle).
+- [ ] Maç önü analizi (şablonlu): son 5 maç formu, aradaki son maçlar, eksikler, puan durumu farkı, ev/deplasman performansı. Maç günü bir kez üretilir, maç kartında "Maç önü" sekmesi.
+- [ ] Maç sonu raporu (şablonlu): olaylar, istatistikler (topla oynama, şut, xG), şut haritası ve oyuncu puanlarından paragraflar ("İlk yarıda baskılı başlayan Fenerbahçe…"). Maç bitince bir kez üretilir (Aşama 3'teki maç özeti verisiyle).
+- [ ] Canlı maç anlatıcısı: her olay türü (gol, kart, ikinci sarı, değişiklik, VAR, penaltı, devre, maç sonu) için 10-15 spiker cümlesi kalıbı; oyuncu adı, dakika ve skor eklenir. `/ws/live` ile simülasyon bandına ve alt satıra gider.
+- [ ] İstatistik modeliyle tahmin rakibi: takımların attığı/yediği gol ortalamasından (ev/deplasman ayrı) Poisson modeli ile skor ve sonuç olasılıkları (%G / %B / %M). Maç başlamadan kilitlenir; Aşama 5'teki tahmin oyununda "Taraftarlar vs Model" tablosu. Modelin nasıl çalıştığı sitede kısaca anlatılır.
+- [ ] Maçın oyuncusu kartı (şablonlu): Aşama 5'teki oylama bitince kazanana API puanı ve maç istatistikleriyle kısa tanıtım.
+- [ ] İsteğe bağlı: ücretsiz kotası olan bir dil modeliyle (örn. Gemini/Groq) sadece maç raporu cümlelerine "cila". Sağlayıcıdan bağımsız arayüz; kota biterse, hata olursa ya da anahtar yoksa şablonlu metin gösterilir. Forum mesajı gibi kullanıcı verisi gönderilmez. Sağlayıcının güncel ücretsiz plan koşulları başlamadan önce kontrol edilir.
 
 ---
 
