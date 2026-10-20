@@ -117,6 +117,10 @@ def trim_incidents(data):
             "awayScore": i.get("awayScore"),
             "text": i.get("text"),
             "player": (i.get("player") or {}).get("name"),
+            # Simülasyon için: değişiklikte giren/çıkan, golde asist (yoksa None)
+            "playerIn": (i.get("playerIn") or {}).get("name"),
+            "playerOut": (i.get("playerOut") or {}).get("name"),
+            "assist": (i.get("assist1") or {}).get("name"),
         })
     return out
 
