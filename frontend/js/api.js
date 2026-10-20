@@ -1008,8 +1008,12 @@ function renderCalendar() {
     const today = localISODate(new Date());
     const daysIn = new Date(y, mo + 1, 0).getDate();
     const lead = (new Date(y, mo, 1).getDay() + 6) % 7;     // Pazartesi ile başlayan hafta
+    // Maçı olmayan haftalar ince satır olarak çizilir (takvimde büyük boşluk kalmasın)
+    const week = day => Math.floor((lead + day - 1) / 7);
+    const busy = new Set([...byDay].filter(([, ms]) => ms.some(x => shown.has(x))).map(([d]) => week(d)));
+    const quiet = w => busy.has(w) ? "" : " is-quiet";
     const cells = [];
-    for (let i = 0; i < lead; i++) cells.push(`<span class="cal-day is-out"></span>`);
+    for (let i = 0; i < lead; i++) cells.push(`<span class="cal-day is-out${quiet(0)}"></span>`);
     for (let day = 1; day <= daysIn; day++) {
         const iso = `${prefix}-${pad2(day)}`;
         const ms = byDay.get(day) || [];
@@ -1017,13 +1021,13 @@ function renderCalendar() {
         const todayCls = iso === today ? " is-today" : "";
         if (!m) {
             const dim = ms.length ? " is-filtered" : "";
-            cells.push(`<span class="cal-day${todayCls}${dim}"><span class="cal-num">${day}</span></span>`);
+            cells.push(`<span class="cal-day${todayCls}${dim}${quiet(week(day))}"><span class="cal-num">${day}</span></span>`);
             continue;
         }
         cells.push(calCell(m, day, m === next, m === pick, todayCls));
     }
     const trail = (7 - (cells.length % 7)) % 7;
-    for (let i = 0; i < trail; i++) cells.push(`<span class="cal-day is-out"></span>`);
+    for (let i = 0; i < trail; i++) cells.push(`<span class="cal-day is-out${quiet(week(daysIn))}"></span>`);
     grid.innerHTML = cells.join("");
 
     const detail = document.getElementById("calDetail");
