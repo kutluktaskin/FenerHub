@@ -36,7 +36,7 @@
 ## Aşama 3: Canlı maç ve otomatik sakatlıklar
 Önce bana SportsAPI planımı (Free/Pro/Ultra) ve Render'ın ücretsiz olup olmadığını sor.
 - [x] Keşif: Son biten maç için /match/{id}/lineups (missingPlayers), /incidents, /statistics ve V6 /search?q=Fenerbahce + /team/{id}/injuries yapılarını en fazla 8 istekle incele, özetle.
-  - 3 istek (injuries, shotmap, best-players); lineups/incidents/statistics önbellekten. missingPlayers isim + description + expectedEndDate veriyor; V6 injuries'te oyuncu adı boş (sadece V6 id). WS snapshot'ları REST ile aynı yapıda. 20 Ekim Slavia maçı WS'ten kaydedildi (scripts/probe_ws_record.py).
+  - 3 istek (injuries, shotmap, best-players); lineups/incidents/statistics önbellekten. missingPlayers isim + description + expectedEndDate veriyor; V6 injuries'te oyuncu adı boş (sadece V6 id). WS snapshot'ları REST ile aynı yapıda. 20 Ekim Slavia maçı WS kaydı için scripts/probe_ws_record.py hazır.
 - [ ] Canlı maç SportsAPI WebSocket'ten (wss://api.sportsapipro.com/v2/football/ws, kotadan sayılmıyor) alınsın. Bağlantıyı backend kursun, API anahtarı tarayıcıya gitmesin. Fenerbahçe maçı başlamadan 15 dakika önce abone olsun, bitince kapatsın. Koparsa artan beklemeyle yeniden bağlansın, hiç çalışmazsa 60 saniyelik REST yedeği devreye girsin.
 - [ ] Veri sitenin kendi WebSocket kanalından (/ws/live) frontend'e aktarılsın.
 - [ ] Frontend: anlık skor ve dakika, gol animasyonu ve bildirimi (toast), olay akışı (gol/kart/değişiklik/VAR), gerçek maç istatistikleri, gerçek olaylara tepki veren 2D simülasyon.
