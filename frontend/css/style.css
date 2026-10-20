@@ -1375,6 +1375,39 @@ table { font-variant-numeric: tabular-nums; }
     25% { transform: scale(1.25); box-shadow: 0 0 30px var(--c-accent-glow); }
 }
 .sim-note { margin: var(--s-2) 0 0; color: var(--c-text-3); font-size: var(--fs-xs); }
+
+/* Anlatım akışı: en yeni olay üstte, ilk satır vurgulu */
+.sim-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: var(--s-2) 0 0;
+    padding: var(--s-2);
+    border-radius: var(--r-md);
+    background: var(--c-inset);
+    list-style: none;
+}
+.sim-feed li {
+    display: grid;
+    grid-template-columns: 44px 18px minmax(0, 1fr);
+    align-items: start;
+    gap: 6px;
+    padding: 6px 8px;
+    border-radius: var(--r-sm);
+    color: var(--c-text-2);
+    font-size: var(--fs-sm);
+    line-height: 1.4;
+}
+.sim-feed li:first-child { background: rgb(255 255 255 / 0.04); color: var(--c-text); }
+.sim-feed .ico { width: 16px; height: 16px; margin-top: 2px; }
+.sim-feed-min { color: var(--c-text-3); font-weight: 700; font-variant-numeric: tabular-nums; }
+.sim-feed-goal .ico { color: var(--c-accent); }
+.sim-feed-card .ico { color: #ffd200; }
+.sim-feed-varDecision .ico, .sim-feed-substitution .ico { color: #78b4ff; }
+@media (prefers-reduced-motion: no-preference) {
+    .sim-feed li:first-child { animation: feed-in 0.4s var(--ease); }
+}
+@keyframes feed-in { from { opacity: 0; transform: translateY(-6px); } }
 @media (max-width: 640px) {
     .sim-banner { min-width: 0; padding: 8px 14px; }
     .sim-banner b { font-size: 1.15rem; }

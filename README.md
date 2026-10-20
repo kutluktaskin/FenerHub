@@ -86,7 +86,7 @@ python -m http.server 5500
 # http://localhost:5500
 ```
 
-Testler: `cd backend && python -m pytest`
+Testler: `cd backend && python -m pytest` (backend), `node --test "frontend/tests/*.test.cjs"` (frontend, kök klasörde; ek paket gerekmez)
 
 ### Elle çalıştırılan araçlar (backend klasöründe)
 

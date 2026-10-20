@@ -178,6 +178,7 @@ function simStartFeed(matchKey, meta) {
     confetti = [];
     players = makePlayers('4-3-3', '4-3-3');
     hideBanner();
+    pushFeed([], false);
     if (!feed.id) {
         setStatus('Canlı veri bağlantısı yok (maç verisi API’den gelmedi).');
         return;
@@ -424,6 +425,49 @@ function onNewEvent(i, m) {
                 `${m.home} ${i.homeScore} - ${i.awayScore} ${m.away}`);
             break;
     }
+    const secondYellow = i.incidentType === 'card' && i.incidentClass === 'yellow' && idx >= 0 && players[idx].card === 'red';
+    const line = commentaryFor(i, m, secondYellow);
+    if (line) {
+        setStatus({ ic: ev.ic, text: line });
+        pushFeed([{ i, ic: ev.ic, text: line }], true);
+    }
+}
+
+// ---------- Anlatım (js/commentary.js) ----------
+function commentaryFor(i, m, secondYellow) {
+    if (!window.Commentary) return null;
+    return Commentary.line(i, { home: m.home, away: m.away, fbIsHome: feed.fbIsHome, secondYellow });
+}
+
+const FEED_MAX = 8;
+// Akışa satır ekler (yeni olay en üste); prepend=false: listeyi baştan kurar
+function pushFeed(items, prepend) {
+    const el = document.getElementById('simFeed');
+    if (!el) return;
+    const html = items.map(({ i, ic, text }) => `<li class="sim-feed-${esc(i.incidentType)}">
+        <span class="sim-feed-min">${esc(incTime(i))}</span>${icon(ic)}<span>${esc(text)}</span></li>`).join('');
+    if (prepend) el.insertAdjacentHTML('afterbegin', html);
+    else el.innerHTML = html;
+    while (el.children.length > FEED_MAX) el.lastElementChild.remove();
+    el.hidden = !el.children.length;
+}
+
+// Sayfa açılınca o ana kadarki olayların anlatımı (ikinci sarılar sırayla sayılarak)
+function feedFromHistory(list, m) {
+    const yellows = {};
+    const items = [];
+    [...list].reverse().forEach(i => {
+        let second = false;
+        if (i.incidentType === 'card' && i.incidentClass === 'yellow' && i.player) {
+            const k = `${i.isHome}|${norm(i.player)}`;
+            yellows[k] = (yellows[k] || 0) + 1;
+            second = yellows[k] === 2;
+        }
+        const ev = describeIncident(i, m);
+        const text = ev && commentaryFor(i, m, second);
+        if (text) items.push({ i, ic: ev.ic, text });
+    });
+    pushFeed(items.reverse().slice(0, FEED_MAX), false);
 }
 
 function applyIncidents(list, m) {
@@ -434,6 +478,7 @@ function applyIncidents(list, m) {
     if (feed.seen === null) {
         feed.seen = new Set(keyed.map(k => k[0]));
         [...list].reverse().forEach(i => applyIncidentState(i, false));
+        feedFromHistory(list, m);
         const last = keyed.map(k => describeIncident(k[1], m)).find(Boolean);
         if (last) {
             setStatus({ ic: last.ic, text: 'Son olay: ' + last.text });

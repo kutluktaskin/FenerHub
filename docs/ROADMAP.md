@@ -112,7 +112,8 @@ Ortak kurallar:
 
 - [ ] Maç önü analizi (şablonlu): son 5 maç formu, aradaki son maçlar, eksikler, puan durumu farkı, ev/deplasman performansı. Maç günü bir kez üretilir, maç kartında "Maç önü" sekmesi.
 - [ ] Maç sonu raporu (şablonlu): olaylar, istatistikler (topla oynama, şut, xG), şut haritası ve oyuncu puanlarından paragraflar ("İlk yarıda baskılı başlayan Fenerbahçe…"). Maç bitince bir kez üretilir (Aşama 3'teki maç özeti verisiyle).
-- [ ] Canlı maç anlatıcısı: her olay türü (gol, kart, ikinci sarı, değişiklik, VAR, penaltı, devre, maç sonu) için 10-15 spiker cümlesi kalıbı; oyuncu adı, dakika ve skor eklenir. `/ws/live` ile simülasyon bandına ve alt satıra gider.
+- [x] Canlı maç anlatıcısı: her olay türü (gol, kart, ikinci sarı, değişiklik, VAR, penaltı, devre, maç sonu) için 10-15 spiker cümlesi kalıbı; oyuncu adı, dakika ve skor eklenir. `/ws/live` ile simülasyon bandına ve alt satıra gider.
+  - frontend/js/commentary.js (13 olay grubu, ana gruplarda 10-12 kalıp, cümle olay kimliğinden seçilir); simülasyonda alt satır + anlatım akışı. Testler: frontend/tests/commentary.test.cjs.
 - [ ] İstatistik modeliyle tahmin rakibi: takımların attığı/yediği gol ortalamasından (ev/deplasman ayrı) Poisson modeli ile skor ve sonuç olasılıkları (%G / %B / %M). Maç başlamadan kilitlenir; Aşama 5'teki tahmin oyununda "Taraftarlar vs Model" tablosu. Modelin nasıl çalıştığı sitede kısaca anlatılır.
 - [ ] Maçın oyuncusu kartı (şablonlu): Aşama 5'teki oylama bitince kazanana API puanı ve maç istatistikleriyle kısa tanıtım.
 - [ ] İsteğe bağlı: ücretsiz kotası olan bir dil modeliyle (örn. Gemini/Groq) sadece maç raporu cümlelerine "cila". Sağlayıcıdan bağımsız arayüz; kota biterse, hata olursa ya da anahtar yoksa şablonlu metin gösterilir. Forum mesajı gibi kullanıcı verisi gönderilmez. Sağlayıcının güncel ücretsiz plan koşulları başlamadan önce kontrol edilir.
