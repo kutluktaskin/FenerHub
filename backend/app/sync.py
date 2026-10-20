@@ -1,7 +1,8 @@
 """SportsAPI -> veritabanı (sadece Fenerbahçe).
 
-  python sync.py --offline   # kayıtlı sayfaları kullanır, istek harcamaz
-  python sync.py             # eksik sayfaları API'den çeker
+Uygulama bunu auto_sync.py ve live.py üzerinden otomatik kullanır. Elle (backend klasöründe):
+  python -m app.sync --offline   # kayıtlı sayfaları kullanır, istek harcamaz
+  python -m app.sync             # eksik sayfaları API'den çeker
 
 Oyuncu istatistikleri (maç/gol/asist) 6 saatte bir API'den yenilenir.
 Çekilen her cevap veritabanındaki api_cache tablosunda saklanır (app/cache.py);
@@ -15,10 +16,9 @@ from datetime import datetime, timezone, timedelta
 import requests
 from dotenv import load_dotenv
 
-from app import cache
-from app.database import SessionLocal
-from app.migrate import run_migrations
-from app import models
+from . import cache, models
+from .database import SessionLocal
+from .migrate import run_migrations
 
 load_dotenv()
 BASE = "https://api.sportsapipro.com/v2/football/api"

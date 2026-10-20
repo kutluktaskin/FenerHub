@@ -31,7 +31,7 @@ def team_info() -> dict:
     if time.time() - _team_cache["at"] < TEAM_INFO_TTL:
         return _team_cache["teams"]
     try:
-        from sync import ALIASES   # API adı -> veritabanındaki ad
+        from ..sync import ALIASES   # API adı -> veritabanındaki ad
     except Exception:
         ALIASES = {}
     teams = {}

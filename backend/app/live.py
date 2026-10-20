@@ -22,8 +22,7 @@ import websockets
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from starlette.concurrency import run_in_threadpool
 
-import sync  # backend/sync.py
-from . import cache, models
+from . import cache, models, sync
 from .database import SessionLocal
 from .routers.matches import match_query, serialize_match, trim_incidents, trim_lineups, trim_stats
 

@@ -3,8 +3,7 @@ import time
 import traceback
 from datetime import datetime
 
-import sync  # backend/sync.py
-from . import cache, live, models
+from . import cache, live, models, sync
 from .database import SessionLocal
 
 TICK = 60  # her dakika kontrol eder, istek sadece süresi dolan işler için atılır

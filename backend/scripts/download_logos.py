@@ -1,16 +1,16 @@
 """Takım logolarını bir kez indirir: frontend/img/teams/{api_id}.png
 
-  python download_logos.py            # eksik logoları indirir
-  python download_logos.py --dry-run  # sadece kaç istek atılacağını gösterir
-  python download_logos.py --keep 60  # kalan günlük kota 60'a inince dur (varsayılan 40)
+  python -m scripts.download_logos            # eksik logoları indirir (backend klasöründe)
+  python -m scripts.download_logos --dry-run  # sadece kaç istek atılacağını gösterir
+  python -m scripts.download_logos --keep 60  # kalan günlük kota 60'a inince dur (varsayılan 40)
 
 Kota Render'daki otomatik senkronla ortak: kalan istek --keep değerine inince durur,
 böylece maç günü canlı veri için pay kalır. Kota sıfırlandıktan sonra çalıştırmak en iyisi.
 
 SportsAPI dokümanına göre logo istekleri (V2) API anahtarı ister ve günlük kotadan düşer;
 logolar değişmediği için bir kez indirip saklamak önerilir. Bu script sadece eksik
-dosyaları ister, ilk hatada durur. Takım listesi pages_fb sayfalarından okunur
-(istek atmaz). Yeni rakipler geldikçe tekrar çalıştırılabilir.
+dosyaları ister, ilk hatada durur. Takım listesi önbellekteki maç sayfalarından okunur
+(api_cache, istek atmaz). Yeni rakipler geldikçe tekrar çalıştırılabilir.
 """
 import json
 import os
@@ -21,18 +21,19 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
+from app import cache
+
 load_dotenv()
-ROOT = Path(__file__).resolve().parent
-PAGES = ROOT / "pages_fb"
-OUT = ROOT.parent / "frontend" / "img" / "teams"
+BACKEND = Path(__file__).resolve().parents[1]
+OUT = BACKEND.parent / "frontend" / "img" / "teams"
 URL = "https://api.sportsapipro.com/v2/football/images/teams/{id}"
 FB_ID = 3052   # Fenerbahçe logosu zaten img/fenerbahce-logo.png
 
 
 def team_ids():
     ids = {}
-    for f in sorted(PAGES.glob("*.json")):
-        for e in json.loads(f.read_text(encoding="utf-8")):
+    for name in ("next_0", "next_1", "last_0"):
+        for e in cache.get(f"pages:{name}") or []:
             for side in ("homeTeam", "awayTeam"):
                 t = e.get(side) or {}
                 if t.get("id") and t["id"] != FB_ID:

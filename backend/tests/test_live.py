@@ -6,8 +6,7 @@ from datetime import date, datetime, timedelta
 
 import pytest
 
-import sync
-from app import cache, live, models
+from app import cache, live, models, sync
 from app.database import SessionLocal
 
 API_ID = 99000001

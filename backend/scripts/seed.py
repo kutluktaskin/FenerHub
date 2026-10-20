@@ -1,6 +1,16 @@
-"""index.html içindeki verileri veritabanına aktarır.
-Tekrar tekrar çalıştırılabilir: önce tabloları temizler."""
-from app.database import SessionLocal, engine, Base
+"""!!! BU SCRIPT VERİTABANINI SİLER !!!
+
+Projenin ilk günlerindeki elle yazılmış verileri (eski index.html) yükler. Çalıştırınca
+takım, oyuncu, maç, istatistik, sakatlık ve puan durumu tabloları TAMAMEN temizlenir.
+Gerçek veri artık SportsAPI'den gelir (app/sync.py); bu script sadece boş bir yerel
+SQLite'ı denemek için durur. Canlı veritabanında (DATABASE_URL) ASLA çalıştırmayın.
+
+  python -m scripts.seed      # onay sorar
+"""
+import os
+import sys
+
+from app.database import SessionLocal, engine, Base, db_label
 from app import models
 from datetime import date, time
 
@@ -125,7 +135,17 @@ UEFA = [
 ]
 
 
+def confirm() -> bool:
+    print("UYARI: Bu script şu veritabanındaki takım, oyuncu, maç, istatistik, sakatlık ve")
+    print(f"puan durumu kayıtlarını SİLER: {db_label()}")
+    if os.environ.get("DATABASE_URL"):
+        print("DATABASE_URL tanımlı: hedef canlı veritabanı olabilir!")
+    return input("Devam etmek için 'evet' yazın: ").strip().lower() == "evet"
+
+
 def main():
+    if not confirm():
+        sys.exit("İptal edildi, hiçbir şey silinmedi.")
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
 

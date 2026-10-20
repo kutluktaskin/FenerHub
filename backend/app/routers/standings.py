@@ -1,10 +1,8 @@
-import json
-import os
-
+"""Puan durumu: GET /api/standings/{super_lig|uefa}"""
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from .. import models
+from .. import cache, models
 from ..database import get_db
 
 router = APIRouter(prefix="/api/standings", tags=["standings"])
@@ -12,18 +10,10 @@ router = APIRouter(prefix="/api/standings", tags=["standings"])
 VALID_COMPETITIONS = {"super_lig", "uefa"}
 SEASON = "2026-27"
 
-# routers -> app -> backend
-BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-CACHE = os.path.join(BACKEND_DIR, "standings_cache.json")
-
 
 def from_cache(competition):
-    """Tablo henüz doldurulmadıysa sync.py'nin JSON önbelleğinden oku."""
-    try:
-        with open(CACHE, encoding="utf-8") as f:
-            rows = json.load(f).get("tables", {}).get(competition, [])
-    except (FileNotFoundError, ValueError):
-        return []
+    """Tablo henüz doldurulmadıysa sync'in önbelleğinden (api_cache: standings) oku."""
+    rows = (cache.get("standings") or {}).get(competition, [])
     return [
         {
             "position": r["position"],

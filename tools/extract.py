@@ -1,6 +1,20 @@
-import cv2
+"""Arka plan animasyonu için videolardan kare çıkarır (geliştirme aracı, sitede kullanılmaz).
+
+frontend/ klasöründeki boga.mp4, stadyum.mp4 ve taraftar.mp4'ten frontend/frames/ altına
+sıralı JPG kareler yazar (background.js bunları oynatır). Videolar repoda değildir.
+DİKKAT: frontend/frames/ klasörünü önce siler.
+
+  pip install opencv-python
+  python tools/extract.py
+"""
 import os
 import shutil
+from pathlib import Path
+
+import cv2
+
+# Yollar frontend klasörüne göre (script nereden çalıştırılırsa çalıştırılsın)
+os.chdir(Path(__file__).resolve().parents[1] / "frontend")
 
 # İşlenecek videoların sırası (Bu sıra web sitesindeki akış sırasıdır)
 video_dosyalari = ["boga.mp4", "stadyum.mp4", "taraftar.mp4"]

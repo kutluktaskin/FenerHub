@@ -1,3 +1,9 @@
+"""Elle sakatlık / ceza kaydı (backend klasöründe):
+
+  python -m scripts.add_absence liste
+  python -m scripts.add_absence ekle "Oyuncu Adı" injury "Diz" --donus "2 Hafta" --maclar 2
+  python -m scripts.add_absence sil "Oyuncu Adı"
+"""
 import argparse
 
 from app.database import SessionLocal
@@ -64,7 +70,7 @@ def cmd_sil(db, args):
 def cmd_liste(db, args):
     rows = db.query(models.Absence).all()
     for a in rows:
-        p = db.query(models.Player).get(a.player_id)
+        p = db.get(models.Player, a.player_id)
         print(f"{p.name:25} {a.type:11} maç_id={a.match_id}  {a.reason or ''}  {a.return_note or ''}")
     print(f"Toplam {len(rows)} kayıt")
 
