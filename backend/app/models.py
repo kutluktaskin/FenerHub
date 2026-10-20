@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Boolean, Column, Integer, String, Text, Date, Time, ForeignKey, Index, UniqueConstraint, false
+    Boolean, Column, Float, Integer, String, Text, Date, Time, ForeignKey, Index, UniqueConstraint, false
 )
 from sqlalchemy.orm import relationship
 from .database import Base
@@ -101,3 +101,12 @@ class ForumPost(Base):
     owner = Column(String(64))                           # gizli sahiplik anahtarı, API'ye verilmez
     parent_id = Column(Integer, ForeignKey("posts.id", ondelete="SET NULL"))
     deleted = Column(Boolean, nullable=False, default=False, server_default=false())
+
+
+class ApiCache(Base):
+    """SportsAPI cevaplarının önbelleği (eskiden pages_fb/, detail_cache/ ve *_cache.json
+    dosyalarıydı; Render'ın diski kalıcı olmadığı için her uyanışta kayboluyordu)."""
+    __tablename__ = "api_cache"
+    key = Column(String(128), primary_key=True)          # "pages:next_0", "detail:16938965:incidents"
+    data = Column(Text, nullable=False)                  # JSON metni
+    fetched_at = Column(Float, nullable=False, default=0)  # Unix zamanı; 0 = bir sonraki turda yenile

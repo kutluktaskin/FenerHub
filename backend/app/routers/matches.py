@@ -1,17 +1,14 @@
-import json
-import os
-from pathlib import Path
+import time
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from .. import models
+from .. import cache, models
 from ..database import get_db
 
 router = APIRouter(prefix="/api/matches", tags=["matches"])
 
 VALID_COMPETITIONS = {"super_lig", "uefa"}
-CACHE = "detail_cache"
 
 
 def serialize_absence(a: models.Absence) -> dict:
@@ -24,28 +21,22 @@ def serialize_absence(a: models.Absence) -> dict:
 
 
 # ---------- Takım renkleri ve API id'leri ----------
-# Veritabanında yok; sync'in kaydettiği pages_fb sayfalarındaki teamColors alanından okunur
-# (istek atmaz). Dosyalar değişince yeniden okunur.
-PAGES_DIR = Path(__file__).resolve().parents[2] / "pages_fb"
-_team_cache = {"stamp": None, "teams": {}}
+# Veritabanında yok; sync'in önbelleğe kaydettiği maç sayfalarındaki teamColors alanından
+# okunur (istek atmaz). Her maç için sorgu atılmasın diye en fazla dakikada bir yenilenir.
+TEAM_INFO_TTL = 60
+_team_cache = {"at": 0.0, "teams": {}}
 
 
 def team_info() -> dict:
-    files = sorted(PAGES_DIR.glob("*.json"))
-    stamp = tuple((f.name, f.stat().st_mtime) for f in files)
-    if stamp == _team_cache["stamp"]:
+    if time.time() - _team_cache["at"] < TEAM_INFO_TTL:
         return _team_cache["teams"]
     try:
         from sync import ALIASES   # API adı -> veritabanındaki ad
     except Exception:
         ALIASES = {}
     teams = {}
-    for f in files:
-        try:
-            events = json.loads(f.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            continue
-        for e in events:
+    for name in ("next_0", "next_1", "last_0"):
+        for e in cache.get(f"pages:{name}") or []:
             for side in ("homeTeam", "awayTeam"):
                 t = e.get(side) or {}
                 if not t.get("name"):
@@ -56,7 +47,7 @@ def team_info() -> dict:
                     "color": colors.get("primary"),
                     "color2": colors.get("secondary"),
                 }
-    _team_cache.update(stamp=stamp, teams=teams)
+    _team_cache.update(at=time.time(), teams=teams)
     return teams
 
 
@@ -105,14 +96,8 @@ def match_query(db: Session):
 def read_cache(api_id, kind):
     if not api_id:
         return None
-    path = f"{CACHE}/{api_id}_{kind}.json"
-    if not os.path.exists(path):
-        return None
-    try:
-        with open(path, encoding="utf-8") as f:
-            return json.load(f).get("data") or None
-    except Exception:
-        return None
+    data = cache.get(f"detail:{api_id}:{kind}")
+    return (data or {}).get("data") or None
 
 
 def trim_incidents(data):

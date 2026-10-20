@@ -4,18 +4,18 @@
   python sync.py             # eksik sayfaları API'den çeker
 
 Oyuncu istatistikleri (maç/gol/asist) 6 saatte bir API'den yenilenir.
-Arada çalışırsa player_stats_cache.json dosyasındaki kayıtlı değerler kullanılır,
-yani istek harcanmaz.
+Çekilen her cevap veritabanındaki api_cache tablosunda saklanır (app/cache.py);
+arada çalışırsa kayıtlı değerler kullanılır, yani istek harcanmaz.
 """
 import os
 import sys
-import json
 import time
 from datetime import datetime, timezone, timedelta
 
 import requests
 from dotenv import load_dotenv
 
+from app import cache
 from app.database import SessionLocal
 from app.migrate import run_migrations
 from app import models
@@ -42,7 +42,6 @@ EXCLUDE_PLAYERS = {"Jayden Oosterwolde"}
 STATS_SEASON = "2026-27"
 STATS_START_YEAR = 2026
 STATS_TOURNAMENTS = {"Trendyol Süper Lig", "UEFA Champions League"}
-STATS_CACHE = "player_stats_cache.json"
 STATS_MAX_AGE = 6 * 3600  # saniye
 # Puan durumu ayarları: (uniqueTournamentId, seasonId).
 # pages_fb maç verisinde bu sezona ait id varsa o kullanılır, yoksa bunlar.
@@ -50,16 +49,25 @@ STANDINGS = {
     "super_lig": (52, 98080),
     "uefa": (7, 96518),
 }
-STANDINGS_CACHE = "standings_cache.json"
 STANDINGS_MAX_AGE = 3 * 3600  # saniye (3 saat): 2 istek x 8 = günde 16 istek (Free plan: 100/gün)
 
+# Son istekte API'nin bildirdiği kalan günlük kota (bilinmiyorsa None).
+# Canlı maçın REST yedeği bütçeyi aşmamak için buna bakar (app/live.py).
+quota_remaining = None
+
+
 def api_get(path):
+    global quota_remaining
     headers = {"x-api-key": os.environ["SPORTS_API_KEY"], "User-Agent": "curl/8"}
     for attempt in range(4):
         r = requests.get(BASE + path, headers=headers, timeout=30)
         # Kalan günlük kota her istekte loglanır (anahtar loga yazılmaz)
         print(f"deneme {attempt + 1}: {path} -> {r.status_code} · kalan kota: "
               f"{r.headers.get('x-ratelimit-remaining', '?')}/{r.headers.get('x-ratelimit-limit', '?')}")
+        try:
+            quota_remaining = int(r.headers["x-ratelimit-remaining"])
+        except (KeyError, ValueError):
+            pass
         if r.status_code in (503, 504) and attempt < 3:
             time.sleep(5 * (attempt + 1))
             continue
@@ -69,19 +77,17 @@ def api_get(path):
 
 
 def fetch_events():
-    """Takım ucundan sayfaları çeker, pages_fb/ klasörüne kaydeder. Kayıtlı sayfayı tekrar istemez."""
-    os.makedirs("pages_fb", exist_ok=True)
+    """Takım ucundan sayfaları çeker, önbelleğe (pages:<yön>_<sayfa>) kaydeder.
+    Kayıtlı sayfayı tekrar istemez; yenilemek için önce kaydı silmek gerekir."""
     by_id = {}
     complete = True
     for direction, max_pages in (("next", 2), ("last", 1)):
         for page in range(max_pages):
-            fn = f"pages_fb/{direction}_{page}.json"
-            if os.path.exists(fn):
-                with open(fn, encoding="utf-8") as f:
-                    evs = json.load(f)
-            elif OFFLINE:
-                break
-            else:
+            key = f"pages:{direction}_{page}"
+            evs = cache.get(key)
+            if evs is None:
+                if OFFLINE:
+                    break
                 try:
                     data = api_get(f"/teams/{FB_ID}/events/{direction}/{page}")
                 except requests.exceptions.HTTPError as err:
@@ -89,8 +95,7 @@ def fetch_events():
                     complete = False
                     break
                 evs = (data.get("data") or {}).get("events") or []
-                with open(fn, "w", encoding="utf-8") as f:
-                    json.dump(evs, f, ensure_ascii=False)
+                cache.put(key, evs)
             if not evs:
                 break
             for e in evs:
@@ -101,11 +106,9 @@ def fetch_events():
 
 def fetch_squad():
     if OFFLINE:
-        with open("squad_raw.json", encoding="utf-8") as f:
-            return json.load(f)["data"]["players"]
+        return cache.get("squad_raw")["data"]["players"]
     data = api_get(f"/teams/{FB_ID}/players")
-    with open("squad_raw.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+    cache.put("squad_raw", data)
     return data["data"]["players"]
 
 
@@ -132,12 +135,9 @@ def summarize_stats(payload):
 def fetch_player_stats(items):
     """{oyuncu adı: {appearances, goals, assists}} döndürür.
     Önbellek 6 saatten tazeyse (ya da --offline ise) API'ye istek atmaz."""
-    cache = {}
-    if os.path.exists(STATS_CACHE):
-        with open(STATS_CACHE, encoding="utf-8") as f:
-            cache = json.load(f)
-    old = cache.get("stats", {})
-    fresh = time.time() - cache.get("fetched_at", 0) < STATS_MAX_AGE
+    old, fetched_at = cache.get_with_time("player_stats")
+    old = old or {}
+    fresh = time.time() - fetched_at < STATS_MAX_AGE
 
     if fresh or OFFLINE:
         if not old:
@@ -162,9 +162,8 @@ def fetch_player_stats(items):
                 stats[p["name"]] = old[p["name"]]
         time.sleep(0.3)
 
-    with open(STATS_CACHE, "w", encoding="utf-8") as f:
-        # Hata olduysa fetched_at=0 yaz: bir sonraki çalıştırmada tekrar denenir
-        json.dump({"fetched_at": time.time() if all_ok else 0, "stats": stats}, f, ensure_ascii=False)
+    # Hata olduysa fetched_at=0 yaz: bir sonraki çalıştırmada tekrar denenir
+    cache.put("player_stats", stats, time.time() if all_ok else 0)
     print(f"Oyuncu istatistikleri API'den çekildi: {len(stats)} oyuncu")
     return stats
 
@@ -173,15 +172,7 @@ def standings_ids():
     (istek atmaz). Bulamazsa STANDINGS'teki değerler kalır."""
     ids = dict(STANDINGS)
     for name in ("next_0", "next_1", "last_0"):
-        fn = f"pages_fb/{name}.json"
-        if not os.path.exists(fn):
-            continue
-        try:
-            with open(fn, encoding="utf-8") as f:
-                events = json.load(f)
-        except ValueError:
-            continue
-        for e in events:
+        for e in cache.get(f"pages:{name}") or []:
             comp, _ = competition_of(e)
             if not comp or e.get("startTimestamp", 0) < SEASON_START:
                 continue
@@ -237,12 +228,9 @@ def parse_standings(data):
 def fetch_standings():
     """{'super_lig': [...], 'uefa': [...]} döndürür. Önbellek 30 dakikadan tazeyse
     (ya da --offline ise) API'ye istek atmaz."""
-    cache = {}
-    if os.path.exists(STANDINGS_CACHE):
-        with open(STANDINGS_CACHE, encoding="utf-8") as f:
-            cache = json.load(f)
-    old = cache.get("tables", {})
-    fresh = time.time() - cache.get("fetched_at", 0) < STANDINGS_MAX_AGE
+    old, fetched_at = cache.get_with_time("standings")
+    old = old or {}
+    fresh = time.time() - fetched_at < STANDINGS_MAX_AGE
 
     if fresh or OFFLINE:
         print("Puan durumu önbellekten kullanıldı (istek harcanmadı).")
@@ -260,9 +248,7 @@ def fetch_standings():
             if key in old:
                 tables[key] = old[key]
 
-    with open(STANDINGS_CACHE, "w", encoding="utf-8") as f:
-        json.dump({"fetched_at": time.time() if all_ok else 0, "tables": tables},
-                  f, ensure_ascii=False)
+    cache.put("standings", tables, time.time() if all_ok else 0)
     print("Puan durumu API'den çekildi:", {k: len(v) for k, v in tables.items()})
     return tables
 
