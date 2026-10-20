@@ -76,26 +76,28 @@ def api_get(path):
     return r.json()
 
 
-def fetch_events():
+def fetch_events(refresh=()):
     """Takım ucundan sayfaları çeker, önbelleğe (pages:<yön>_<sayfa>) kaydeder.
-    Kayıtlı sayfayı tekrar istemez; yenilemek için önce kaydı silmek gerekir."""
+
+    Kayıtlı sayfa tekrar istenmez; refresh içindeki sayfalar ("next_0" gibi) yeniden
+    istenir. İstek başarısız olursa (kota, ağ, sunucu hatası) eski sayfa SİLİNMEZ ve
+    kullanılmaya devam eder: takım renkleri ve logolar bu sayfalardan okunur."""
     by_id = {}
     complete = True
     for direction, max_pages in (("next", 2), ("last", 1)):
         for page in range(max_pages):
-            key = f"pages:{direction}_{page}"
+            name = f"{direction}_{page}"
+            key = f"pages:{name}"
             evs = cache.get(key)
-            if evs is None:
-                if OFFLINE:
-                    break
+            if (evs is None or name in refresh) and not OFFLINE:
                 try:
                     data = api_get(f"/teams/{FB_ID}/events/{direction}/{page}")
-                except requests.exceptions.HTTPError as err:
-                    print(f"!! {direction}/{page} alınamadı ({err}). Sonra tekrar çalıştır.")
+                    evs = (data.get("data") or {}).get("events") or []
+                    cache.put(key, evs)
+                except requests.exceptions.RequestException as err:
                     complete = False
-                    break
-                evs = (data.get("data") or {}).get("events") or []
-                cache.put(key, evs)
+                    print(f"!! {direction}/{page} alınamadı ({err}). " +
+                          ("Kayıtlı sayfa kullanılıyor." if evs is not None else "Sonra tekrar denenecek."))
             if not evs:
                 break
             for e in evs:

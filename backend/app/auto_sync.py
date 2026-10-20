@@ -68,11 +68,10 @@ def in_live_window(m):
 
 
 def refresh_matches(full):
-    for name in (("next_0", "last_0") if full else ("next_0",)):
-        key = f"pages:{name}"
-        if cache.age(key) > 120:
-            cache.delete(key)
-    events = sync.fetch_events()
+    # 2 dakikadan eski sayfalar yeniden istenir; istek başarısız olursa eskisi korunur
+    names = ("next_0", "last_0") if full else ("next_0",)
+    stale = [n for n in names if cache.age(f"pages:{n}") > 120]
+    events = sync.fetch_events(refresh=stale)
     db = SessionLocal()
     try:
         sync.sync_matches(db, events)
