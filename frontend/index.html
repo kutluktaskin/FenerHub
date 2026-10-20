@@ -16,10 +16,10 @@
     <!-- Arka planın ilk karesi erkenden insin (background.js aynı dosyayı kullanır) -->
     <link rel="preload" as="image" href="frames/frame_0001.jpg" fetchpriority="high">
     <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=20261020b">
 </head>
 <body>
-    <script src="js/ui.js"></script>
+    <script src="js/ui.js?v=20261020b"></script>
     <a class="skip-link" href="#icerik">İçeriğe geç</a>
 
     <!-- SABİT ÜST MENÜ -->
@@ -278,11 +278,11 @@
             <!-- Takvim görünümü: api.js renderCalendar doldurur -->
             <div class="fx-cal" id="fxCal">
                 <div class="cal-head">
-                    <button type="button" class="cal-nav" data-step="-1" aria-label="Önceki ay"><svg class="ico" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
+                    <button type="button" class="cal-nav" data-step="-1" aria-label="Önceki maçlar"><svg class="ico" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
                     <h3 class="cal-title" id="calTitle" aria-live="polite">&nbsp;</h3>
-                    <button type="button" class="cal-nav" data-step="1" aria-label="Sonraki ay"><svg class="ico" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
+                    <button type="button" class="cal-nav" data-step="1" aria-label="Sonraki maçlar"><svg class="ico" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
                 </div>
-                <div class="cal-grid" id="calGrid" role="group" aria-label="Ayın maçları"></div>
+                <div class="cal-grid" id="calGrid" role="group" aria-label="Sezonun maçları" tabindex="0"></div>
                 <div class="cal-detail" id="calDetail" aria-live="polite"></div>
             </div>
 
@@ -350,12 +350,12 @@
     </aside>
 
     <!-- Harici JS Dosyaları -->
-    <script defer src="js/background.js"></script>
-    <script defer src="js/matchEngine.js"></script>
-    <script defer src="js/fx.js"></script>
-    <script defer src="js/api.js"></script>
-    <script defer src="js/main.js"></script>
-    <script defer src="js/nav.js"></script>
-    <script defer src="js/forum.js"></script>
+    <script defer src="js/background.js?v=20261020b"></script>
+    <script defer src="js/matchEngine.js?v=20261020b"></script>
+    <script defer src="js/fx.js?v=20261020b"></script>
+    <script defer src="js/api.js?v=20261020b"></script>
+    <script defer src="js/main.js?v=20261020b"></script>
+    <script defer src="js/nav.js?v=20261020b"></script>
+    <script defer src="js/forum.js?v=20261020b"></script>
 </body>
 </html>

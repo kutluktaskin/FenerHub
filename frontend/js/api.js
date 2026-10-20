@@ -908,6 +908,7 @@ function initFixtureFilters() {
         const container = document.querySelector(".fixtures-grid");
         if (container && fxAll) {
             delete container.dataset.autoScrolled;   // filtre değişince sıradaki maça yeniden kay
+            calScroll = true;
             renderFixtures(container, fxAll);
         }
     });
@@ -923,15 +924,14 @@ function initFixtureFilters() {
         try { localStorage.setItem("fxView", btn.dataset.view); } catch (e) { /* önemsiz */ }
     });
 
-    // Takvimde ay değiştirme ve gün seçme
+    // Takvim şeridi: oklar bir ekran kaydırır, yaprağa tıklayınca maç kartı altta açılır
+    const strip = document.getElementById("calGrid");
     document.querySelectorAll(".cal-nav").forEach(btn => btn.addEventListener("click", () => {
-        const [y, m] = calMonth;
-        const d = new Date(y, m + Number(btn.dataset.step), 1);
-        calMonth = [d.getFullYear(), d.getMonth()];
-        calSelected = null;
-        renderCalendar();
+        const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        strip.scrollBy({ left: Number(btn.dataset.step) * strip.clientWidth * 0.8, behavior: reduce ? "auto" : "smooth" });
     }));
-    document.getElementById("calGrid")?.addEventListener("click", e => {
+    strip?.addEventListener("scroll", updateCalNav, { passive: true });
+    strip?.addEventListener("click", e => {
         const cell = e.target.closest(".cal-day[data-id]");
         if (!cell) return;
         calSelected = Number(cell.dataset.id);
@@ -944,7 +944,10 @@ function setFixtureView(view) {
         b.setAttribute("aria-pressed", String(b.dataset.view === view)));
     const cal = document.getElementById("fxCal");
     const list = document.querySelector(".fixtures-grid");
-    if (cal) cal.hidden = view !== "cal";
+    if (cal) {
+        cal.hidden = view !== "cal";
+        if (view === "cal" && fxAll) { calScroll = true; renderCalendar(); }
+    }
     if (list) {
         list.hidden = view !== "list";
         // Gizliyken kaydırma ölçülemez: listeye geçince sıradaki maça yeniden kay
@@ -956,56 +959,68 @@ function setFixtureView(view) {
 }
 
 // ---------- Takvim görünümü ----------
-let calMonth = null;        // [yıl, ay(0-11)] gösterilen ay
+// Sezonun bütün maçları tek şeritte yan yana (takvim yaprakları); ay başlarında ay etiketi.
 let calSelected = null;     // altta kartı açık maçın id'si
+let calScroll = true;       // bir sonraki çizimde şerit seçili maça kaysın mı
 
 function fxFiltered(list) {
     return list.filter(m => Object.entries(fxFilter).every(([g, v]) => FX_FILTERS[g][v](m)));
 }
 
+function updateCalNav() {
+    const strip = document.getElementById("calGrid");
+    if (!strip) return;
+    const max = strip.scrollWidth - strip.clientWidth;
+    document.querySelector('.cal-nav[data-step="-1"]').disabled = strip.scrollLeft <= 2;
+    document.querySelector('.cal-nav[data-step="1"]').disabled = strip.scrollLeft >= max - 2;
+}
+
 function renderCalendar() {
-    const grid = document.getElementById("calGrid");
-    if (!grid || !fxAll) return;
+    const strip = document.getElementById("calGrid");
+    if (!strip || !fxAll) return;
     const all = [...fxAll].filter(m => m.match_date).sort((a, b) =>
         a.match_date.localeCompare(b.match_date) || (a.kickoff_time || "").localeCompare(b.kickoff_time || ""));
-    if (!all.length) return;
     const next = all.find(m => m.status !== "finished");
-    const shown = new Set(fxFiltered(all));
+    const visible = fxFiltered(all);
 
-    // Sezonun ilk ve son ayı arasında gezinilir; ilk açılışta sıradaki maçın ayı
-    const ym = s => [Number(s.slice(0, 4)), Number(s.slice(5, 7)) - 1];
-    const first = ym(all[0].match_date), last = ym(all[all.length - 1].match_date);
-    const idx = ([y, m]) => y * 12 + m;
-    if (!calMonth) calMonth = ym((next || all[all.length - 1]).match_date);
-    if (idx(calMonth) < idx(first)) calMonth = first;
-    if (idx(calMonth) > idx(last)) calMonth = last;
-    const [y, mo] = calMonth;
-    document.querySelector('.cal-nav[data-step="-1"]').disabled = idx(calMonth) <= idx(first);
-    document.querySelector('.cal-nav[data-step="1"]').disabled = idx(calMonth) >= idx(last);
-
-    const prefix = `${y}-${pad2(mo + 1)}`;
-    const monthMatches = all.filter(m => m.match_date.startsWith(prefix));
-
-    // Başlık: ay adı + o ayın sonuçları (filtreye göre)
-    const visible = monthMatches.filter(m => shown.has(m));
+    // Başlık: sezon ve filtredeki maçların sonuçları
     const played = visible.filter(m => m.status === "finished" && m.home_score !== null);
     const cnt = r => played.filter(m => resultOf(m) === r).length;
-    document.getElementById("calTitle").innerHTML = `${MONTHS_TR[mo]} ${y}
+    document.getElementById("calTitle").innerHTML = `Sezon 2026/27
         <small>${visible.length} maç${played.length ? ` <span class="res-badge win">${cnt("win")}G</span><span class="res-badge draw">${cnt("draw")}B</span><span class="res-badge loss">${cnt("loss")}M</span>` : ""}</small>`;
 
-    // Seçili maç: tıklanan; yoksa ayın sıradaki/canlı maçı; yoksa ayın son oynanan maçı
-    const pick = monthMatches.find(m => m.id === calSelected && shown.has(m))
-        || monthMatches.find(m => (m.status === "live" || m === next) && shown.has(m))
-        || [...monthMatches].reverse().find(m => shown.has(m) && m.status === "finished")
-        || monthMatches.find(m => shown.has(m));
+    // Seçili maç: tıklanan; yoksa canlı/sıradaki; yoksa son oynanan
+    const pick = visible.find(m => m.id === calSelected)
+        || visible.find(m => m.status === "live" || m === next)
+        || [...visible].reverse().find(m => m.status === "finished")
+        || visible[0];
 
-    // Sadece maç günleri, tarih sırasıyla yan yana (takvim yaprakları)
     const today = localISODate(new Date());
-    grid.innerHTML = visible.map(m => calCell(m, m === next, m === pick, m.match_date === today)).join("");
+    let html = "", month = "";
+    visible.forEach(m => {
+        const key = m.match_date.slice(0, 7);
+        if (key !== month) {
+            month = key;
+            html += `<span class="cal-month"><b>${MONTHS_TR[Number(key.slice(5, 7)) - 1]}</b>${key.slice(0, 4)}</span>`;
+        }
+        html += calCell(m, m === next, m === pick, m.match_date === today);
+    });
+    const keep = strip.scrollLeft;
+    strip.innerHTML = html || `<p class="empty-note">${icon("info")}Bu filtreye uyan maç yok.</p>`;
+
+    // İlk açılışta / filtre değişince seçili maç ortaya gelir; yaprak seçince kaydırma korunur
+    const sel = strip.querySelector(".cal-day.is-selected");
+    if (calScroll && sel && strip.clientWidth) {
+        const r = sel.getBoundingClientRect(), g = strip.getBoundingClientRect();
+        strip.scrollLeft = keep + r.left - g.left - (strip.clientWidth - r.width) / 2;
+        calScroll = false;
+    } else {
+        strip.scrollLeft = keep;
+    }
+    updateCalNav();
 
     const detail = document.getElementById("calDetail");
-    detail.innerHTML = pick ? fixtureCard(pick, pick === next)
-        : `<p class="empty-note">${icon("info")}Bu ay filtreye uyan maç yok.</p>`;
+    detail.innerHTML = pick ? fixtureCard(pick, pick === next) : "";
 }
 
 function calCell(m, isNext, isSelected, isToday) {
@@ -1028,15 +1043,18 @@ function calCell(m, isNext, isSelected, isToday) {
     if (isSelected) cls += " is-selected";
     const accent = teamAccent(rival) || "var(--c-text-3)";
     const d = new Date(m.match_date + "T00:00:00");
-    const label = `${longDate(m)}: ${m.home} - ${m.away}` +
-        (done ? `, ${m.home_score}-${m.away_score}` : `, ${m.kickoff_time || ""}`);
+    const venue = fbHome ? "İç saha" : "Deplasman";
+    const comp = COMPETITION_SHORT[m.competition] ?? "";
+    const label = `${longDate(m)}, ${venue}, ${comp}: ${m.home} - ${m.away}` +
+        (done ? `, ${m.home_score}-${m.away_score}` : "");
     return `<button type="button" class="${cls}" data-id="${m.id}" style="--rival:${accent}"
             aria-label="${esc(label)}" aria-pressed="${isSelected}">
         <span class="cal-date"><b>${d.getDate()}</b><span>${MONTHS_TR[d.getMonth()].slice(0, 3)}<i>${DAYS_TR[d.getDay()]}</i></span></span>
-        <span class="cal-tags">${icon(m.competition === "uefa" ? "star" : "trophy")}${icon(fbHome ? "home" : "plane")}</span>
+        <span class="cal-venue ${fbHome ? "is-home" : "is-away"}">${icon(fbHome ? "home" : "plane")}${venue}</span>
         <span class="cal-crest">${crest(rival, "crest-sm")}</span>
         <span class="cal-rival">${esc(rival)}</span>
         ${body}
+        <span class="cal-comp">${icon(m.competition === "uefa" ? "star" : "trophy")}${esc(comp)}</span>
     </button>`;
 }
 
