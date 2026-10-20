@@ -251,6 +251,10 @@
             <div class="fx-head">
                 <h2 class="box-title"><svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg>Sezon fikstürü <small>2026/27 · TSİ</small></h2>
                 <p class="fx-summary" id="fxSummary"></p>
+                <div class="fx-seg fx-view" role="group" aria-label="Görünüm">
+                    <button type="button" data-view="cal" aria-pressed="true"><svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg>Takvim</button>
+                    <button type="button" data-view="list" aria-pressed="false"><svg class="ico" aria-hidden="true"><use href="#i-list"/></svg>Liste</button>
+                </div>
             </div>
 
             <!-- Filtreler: her grupta bir seçim (api.js initFixtureFilters) -->
@@ -272,8 +276,20 @@
                 </div>
             </div>
 
-            <!-- api.js aylara göre gruplayıp doldurur; liste kendi içinde kayar -->
-            <div class="fixtures-grid scroll-thin" tabindex="0" aria-label="Maç listesi">
+            <!-- Takvim görünümü: api.js renderCalendar doldurur -->
+            <div class="fx-cal" id="fxCal">
+                <div class="cal-head">
+                    <button type="button" class="cal-nav" data-step="-1" aria-label="Önceki ay"><svg class="ico" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
+                    <h3 class="cal-title" id="calTitle" aria-live="polite">&nbsp;</h3>
+                    <button type="button" class="cal-nav" data-step="1" aria-label="Sonraki ay"><svg class="ico" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
+                </div>
+                <div class="cal-week" aria-hidden="true"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span></div>
+                <div class="cal-grid" id="calGrid" role="group" aria-label="Ayın maçları"></div>
+                <div class="cal-detail" id="calDetail" aria-live="polite"></div>
+            </div>
+
+            <!-- Liste görünümü: api.js aylara göre gruplayıp doldurur; liste kendi içinde kayar -->
+            <div class="fixtures-grid scroll-thin" hidden tabindex="0" aria-label="Maç listesi">
                 <div class="fx-card skel-card"><span class="skel skel-w40"></span><span class="skel skel-w80"></span><span class="skel skel-w30"></span></div>
                 <div class="fx-card skel-card"><span class="skel skel-w40"></span><span class="skel skel-w80"></span><span class="skel skel-w30"></span></div>
                 <div class="fx-card skel-card"><span class="skel skel-w40"></span><span class="skel skel-w80"></span><span class="skel skel-w30"></span></div>

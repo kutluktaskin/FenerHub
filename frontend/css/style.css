@@ -1920,6 +1920,176 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .fx-seg button:hover { color: var(--c-text); }
 .fx-seg button[aria-pressed="true"] { background: var(--c-accent); color: var(--c-accent-ink); }
 
+/* Görünüm düğmesi (Takvim / Liste) başlığın sağında */
+.fx-view { margin-left: auto; }
+.fx-seg button { display: inline-flex; align-items: center; gap: 6px; }
+.fx-seg button .ico { width: 15px; height: 15px; }
+
+/* ---------- Takvim görünümü ----------
+   Pazartesi ile başlayan aylık ızgara. Maç günü kutusu rakibin renginde: üstte renk
+   şeridi, zeminde renkten sönen geçiş (--rival JS'ten, API teamColors). Bir güne
+   tıklanınca o maçın kartı ızgaranın altında açılır. */
+.fx-cal { display: flex; flex-direction: column; gap: var(--s-3); container: cal / inline-size; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); }
+.cal-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    color: var(--c-text);
+    font-size: var(--fs-lg);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.cal-title small {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--c-text-3);
+    font-family: var(--f-body);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+}
+.cal-nav {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex: none;
+    border: 1px solid var(--c-line-strong);
+    border-radius: 50%;
+    background: var(--c-inset);
+    color: var(--c-text);
+    transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+}
+.cal-nav:hover:not(:disabled) { border-color: var(--c-accent); color: var(--c-accent); }
+.cal-nav:disabled { opacity: 0.35; cursor: default; }
+
+.cal-week, .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.cal-week span {
+    color: var(--c-text-3);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+}
+.cal-week span:nth-child(n+6) { color: var(--c-text-2); }
+
+.cal-day {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3px;
+    min-width: 0;
+    min-height: 100px;
+    padding: 26px 6px 8px;
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-md);
+    background: var(--c-inset);
+    color: var(--c-text-3);
+    font: inherit;
+    text-align: center;
+}
+.cal-day.is-out { border-color: transparent; background: none; }
+/* Maçsız gün: sadece ince çerçeve, zemin yok (maç günleri öne çıksın) */
+.cal-day:not(.has-match) { background: none; border-color: color-mix(in srgb, var(--c-line) 55%, transparent); }
+.cal-num {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    min-width: 20px;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    line-height: 20px;
+}
+.cal-day.is-today .cal-num { padding: 0 6px; border-radius: var(--r-pill); background: var(--c-text); color: var(--c-navy-950); }
+/* Filtre yüzünden gizlenen maç günü: küçük nokta */
+.cal-day.is-filtered::after {
+    content: "";
+    position: absolute;
+    bottom: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--c-line-strong);
+}
+
+.cal-day.has-match {
+    --rival: var(--c-text-3);
+    cursor: pointer;
+    border-color: color-mix(in oklab, var(--rival) 40%, var(--c-line));
+    background:
+        linear-gradient(170deg, color-mix(in oklab, var(--rival) 32%, transparent), transparent 78%),
+        var(--c-surface-2);
+    box-shadow: inset 0 3px 0 var(--rival);
+    color: var(--c-text);
+    transition: transform var(--t-fast) var(--ease), border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.cal-day.has-match:hover { transform: translateY(-2px); border-color: var(--rival); }
+.cal-day.has-match .cal-num { color: var(--c-text-2); }
+.cal-day.has-match.is-today .cal-num { color: var(--c-navy-950); }
+.cal-tags { position: absolute; top: 7px; right: 7px; display: flex; gap: 3px; color: var(--c-text-3); }
+.cal-tags .ico { width: 13px; height: 13px; }
+.cal-crest .crest-sm { --size: 34px; }
+.cal-rival {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.cal-score, .cal-time {
+    padding: 1px 8px;
+    border-radius: var(--r-sm);
+    font-family: var(--f-display);
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+.cal-time { color: var(--c-text-2); }
+.cal-sub { font-size: 10px; font-weight: 700; }
+.cal-sub.is-live { color: var(--c-live); }
+/* Oynanmış maç: skor sonucun renginde (galibiyet yeşil, beraberlik gri, mağlubiyet kırmızı) */
+.cal-day.is-played.win { --res: var(--c-win); --res-soft: var(--c-win-soft); }
+.cal-day.is-played.draw { --res: var(--c-draw); --res-soft: var(--c-draw-soft); }
+.cal-day.is-played.loss { --res: var(--c-loss); --res-soft: var(--c-loss-soft); }
+.cal-day.is-played .cal-score { background: var(--res-soft); color: var(--res); }
+/* Sıradaki maç sarı çerçeve, canlı maç kırmızı */
+.cal-day.is-next { border-color: var(--c-accent); box-shadow: inset 0 3px 0 var(--rival), 0 0 0 1px var(--c-accent), 0 0 20px var(--c-accent-glow); }
+.cal-day.is-next .cal-time { background: var(--c-accent); color: var(--c-accent-ink); }
+.cal-day.is-live { border-color: var(--c-live); box-shadow: inset 0 3px 0 var(--rival), 0 0 0 1px var(--c-live); }
+.cal-day.is-live .cal-score { background: var(--c-live-soft); color: var(--c-live); }
+/* Kartı altta açık olan gün */
+.cal-day.is-selected { outline: 2px solid var(--c-text); outline-offset: 2px; }
+/* Alttaki kart listedeki kartla aynı: dar ekran düzeni için aynı container adı */
+.cal-detail { container: fixtures / inline-size; }
+.cal-detail:empty { display: none; }
+
+/* Dar ekranda kutular küçülür: rakip adı ve etiketler gizlenir, logo ve skor kalır */
+@container cal (max-width: 600px) {
+    .cal-week, .cal-grid { gap: 4px; }
+    .cal-day { min-height: 66px; padding: 18px 2px 5px; gap: 2px; }
+    .cal-num { top: 3px; left: 4px; min-width: 0; font-size: 10px; line-height: 16px; }
+    .cal-day.is-today .cal-num { padding: 0 4px; }
+    .cal-tags, .cal-rival { display: none; }
+    .cal-crest .crest-sm { --size: 24px; }
+    .cal-score, .cal-time { padding: 0 4px; font-size: 0.78rem; }
+    .cal-sub { font-size: 9px; }
+    .cal-week span { font-size: 10px; letter-spacing: 0; }
+    .cal-title { font-size: var(--fs-md); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .cal-day.has-match:hover { transform: none; }
+}
+
 /* Liste kendi içinde kayar; ay başlıkları yapışkan. Kart düzeni listenin genişliğine göre
    değişir (container query). */
 .fixtures-grid {
