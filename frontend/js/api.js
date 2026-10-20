@@ -959,7 +959,7 @@ function setFixtureView(view) {
 }
 
 // ---------- Takvim görünümü ----------
-// Sezonun bütün maçları tek şeritte yan yana (takvim yaprakları); ay başlarında ay etiketi.
+// Sezonun bütün maçları tek şeritte kesintisiz yan yana (takvim yaprakları).
 let calSelected = null;     // altta kartı açık maçın id'si
 let calScroll = true;       // bir sonraki çizimde şerit seçili maça kaysın mı
 
@@ -996,15 +996,7 @@ function renderCalendar() {
         || visible[0];
 
     const today = localISODate(new Date());
-    let html = "", month = "";
-    visible.forEach(m => {
-        const key = m.match_date.slice(0, 7);
-        if (key !== month) {
-            month = key;
-            html += `<span class="cal-month"><b>${MONTHS_TR[Number(key.slice(5, 7)) - 1]}</b>${key.slice(0, 4)}</span>`;
-        }
-        html += calCell(m, m === next, m === pick, m.match_date === today);
-    });
+    const html = visible.map(m => calCell(m, m === next, m === pick, m.match_date === today)).join("");
     const keep = strip.scrollLeft;
     strip.innerHTML = html || `<p class="empty-note">${icon("info")}Bu filtreye uyan maç yok.</p>`;
 
