@@ -96,6 +96,24 @@
 - [ ] docs/ altına kısa bir "Teknik kararlar" notu: neden WebSocket proxy, neden Postgres, istek bütçesi nasıl yönetildi.
 - [ ] .env.example güncel olsun.
 
+## Aşama 11: Yapay zekâ (Claude API)
+Ortak kurallar (her madde için):
+- `ANTHROPIC_API_KEY` sadece Render ortam değişkeninde; tarayıcı modele doğrudan bağlanmaz, her istek FastAPI üzerinden geçer. `.env.example`'a eklenir.
+- Model: çok sayıda kısa iş (moderasyon, anlatıcı) için Claude Haiku 5.5; kalite isteyen iş (maç raporu, sohbet botu) için Claude Sonnet 5.5. Model adları tek bir ayar dosyasında.
+- Üretilen her metin veritabanında önbelleğe alınır (aynı istek için tekrar ücret ödenmez). Kişi/IP başına günlük sınır. Anthropic panelinde aylık harcama limiti ayarlanır (adım adım yaz).
+- Rakamlar her zaman veritabanından gelir; model sadece metni kurar. Üretilen içerikte "Yapay zekâ ile hazırlandı" etiketi.
+- API hatasında ya da limit dolunca site çalışmaya devam eder: özellik sessizce gizlenir.
+
+- [ ] Altyapı: `app/ai.py` (istemci, model ayarı, önbellek tablosu + Alembic migration, günlük sınır, hata yönetimi), testlerde gerçek API çağrılmaz (sahte istemci).
+- [ ] Maç önü analizi: son 5 maç formu, aradaki maçlar, eksikler ve puan durumundan 4-5 paragraf Türkçe önizleme. Maç günü bir kez üretilir, maç kartında "Maç önü" sekmesi.
+- [ ] Maç sonu raporu: olaylar, istatistikler, şut haritası ve oyuncu puanlarından rapor. Maç bitince bir kez üretilir (Aşama 3'teki maç özeti verisiyle).
+- [ ] Forum moderasyonu: her mesaj kaydedilmeden önce hızlı modelle kontrol (hakaret, nefret söylemi, spam, kişisel bilgi). Şüpheli mesaj gizlenir ve işaretlenir; model ulaşılamazsa mevcut kelime filtresi devam eder. Aşama 6'daki küfür filtresiyle birlikte çalışır.
+- [ ] Canlı maç anlatıcısı: her gol/kart/değişiklik/VAR olayına kısa, heyecanlı spiker cümlesi; `/ws/live` ile simülasyon bandına ve alt satıra gider. Olay başına bir kez üretilir.
+- [ ] 12. Adam asistanı (sohbet botu): taraftar sorusunu sitenin kendi verisinden cevaplar (araç çağrısı / tool use ile kadro, maç, puan, sakatlık uçları). Veride olmayanı uydurmaz, "bilmiyorum" der. Kişi başı günlük soru sınırı, Türkçe, forum panelinde ayrı sekme.
+- [ ] Yapay zekâya karşı tahmin: Aşama 5'teki skor tahmin oyununa yapay zekâ da oyuncu olarak katılır (maç önü verisinden tahmin, maç başlamadan kilitlenir). Liderlik tablosunda "Taraftarlar vs Yapay zekâ".
+- [ ] Günün tribün özeti: genel ve transfer odalarındaki günün mesajlarından 3 cümlelik özet, günde bir kez (gece) üretilir. Kişisel bilgi ve takma ad içermez.
+- [ ] Maçın oyuncusu kartı: Aşama 5'teki oylama bitince kazanan için kısa, esprili tanıtım yazısı (gerçek istatistiklerle).
+
 ---
 
 ## Ek: Bilinen durum (önceki oturumlardan, 2026-10-20)
