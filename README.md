@@ -9,7 +9,7 @@
 Fenerbahçe taraftarları için canlı maç merkezi: canlı skor ve 2D maç simülasyonu, kadro istatistikleri,
 puan durumu, sezon fikstürü ve taraftar sohbeti.
 
-**[Canlı demo](https://fenerhub-frontend.vercel.app)** · **[API dokümanı](https://fenerhub.onrender.com/docs)** · **[Teknik kararlar](docs/teknik-kararlar.md)**
+**[Canlı demo](https://fenerhub.vercel.app)** · **[API dokümanı](https://fenerhub.onrender.com/docs)** · **[Teknik kararlar](docs/teknik-kararlar.md)**
 
 ![Ana sayfa](docs/screenshots/anasayfa.png)
 
