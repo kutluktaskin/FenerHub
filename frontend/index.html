@@ -16,10 +16,10 @@
     <!-- Arka planın ilk karesi erkenden insin (background.js aynı dosyayı kullanır) -->
     <link rel="preload" as="image" href="frames/frame_0001.jpg" fetchpriority="high">
     <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style.css?v=20261020c">
+    <link rel="stylesheet" href="css/style.css?v=20261021c">
 </head>
 <body>
-    <script src="js/ui.js?v=20261020c"></script>
+    <script src="js/ui.js?v=20261021c"></script>
     <a class="skip-link" href="#icerik">İçeriğe geç</a>
 
     <!-- SABİT ÜST MENÜ -->
@@ -106,12 +106,17 @@
                     </div>
 
                     <div id="pitchTab" class="tab-content active-content">
-                        <canvas id="matchPitch" class="match-pitch"></canvas>
+                        <div class="sim-stage">
+                            <canvas id="matchPitch" class="match-pitch" aria-label="2D maç simülasyonu"></canvas>
+                            <!-- Gol, kart, değişiklik, VAR bandı (matchEngine.js showBanner) -->
+                            <div class="sim-banner" id="simBanner" role="status" aria-live="polite" hidden></div>
+                        </div>
                         <div class="timeline-bar">
                             <span class="sim-minute" id="matchMinute">89'</span>
                             <span id="matchStatusText">Simülasyon hazırlanıyor...</span>
                             <span class="sim-league" id="simLeagueName">Trendyol Süper Lig</span>
                         </div>
+                        <p class="sim-note">Skor, olaylar ve kadrolar gerçek veridir; oyuncuların sahadaki konumları temsilidir. Oyuncunun adı için üzerine gelin ya da dokunun.</p>
                     </div>
 
                     <div id="statsTab" class="tab-content">
@@ -350,12 +355,12 @@
     </aside>
 
     <!-- Harici JS Dosyaları -->
-    <script defer src="js/background.js?v=20261020c"></script>
-    <script defer src="js/matchEngine.js?v=20261020c"></script>
-    <script defer src="js/fx.js?v=20261020c"></script>
-    <script defer src="js/api.js?v=20261020c"></script>
-    <script defer src="js/main.js?v=20261020c"></script>
-    <script defer src="js/nav.js?v=20261020c"></script>
-    <script defer src="js/forum.js?v=20261020c"></script>
+    <script defer src="js/background.js?v=20261021c"></script>
+    <script defer src="js/matchEngine.js?v=20261021c"></script>
+    <script defer src="js/fx.js?v=20261021c"></script>
+    <script defer src="js/api.js?v=20261021c"></script>
+    <script defer src="js/main.js?v=20261021c"></script>
+    <script defer src="js/nav.js?v=20261021c"></script>
+    <script defer src="js/forum.js?v=20261021c"></script>
 </body>
 </html>
