@@ -18,6 +18,7 @@ def serialize_absence(a: models.Absence) -> dict:
         "type": a.type,            # injury | suspension | returned
         "reason": a.reason,
         "return_note": a.return_note,
+        "source": a.source,        # api | manual
     }
 
 

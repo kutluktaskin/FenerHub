@@ -67,6 +67,9 @@ class Absence(Base):
     type = Column(String, nullable=False)  # injury | suspension | returned
     reason = Column(String)
     return_note = Column(String)           # "Mart 2027", "2 Hafta"
+    # api: kadro verisindeki missingPlayers'tan otomatik (app/absences_sync.py)
+    # manual: elle girildi (scripts/add_absence.py); otomatik güncelleme bunlara dokunmaz
+    source = Column(String(10), nullable=False, default="manual", server_default="manual")
     player = relationship("Player")
     match = relationship("Match", back_populates="absences")
 

@@ -22,7 +22,7 @@ import websockets
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from starlette.concurrency import run_in_threadpool
 
-from . import cache, models, sync
+from . import absences_sync, cache, models, sync
 from .database import SessionLocal
 from .routers.matches import match_query, serialize_match, trim_incidents, trim_lineups, trim_stats
 
@@ -247,6 +247,8 @@ class Follower:
         state[kind] = TRIM[kind](data)
         state["updated"] = time.time()
         await hub.broadcast({"type": "update", "kind": kind, "data": state[kind]})
+        if kind == "lineups":
+            await run_in_threadpool(absences_sync.apply_lineups, self.api_id, data)
 
         if kind != "incidents":
             return

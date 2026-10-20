@@ -5,7 +5,7 @@ import time
 import traceback
 from datetime import datetime
 
-from . import cache, live, models, sync
+from . import absences_sync, cache, live, models, sync
 from .database import SessionLocal
 
 TICK = 60  # her dakika kontrol eder, istek sadece süresi dolan işler için atılır
@@ -17,7 +17,17 @@ LAST_LIVE = 1800
 LAST_IDLE = 21600
 INCIDENTS_EVERY = 300
 STATS_EVERY = 900
-LINEUPS_EVERY = 900
+
+
+def lineups_every(minutes_since_kickoff):
+    """Kadro (ve maç günü eksikleri) sorgu aralığı: maça 24 saatten az kala 3 saatte bir,
+    son 2 saatte 30 dakikada bir; kadro onaylanınca durur. Aralık dışında None."""
+    d = minutes_since_kickoff
+    if -24 * 60 <= d < -120:
+        return 3 * 3600
+    if -120 <= d < 5:
+        return 1800
+    return None
 STANDINGS_EVERY = sync.STANDINGS_MAX_AGE  # 3 saat
 
 backoff = {}
@@ -100,6 +110,8 @@ def refresh_standings():
 def fetch_kind(api_id, kind):
     data = sync.api_get(f"/match/{api_id}/{kind}")
     cache.put(f"detail:{api_id}:{kind}", data)
+    if kind == "lineups":
+        absences_sync.apply_lineups(api_id, data.get("data"))   # maç günü eksikleri + genel rapor
     return data
 
 
@@ -135,10 +147,11 @@ def tick():
         if not aid:
             continue
 
-        # 2) ilk 11: başlamadan ~75 dk önce onaylanana kadar
+        # 2) ilk 11 ve maç günü eksikleri: maça 24 saat kala başlar, kadro onaylanınca durur
         if live.covers(aid):
             continue    # canlı WebSocket bu maçı izliyor: kadro/olay/istatistik oradan gelir (kotasız)
-        if -75 <= m["d"] < 5 and not lineups_ready(aid) and due(f"detail:{aid}:lineups", LINEUPS_EVERY):
+        every = lineups_every(m["d"])
+        if every and not lineups_ready(aid) and due(f"detail:{aid}:lineups", every):
             guard(f"lin{aid}", lambda a=aid: fetch_kind(a, "lineups"))
 
         # 3) olaylar ve istatistik: sadece maç başladıysa

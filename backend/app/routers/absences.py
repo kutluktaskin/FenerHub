@@ -31,6 +31,7 @@ def list_absences():
                 "type": a.type,
                 "reason": a.reason,
                 "return_note": a.return_note,
+                "source": a.source,
                 "appearances": stat.appearances if stat else 0,
                 "goals": stat.goals if stat else 0,
                 "assists": stat.assists if stat else 0,
