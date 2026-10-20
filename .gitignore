@@ -1,0 +1,47 @@
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+.pytest_cache/
+venv/
+.venv/
+
+# ---------- Ortam ve gizli bilgiler ----------
+# API anahtarı ve veritabanı adresi asla repoya girmez (örnek: backend/.env.example)
+.env
+.env.*
+!.env.example
+
+# ---------- Veritabanı ----------
+# Yerel geliştirme SQLite dosyaları; canlıda Neon Postgres kullanılır (DATABASE_URL)
+*.db
+*.db-*
+*.db.bak*
+
+# ---------- API önbelleği ----------
+# Önbellek veritabanındaki api_cache tablosunda; eski dosya önbellekleri yerelde kalabilir
+backend/pages/
+backend/pages_fb/
+backend/detail_cache/
+backend/detail_*.json
+backend/*_cache.json
+backend/*_raw.json
+backend/standings_*.json
+backend/events_all.json
+
+# ---------- Keşif / deneme ----------
+# API keşif scriptleri ve çıktıları (API anahtarıyla çalışır)
+probe_*
+*.out.json
+*.jsonl
+
+# ---------- Editör ----------
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---------- Medya ----------
+# Arka plan karelerinin kaynağı olan videolar ve sıkıştırılmamış kareler (tools/extract.py)
+*.mp4
+frontend/frames_orijinal_yedek/
