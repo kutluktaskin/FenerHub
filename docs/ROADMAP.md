@@ -106,3 +106,8 @@ Yeni oturumda bağlam kaybolmasın diye eklendi; yol haritası maddesi değildir
 - Aşama 3 keşfinin bir kısmı yapıldı: WebSocket kotasız ve abone olunca **snapshot** veriyor (bitmiş maçlar dahil): lineups + `missingPlayers` (ad, `missing`/`doubtful`, açıklama, `expectedEndDate`), incidents, stats. V6 Fenerbahçe id: `59gklziew2a17xd`. Kalan keşif (3 istek): V6 `/team/{id}/injuries` içeriği, V1 arama (kotasız V1 görsel id'si), V2 `/teams/3052/image`. Script: `backend/scripts/probe_sportsapi.py` (git dışı).
 - Önerilen bütçe planı (~25 istek/gün, WS yedeği 60 sn yerine 5 dk) kullanıcı onayı bekliyor.
 - Logolar: `backend/download_logos.py` ile bir kez indirilip `frontend/img/teams/` altına konacak (henüz indirilmedi, kota yetmedi).
+
+## Temizlik yapıldı (20 Ekim 2026, chore/cleanup)
+- Deneme scriptleri ve ham API çıktıları silindi; pycache, editör ayarı ve dosya önbellekleri git'ten çıkarıldı (yerelde duruyor). Tek kök `.gitignore`, `backend/.env.example`, README, MIT LICENSE eklendi.
+- Taşınanlar: `backend/sync.py` → `backend/app/sync.py` (`python -m app.sync`); `add_absence.py`, `download_logos.py`, `seed.py` → `backend/scripts/` (`python -m scripts.<ad>`); `frontend/extract.py` → `tools/extract.py`. Yukarıdaki notlarda geçen eski yollar bu yeni yerleri gösterir.
+- Render ve Vercel ayarları değişmedi.
