@@ -1,6 +1,5 @@
 # FenerHub
 
-[![CI](https://github.com/kutluktaskin/FenerHub/actions/workflows/ci.yml/badge.svg)](https://github.com/kutluktaskin/FenerHub/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?logo=postgresql&logoColor=white)
@@ -29,7 +28,7 @@ Fenerbahçe taraftarları için canlı maç merkezi: maç kartları ve geri say�
 - **SQLite → PostgreSQL geçişi:** Veri kaybı olmadan, id'leri ve canlı forum mesajlarını koruyan tek seferlik aktarım.
 - **Proxy arkasında gerçek IP:** `X-Forwarded-For` sağdan okunur, Cloudflare ve özel ağlar atlanır; forumdaki hız sınırı sahteleme yapılamadan kullanıcı başına çalışır.
 - **Otomatik sakatlık raporu:** Kadro verisindeki eksik oyuncu listesi Türkçeye çevrilip rapora işlenir. Elle girilen kayıtlar korunur.
-- **Test ve CI:** 33 backend (pytest) ve 7 frontend (`node --test`) testi her push'ta GitHub Actions'ta çalışır.
+- **Test ve CI:** 33 backend (pytest) ve 7 frontend (`node --test`) testi; her push'ta çalışacak GitHub Actions iş akışı hazır (`.github/workflows/ci.yml`).
 
 Kararların gerekçeleri ve bedelleri: **[docs/teknik-kararlar.md](docs/teknik-kararlar.md)**
 
@@ -200,6 +199,6 @@ Bu site Fenerbahçe SK ile resmi bir bağlantısı olmayan bir taraftar projesid
 
 - **Backend:** FastAPI, SQLAlchemy, Alembic, PostgreSQL (Neon), deployed on Render. Fits a 100-requests/day free API plan with a request budget, a database-backed response cache and adaptive polling. During a match it opens a single quota-free WebSocket to the data provider and fans the events out to all browsers through its own `/ws/live` channel, so the API key never reaches the client. Migrations run at startup because the free host has no shell.
 - **Frontend:** framework-free JavaScript and modern CSS on Vercel. The simulation animates real goals, cards, substitutions and VAR decisions; a template-based commentator writes Turkish play-by-play lines from the real event data.
-- **Quality:** 33 backend and 7 frontend tests on every push via GitHub Actions. Design decisions and trade-offs: [docs/teknik-kararlar.md](docs/teknik-kararlar.md) (Turkish).
+- **Quality:** 33 backend and 7 frontend tests, with a GitHub Actions workflow for every push. Design decisions and trade-offs: [docs/teknik-kararlar.md](docs/teknik-kararlar.md) (Turkish).
 
 This is an unofficial fan project with no affiliation to Fenerbahçe SK.
