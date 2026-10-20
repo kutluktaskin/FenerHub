@@ -152,6 +152,11 @@ setInterval(() => {
     if (simMode === 'live' && matchState !== 'idle' && Date.now() >= holdUntil) carrierIndex = nextPass();
 }, 1100);
 
+// Dakika her saniye ilerler (WS'ten mesaj gelmeyen dakikalarda da saat durmasın)
+setInterval(() => {
+    if (feed.m && feed.m.status === 'live') applyScoreboard(feed.m, feed.incidents);
+}, 1000);
+
 // ---------- Gerçek veri akışı ----------
 function newFeed(id) {
     return {
