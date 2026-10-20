@@ -1,10 +1,11 @@
-fastapi
-uvicorn[standard]
-sqlalchemy>=2.0
-requests
-python-dotenv
+# Sürümler sabit: yerelde testleri geçen sürümler (Render aynısını kurar)
+fastapi==0.143.3
+uvicorn[standard]==0.54.0
+sqlalchemy==2.1.5
+requests==2.34.2
+python-dotenv==1.2.4
 # Postgres (Neon) sürücüsü ve şema migration'ları
-psycopg[binary]>=3.2
-alembic>=1.13
+psycopg[binary]==3.3.6
+alembic==1.20.0
 # Canlı maç: SportsAPI WebSocket istemcisi (app/live.py)
-websockets>=14
+websockets==17.2

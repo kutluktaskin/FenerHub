@@ -1,3 +1,4 @@
+"""Kadro ve oyuncu istatistikleri: GET /api/squad"""
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session, joinedload
 

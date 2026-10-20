@@ -104,7 +104,6 @@ async function loadStandings() {
         if (body("super_lig")) renderStandings(body("super_lig"), sl, "super_lig");
         if (body("uefa")) renderStandings(body("uefa"), eu, "uefa");
 
-        console.log("Puan durumu API'den yüklendi");
     } catch (err) {
         console.error("Puan durumu yüklenemedi:", err);
         tables.forEach(t => showLoadError(t.tBodies[0], 8));
@@ -254,7 +253,6 @@ async function loadSquad() {
         renderSquad();
         renderReadiness(squadState.players);
         renderSquadSummary(squadState.players);
-        console.log("Kadro API'den yüklendi");
     } catch (err) {
         console.warn("Kadro API'sine ulaşılamadı:", err);
         showLoadError(tbody, 6);
@@ -320,7 +318,6 @@ async function loadAbsences() {
     if (!container) return;
     try {
         renderAbsences(container, await apiGet("/api/absences"));
-        console.log("Sakatlık raporu API'den yüklendi");
     } catch (err) {
         console.warn("Sakatlık API'sine ulaşılamadı:", err);
         showLoadError(container);
@@ -808,7 +805,6 @@ async function loadUpcomingMatches() {
             renderMatchCard(card, m, MATCH_KEYS[i]);
             if (MATCH_KEYS[i]) syncMatchMeta(m, MATCH_KEYS[i]);
         });
-        console.log("Yakın maçlar API'den yüklendi");
     } catch (err) {
         console.warn("Maç API'sine ulaşılamadı:", err);
         const hero = document.querySelector(".recent-match-card.is-hero.is-loading");
@@ -1134,7 +1130,6 @@ async function loadFixtures() {
         rememberTeams(all);
         await logosReady;
         renderFixtures(container, all);
-        console.log("Fikstür API'den yüklendi");
     } catch (err) {
         console.warn("Fikstür API'sine ulaşılamadı:", err);
         showLoadError(container);

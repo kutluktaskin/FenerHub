@@ -1,3 +1,4 @@
+"""SQLAlchemy modelleri. Şema değişiklikleri Alembic ile yapılır (migrations/versions)."""
 from sqlalchemy import (
     Boolean, Column, Float, Integer, String, Text, Date, Time, ForeignKey, Index, UniqueConstraint, false
 )

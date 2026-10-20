@@ -1,3 +1,5 @@
+"""Periyodik SportsAPI senkronu: maç listesi, puan durumu ve (canlı WebSocket
+izlemiyorsa) maç detayları. Günlük kotayı korumak için her iş kendi aralığıyla çalışır."""
 import asyncio
 import time
 import traceback

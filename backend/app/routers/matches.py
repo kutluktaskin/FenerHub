@@ -1,3 +1,4 @@
+"""Maçlar: GET /api/matches, /upcoming, /{id}, /{id}/detail (detay önbellekten, istek atmaz)."""
 import time
 
 from fastapi import APIRouter, Depends, HTTPException

@@ -1,8 +1,7 @@
 """Canlı maç modülü: önbellek, maç seçimi ve gelen mesajların işlenmesi (ağ bağlantısı yok)."""
 import asyncio
-import json
 import time
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import pytest
 

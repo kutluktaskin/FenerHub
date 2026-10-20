@@ -60,24 +60,3 @@ def client_ip(request):
     # Hepsi proxy ya da başlık yok: en soldaki geçerli adres, o da yoksa bağlantı adresi
     first = next((ip for ip in hops if ip is not None), None)
     return str(first or peer_ip or "unknown")
-
-
-def classify(ip):
-    """Teşhis için adres türü: özel / cloudflare / genel / geçersiz."""
-    if ip is None:
-        return "geçersiz"
-    if ip.is_private or ip.is_loopback or ip.is_link_local:
-        return "özel"
-    if any(ip in net for net in CLOUDFLARE_NETS):
-        return "cloudflare"
-    return "genel"
-
-
-def mask(ip):
-    """Loga tam adres yazılmaz: 203.0.113.7 -> 203.0.x.x, 2001:db8::1 -> 2001:db8::x"""
-    if ip is None:
-        return "-"
-    if ip.version == 4:
-        a, b, *_ = str(ip).split(".")
-        return f"{a}.{b}.x.x"
-    return ":".join(ip.exploded.split(":")[:2]) + "::x"

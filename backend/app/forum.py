@@ -1,3 +1,4 @@
+"""12. Adam forumu: oda bazlı mesajlar, yanıt, tepki, silme ve /ws/forum canlı yayını."""
 import hmac
 import re
 import time

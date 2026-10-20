@@ -45,7 +45,6 @@ document.addEventListener("keydown", e => {
   const NICK_COLORS = ["var(--nick-1)", "var(--nick-2)", "var(--nick-3)", "var(--nick-4)"];
   const nickColor = n => NICK_COLORS[[...n].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % NICK_COLORS.length];
   const MAX_DOM = 200;
-  console.log("12. Adam (forum.js v9) yüklendi");
   let tabKey = "genel", room = "genel", nextMatch = null, ws, stick = true, replyTo = null;
   
   const mine = new Set();
