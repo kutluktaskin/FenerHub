@@ -985,12 +985,6 @@ function renderCalendar() {
 
     const prefix = `${y}-${pad2(mo + 1)}`;
     const monthMatches = all.filter(m => m.match_date.startsWith(prefix));
-    const byDay = new Map();
-    monthMatches.forEach(m => {
-        const day = Number(m.match_date.slice(8, 10));
-        if (!byDay.has(day)) byDay.set(day, []);
-        byDay.get(day).push(m);
-    });
 
     // Başlık: ay adı + o ayın sonuçları (filtreye göre)
     const visible = monthMatches.filter(m => shown.has(m));
@@ -1005,42 +999,21 @@ function renderCalendar() {
         || [...monthMatches].reverse().find(m => shown.has(m) && m.status === "finished")
         || monthMatches.find(m => shown.has(m));
 
+    // Sadece maç günleri, tarih sırasıyla yan yana (takvim yaprakları)
     const today = localISODate(new Date());
-    const daysIn = new Date(y, mo + 1, 0).getDate();
-    const lead = (new Date(y, mo, 1).getDay() + 6) % 7;     // Pazartesi ile başlayan hafta
-    // Maçı olmayan haftalar ince satır olarak çizilir (takvimde büyük boşluk kalmasın)
-    const week = day => Math.floor((lead + day - 1) / 7);
-    const busy = new Set([...byDay].filter(([, ms]) => ms.some(x => shown.has(x))).map(([d]) => week(d)));
-    const quiet = w => busy.has(w) ? "" : " is-quiet";
-    const cells = [];
-    for (let i = 0; i < lead; i++) cells.push(`<span class="cal-day is-out${quiet(0)}"></span>`);
-    for (let day = 1; day <= daysIn; day++) {
-        const iso = `${prefix}-${pad2(day)}`;
-        const ms = byDay.get(day) || [];
-        const m = ms.find(x => shown.has(x));
-        const todayCls = iso === today ? " is-today" : "";
-        if (!m) {
-            const dim = ms.length ? " is-filtered" : "";
-            cells.push(`<span class="cal-day${todayCls}${dim}${quiet(week(day))}"><span class="cal-num">${day}</span></span>`);
-            continue;
-        }
-        cells.push(calCell(m, day, m === next, m === pick, todayCls));
-    }
-    const trail = (7 - (cells.length % 7)) % 7;
-    for (let i = 0; i < trail; i++) cells.push(`<span class="cal-day is-out${quiet(week(daysIn))}"></span>`);
-    grid.innerHTML = cells.join("");
+    grid.innerHTML = visible.map(m => calCell(m, m === next, m === pick, m.match_date === today)).join("");
 
     const detail = document.getElementById("calDetail");
     detail.innerHTML = pick ? fixtureCard(pick, pick === next)
         : `<p class="empty-note">${icon("info")}Bu ay filtreye uyan maç yok.</p>`;
 }
 
-function calCell(m, day, isNext, isSelected, todayCls) {
+function calCell(m, isNext, isSelected, isToday) {
     const fbHome = m.home === "Fenerbahçe";
     const rival = rivalOf(m);
     const live = m.status === "live";
     const done = m.status === "finished" && m.home_score !== null && m.home_score !== undefined;
-    let cls = "cal-day has-match" + todayCls, body;
+    let cls = "cal-day" + (isToday ? " is-today" : ""), body;
     if (live) {
         cls += " is-live";
         body = `<b class="cal-score">${m.home_score ?? 0}-${m.away_score ?? 0}</b><span class="cal-sub is-live">${esc(liveMinute(m) ?? "Canlı")}</span>`;
@@ -1054,11 +1027,12 @@ function calCell(m, day, isNext, isSelected, todayCls) {
     }
     if (isSelected) cls += " is-selected";
     const accent = teamAccent(rival) || "var(--c-text-3)";
-    const label = `${day} ${MONTHS_TR[Number(m.match_date.slice(5, 7)) - 1]}: ${m.home} - ${m.away}` +
+    const d = new Date(m.match_date + "T00:00:00");
+    const label = `${longDate(m)}: ${m.home} - ${m.away}` +
         (done ? `, ${m.home_score}-${m.away_score}` : `, ${m.kickoff_time || ""}`);
     return `<button type="button" class="${cls}" data-id="${m.id}" style="--rival:${accent}"
             aria-label="${esc(label)}" aria-pressed="${isSelected}">
-        <span class="cal-num">${day}</span>
+        <span class="cal-date"><b>${d.getDate()}</b><span>${MONTHS_TR[d.getMonth()].slice(0, 3)}<i>${DAYS_TR[d.getDay()]}</i></span></span>
         <span class="cal-tags">${icon(m.competition === "uefa" ? "star" : "trophy")}${icon(fbHome ? "home" : "plane")}</span>
         <span class="cal-crest">${crest(rival, "crest-sm")}</span>
         <span class="cal-rival">${esc(rival)}</span>

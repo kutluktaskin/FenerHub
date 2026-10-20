@@ -26,10 +26,7 @@
     <nav class="navbar" aria-label="Ana menü">
         <a href="#yakindakiMaclar" onclick="event.preventDefault(); scrollToSection('yakindakiMaclar')" class="logo fh-logo" aria-label="FenerHub ana sayfa">
             <img class="fh-mark" src="img/favicon.svg" alt="" width="34" height="39">
-            <span class="fh-text">
-                <span class="fh-word"><span style="--i:0">F</span><span style="--i:1">E</span><span style="--i:2">N</span><span style="--i:3">E</span><span style="--i:4">R</span><span class="fh-hub" style="--i:5">HUB</span></span>
-                <span class="fh-tag">Maç Merkezi</span>
-            </span>
+            <span class="fh-word"><span style="--i:0">F</span><span style="--i:1">E</span><span style="--i:2">N</span><span style="--i:3">E</span><span style="--i:4">R</span><span class="fh-hub" style="--i:5">HUB</span></span>
         </a>
         <div class="nav-links" id="navLinks">
             <button type="button" data-section="yakindakiMaclar" onclick="scrollToSection('yakindakiMaclar')">Yakın Maçlar</button>
@@ -285,7 +282,6 @@
                     <h3 class="cal-title" id="calTitle" aria-live="polite">&nbsp;</h3>
                     <button type="button" class="cal-nav" data-step="1" aria-label="Sonraki ay"><svg class="ico" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
                 </div>
-                <div class="cal-week" aria-hidden="true"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span></div>
                 <div class="cal-grid" id="calGrid" role="group" aria-label="Ayın maçları"></div>
                 <div class="cal-detail" id="calDetail" aria-live="polite"></div>
             </div>
@@ -306,7 +302,7 @@
     </main>
 
     <footer class="site-footer">
-        <div class="footer-brand"><img class="fh-mark" src="img/favicon.svg" alt="" width="28" height="32" loading="lazy">FENER<span>HUB</span></div>
+        <div class="footer-brand"><img class="fh-mark" src="img/favicon.svg" alt="" width="28" height="32" loading="lazy"><span>FENER<b>HUB</b></span></div>
         <p>Maç, kadro ve puan verileri SportsAPI Pro üzerinden otomatik alınır; canlı skorlar birkaç dakika gecikebilir.</p>
         <p>Taraftar projesidir, Fenerbahçe SK ile resmi bir bağı yoktur. · <span id="footerYear">2026</span></p>
     </footer>

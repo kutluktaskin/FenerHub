@@ -556,7 +556,6 @@ table { font-variant-numeric: tabular-nums; }
     transition: transform var(--t) var(--ease), filter var(--t);
 }
 .fh-logo:hover .fh-mark { transform: translateY(-1px) scale(1.06) rotate(-3deg); filter: drop-shadow(0 6px 16px rgb(255 210 0 / 0.38)); }
-.fh-text { display: flex; flex-direction: column; line-height: 1; }
 .fh-word {
     display: inline-flex;
     font-family: var(--f-display);
@@ -577,21 +576,10 @@ table { font-variant-numeric: tabular-nums; }
     background-clip: text;
     color: transparent;
 }
-.fh-tag {
-    margin-top: 3px;
-    color: var(--c-text-3);
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    opacity: 0;
-    animation: fhDrop 0.45s var(--ease) 0.4s forwards;
-}
 @keyframes fhDrop { to { opacity: 1; transform: none; } }
 @media (max-width: 640px) {
     .fh-mark { width: 30px; }
     .fh-word { font-size: 1.4rem; }
-    .fh-tag { display: none; }
 }
 
 .nav-links {
@@ -1988,91 +1976,77 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .cal-nav:hover:not(:disabled) { border-color: var(--c-accent); color: var(--c-accent); }
 .cal-nav:disabled { opacity: 0.35; cursor: default; }
 
-.cal-week, .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
-.cal-week span {
-    color: var(--c-text-3);
-    font-size: var(--fs-xs);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-align: center;
-    text-transform: uppercase;
-}
-.cal-week span:nth-child(n+6) { color: var(--c-text-2); }
+/* Ayın maçları takvim yaprakları gibi yan yana: sadece maç günleri, boş gün yok.
+   Yaprağın üstünde tarih (gün, ay, hafta günü), altında rakip ve saat/skor. */
+.cal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: var(--s-3); }
 
 .cal-day {
+    --rival: var(--c-text-3);
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
-    gap: 3px;
+    gap: 6px;
     min-width: 0;
-    min-height: 100px;
-    padding: 26px 6px 8px;
-    border: 1px solid var(--c-line);
+    padding: 0 10px 12px;
+    overflow: hidden;
+    border: 1px solid color-mix(in oklab, var(--rival) 40%, var(--c-line));
     border-radius: var(--r-md);
-    background: var(--c-inset);
-    color: var(--c-text-3);
+    background:
+        linear-gradient(175deg, color-mix(in oklab, var(--rival) 26%, transparent), transparent 80%),
+        var(--c-surface-2);
+    color: var(--c-text);
     font: inherit;
     text-align: center;
-}
-.cal-day.is-out { border-color: transparent; background: none; }
-/* Maçsız gün: sadece ince çerçeve, zemin yok (maç günleri öne çıksın) */
-/* Maçsız gün kutusuz, sadece tarih; maçı olmayan hafta ince bir satıra iner (boşluk kalmasın) */
-.cal-day:not(.has-match) { background: none; border-color: transparent; }
-.cal-day.is-quiet { min-height: 30px; padding: 0; }
-.cal-day.is-quiet .cal-num { top: 50%; transform: translateY(-50%); }
-.cal-num {
-    position: absolute;
-    top: 6px;
-    left: 8px;
-    min-width: 20px;
-    font-size: var(--fs-xs);
-    font-weight: 700;
-    line-height: 20px;
-}
-.cal-day.is-today .cal-num { padding: 0 6px; border-radius: var(--r-pill); background: var(--c-text); color: var(--c-navy-950); }
-/* Filtre yüzünden gizlenen maç günü: küçük nokta */
-.cal-day.is-filtered::after {
-    content: "";
-    position: absolute;
-    bottom: 10px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--c-line-strong);
-}
-
-.cal-day.has-match {
-    --rival: var(--c-text-3);
     cursor: pointer;
-    border-color: color-mix(in oklab, var(--rival) 40%, var(--c-line));
-    background:
-        linear-gradient(170deg, color-mix(in oklab, var(--rival) 32%, transparent), transparent 78%),
-        var(--c-surface-2);
-    box-shadow: inset 0 3px 0 var(--rival);
-    color: var(--c-text);
     transition: transform var(--t-fast) var(--ease), border-color var(--t-fast), box-shadow var(--t-fast);
 }
-.cal-day.has-match:hover { transform: translateY(-2px); border-color: var(--rival); }
-.cal-day.has-match .cal-num { color: var(--c-text-2); }
-.cal-day.has-match.is-today .cal-num { color: var(--c-navy-950); }
-.cal-tags { position: absolute; top: 7px; right: 7px; display: flex; gap: 3px; color: var(--c-text-3); }
+.cal-day:hover { transform: translateY(-2px); border-color: var(--rival); }
+
+/* Yaprağın başlığı: rakip renginde şerit üstünde tarih */
+.cal-date {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    align-self: stretch;
+    margin: 0 -10px 4px;
+    padding: 8px 10px 6px;
+    border-top: 4px solid var(--rival);
+    border-bottom: 1px dashed var(--c-line-strong);
+    background: rgb(0 0 0 / 0.18);
+}
+.cal-date b { font-family: var(--f-display); font-size: 1.9rem; font-weight: 700; line-height: 1; }
+.cal-date span {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color: var(--c-text-2);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1.25;
+    text-transform: uppercase;
+}
+.cal-date span i { color: var(--c-text-3); font-style: normal; font-weight: 600; }
+.cal-day.is-today .cal-date b { color: var(--c-accent); }
+
+.cal-tags { position: absolute; top: 10px; right: 8px; display: flex; flex-direction: column; gap: 3px; color: var(--c-text-3); }
 .cal-tags .ico { width: 13px; height: 13px; }
-.cal-crest .crest-sm { --size: 34px; }
+.cal-crest .crest-sm { --size: 36px; }
 .cal-rival {
     max-width: 100%;
     overflow: hidden;
-    font-size: var(--fs-xs);
+    font-size: var(--fs-sm);
     font-weight: 600;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 .cal-score, .cal-time {
-    padding: 1px 8px;
+    padding: 1px 10px;
     border-radius: var(--r-sm);
     font-family: var(--f-display);
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-variant-numeric: tabular-nums;
     line-height: 1.3;
     white-space: nowrap;
@@ -2086,32 +2060,32 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .cal-day.is-played.loss { --res: var(--c-loss); --res-soft: var(--c-loss-soft); }
 .cal-day.is-played .cal-score { background: var(--res-soft); color: var(--res); }
 /* Sıradaki maç sarı çerçeve, canlı maç kırmızı */
-.cal-day.is-next { border-color: var(--c-accent); box-shadow: inset 0 3px 0 var(--rival), 0 0 0 1px var(--c-accent), 0 0 20px var(--c-accent-glow); }
+.cal-day.is-next { border-color: var(--c-accent); box-shadow: 0 0 0 1px var(--c-accent), 0 0 20px var(--c-accent-glow); }
 .cal-day.is-next .cal-time { background: var(--c-accent); color: var(--c-accent-ink); }
-.cal-day.is-live { border-color: var(--c-live); box-shadow: inset 0 3px 0 var(--rival), 0 0 0 1px var(--c-live); }
+.cal-day.is-live { border-color: var(--c-live); box-shadow: 0 0 0 1px var(--c-live); }
 .cal-day.is-live .cal-score { background: var(--c-live-soft); color: var(--c-live); }
-/* Kartı altta açık olan gün */
+/* Kartı altta açık olan yaprak */
 .cal-day.is-selected { outline: 2px solid var(--c-text); outline-offset: 2px; }
 /* Alttaki kart listedeki kartla aynı: dar ekran düzeni için aynı container adı */
 .cal-detail { container: fixtures / inline-size; }
 .cal-detail:empty { display: none; }
 
-/* Dar ekranda kutular küçülür: rakip adı ve etiketler gizlenir, logo ve skor kalır */
+/* Dar ekranda yapraklar küçülür, bir satıra üç yaprak sığar */
 @container cal (max-width: 600px) {
-    .cal-week, .cal-grid { gap: 4px; }
-    .cal-day { min-height: 66px; padding: 18px 2px 5px; gap: 2px; }
-    .cal-day.is-quiet { min-height: 24px; padding: 0; }
-    .cal-num { top: 3px; left: 4px; min-width: 0; font-size: 10px; line-height: 16px; }
-    .cal-day.is-today .cal-num { padding: 0 4px; }
-    .cal-tags, .cal-rival { display: none; }
-    .cal-crest .crest-sm { --size: 24px; }
-    .cal-score, .cal-time { padding: 0 4px; font-size: 0.78rem; }
-    .cal-sub { font-size: 9px; }
-    .cal-week span { font-size: 10px; letter-spacing: 0; }
+    .cal-grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: var(--s-2); }
+    .cal-day { padding: 0 6px 8px; gap: 4px; }
+    .cal-date { margin: 0 -6px 2px; padding: 6px 6px 4px; gap: 5px; }
+    .cal-date b { font-size: 1.45rem; }
+    .cal-date span { font-size: 9.5px; letter-spacing: 0.03em; }
+    .cal-tags { top: 8px; right: 5px; }
+    .cal-tags .ico { width: 11px; height: 11px; }
+    .cal-crest .crest-sm { --size: 28px; }
+    .cal-rival { font-size: var(--fs-xs); }
+    .cal-score, .cal-time { padding: 0 6px; font-size: 0.95rem; }
     .cal-title { font-size: var(--fs-md); }
 }
 @media (prefers-reduced-motion: reduce) {
-    .cal-day.has-match:hover { transform: none; }
+    .cal-day:hover { transform: none; }
 }
 
 /* Liste kendi içinde kayar; ay başlıkları yapışkan. Kart düzeni listenin genişliğine göre
@@ -2745,7 +2719,7 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     letter-spacing: 0.05em;
     color: var(--c-text);
 }
-.footer-brand span { color: var(--c-accent); }
+.footer-brand b { color: var(--c-accent); }
 
 /* ---------- Hareket azaltma ---------- */
 @media (prefers-reduced-motion: reduce) {
@@ -2755,5 +2729,5 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
-    .fh-word span, .fh-tag { opacity: 1; transform: none; }
+    .fh-word span { opacity: 1; transform: none; }
 }
