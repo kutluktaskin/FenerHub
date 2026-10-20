@@ -59,6 +59,7 @@ def serialize_match(m: models.Match, with_absences: bool = False) -> dict:
         "id": m.id,
         "api_id": m.api_id,
         "competition": m.competition,
+        "matchday": m.matchday,
         "match_date": m.match_date.isoformat() if m.match_date else None,
         "kickoff_time": m.kickoff_time.strftime("%H:%M") if m.kickoff_time else None,
         "home": m.home_team.name,

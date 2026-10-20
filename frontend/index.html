@@ -253,6 +253,25 @@
                 <p class="fx-summary" id="fxSummary"></p>
             </div>
 
+            <!-- Filtreler: her grupta bir seçim (api.js initFixtureFilters) -->
+            <div class="fx-filters" role="toolbar" aria-label="Fikstür filtreleri">
+                <div class="fx-seg" data-group="comp" role="group" aria-label="Turnuva">
+                    <button type="button" data-value="all" aria-pressed="true">Tümü</button>
+                    <button type="button" data-value="super_lig" aria-pressed="false">Süper Lig</button>
+                    <button type="button" data-value="uefa" aria-pressed="false">Şampiyonlar Ligi</button>
+                </div>
+                <div class="fx-seg" data-group="venue" role="group" aria-label="Saha">
+                    <button type="button" data-value="all" aria-pressed="true">Tümü</button>
+                    <button type="button" data-value="home" aria-pressed="false">İç saha</button>
+                    <button type="button" data-value="away" aria-pressed="false">Deplasman</button>
+                </div>
+                <div class="fx-seg" data-group="state" role="group" aria-label="Durum">
+                    <button type="button" data-value="all" aria-pressed="true">Tümü</button>
+                    <button type="button" data-value="played" aria-pressed="false">Oynanan</button>
+                    <button type="button" data-value="upcoming" aria-pressed="false">Kalan</button>
+                </div>
+            </div>
+
             <!-- api.js aylara göre gruplayıp doldurur; liste kendi içinde kayar -->
             <div class="fixtures-grid scroll-thin" tabindex="0" aria-label="Maç listesi">
                 <div class="fx-card skel-card"><span class="skel skel-w40"></span><span class="skel skel-w80"></span><span class="skel skel-w30"></span></div>

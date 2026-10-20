@@ -830,41 +830,91 @@ function resultOf(m) {
     return fb > opp ? "win" : fb < opp ? "loss" : "draw";
 }
 
+// Kartın kenar şeridi (--home/--away) ve zemin geçişi (--home-wash/--away-wash) için takım
+// renkleri: Fenerbahçe şeritte sarı, zeminde mavi (sarı lacivertle karışınca zeytine döner);
+// rakip API rengi, beyaz/siyah/gri ise nötr gri (lacivert zeminde kaybolmasın).
+function fxTeamVars(name, side) {
+    if (name === "Fenerbahçe") return `--${side}:var(--c-accent);--${side}-wash:var(--c-fb-blue)`;
+    const c = teamAccent(name) || "var(--c-text-3)";
+    return `--${side}:${c};--${side}-wash:${c}`;
+}
+
+function fxTeam(name, side, cls) {
+    return `<div class="fx-team ${side}${cls}">${side === "home"
+        ? `<span class="fx-name">${esc(name)}</span>${crest(name, "crest-sm")}`
+        : `${crest(name, "crest-sm")}<span class="fx-name">${esc(name)}</span>`}</div>`;
+}
+
 function fixtureCard(m, isNext) {
     const hasScore = m.home_score !== null && m.home_score !== undefined;
     const live = m.status === "live";
     const done = m.status === "finished" && hasScore;
-    const fbHome = m.home === "Fenerbahçe";
-    const rival = rivalOf(m);
     const d = m.match_date ? new Date(m.match_date + "T00:00:00") : null;
 
-    let cls = "fx-card", right;
+    let cls = "fx-card", center, state = "";
+    let homeCls = "", awayCls = "";
     if (live) {
         cls += " is-live";
-        right = `<span class="fx-live"><span class="live-pulse"></span>${esc(liveMinute(m) ?? "Canlı")}</span>
-            <b class="fx-score">${m.home_score ?? 0} - ${m.away_score ?? 0}</b>`;
+        center = `<b class="fx-score">${m.home_score ?? 0}<i>-</i>${m.away_score ?? 0}</b>
+            <span class="fx-live"><span class="live-pulse"></span>${esc(liveMinute(m) ?? "Canlı")}</span>`;
     } else if (done) {
         const res = resultOf(m);
         cls += ` is-played ${res}`;
-        right = `<span class="res-badge ${res}" title="${RESULT[res].label}">${RESULT[res].letter}</span>
-            <b class="fx-score">${m.home_score} - ${m.away_score}</b>`;
+        center = `<b class="fx-score">${m.home_score}<i>-</i>${m.away_score}</b>`;
+        state = `<span class="res-badge ${res}" title="${RESULT[res].label}">${RESULT[res].letter}</span>`;
+        // Kazanan tarafın adı kalın, kaybedenin soluk
+        if (m.home_score > m.away_score) awayCls = " is-loser";
+        if (m.home_score < m.away_score) homeCls = " is-loser";
     } else {
         cls += " is-upcoming" + (isNext ? " is-next" : "");
-        right = `<b class="fx-time">${esc(m.kickoff_time ?? "--:--")}</b>${isNext ? `<span class="fx-next">Sıradaki</span>` : ""}`;
+        center = `<b class="fx-time">${esc(m.kickoff_time ?? "--:--")}</b>`;
+        if (isNext) state = `<span class="fx-next">Sıradaki</span>`;
     }
 
+    const comp = COMPETITION_SHORT[m.competition] ?? "";
+    const week = m.matchday ? ` · ${m.matchday}. Hafta` : "";
+    const date = d ? `${d.getDate()} ${MONTHS_TR[d.getMonth()].slice(0, 3)} ${DAYS_TR[d.getDay()]}` : "Tarih belli değil";
     const label = `${m.home} - ${m.away}, ${d ? longDate(m) : "tarih belli değil"}`;
-    return `<article class="${cls}" aria-label="${esc(label)}"${isNext ? ' aria-current="true"' : ""}>
-        <div class="fx-date">${d ? `<b>${d.getDate()}</b><span>${DAYS_TR[d.getDay()]}</span>` : "<b>–</b>"}</div>
-        <div class="fx-body">
-            <div class="fx-opp">${crest(rival, "crest-sm")}<span>${esc(rival)}</span></div>
-            <div class="fx-tags">
-                <span class="fx-comp">${icon(m.competition === "uefa" ? "star" : "trophy")}${esc(COMPETITION_SHORT[m.competition] ?? "")}</span>
-                <span class="fx-venue">${icon(fbHome ? "home" : "plane")}${fbHome ? "İç saha" : "Deplasman"}</span>
-            </div>
+    const colors = `${fxTeamVars(m.home, "home")};${fxTeamVars(m.away, "away")}`;
+    return `<article class="${cls}" style="${colors}" aria-label="${esc(label)}"${isNext ? ' aria-current="true"' : ""}>
+        <div class="fx-meta">
+            <time${m.match_date ? ` datetime="${m.match_date}"` : ""}>${date}</time>
+            <span class="fx-comp comp-${esc(m.competition)}">${icon(m.competition === "uefa" ? "star" : "trophy")}${esc(comp)}${week}</span>
+            <span class="fx-state">${state}</span>
         </div>
-        <div class="fx-right">${right}</div>
+        <div class="fx-match">
+            ${fxTeam(m.home, "home", homeCls)}
+            <div class="fx-center">${center}</div>
+            ${fxTeam(m.away, "away", awayCls)}
+        </div>
     </article>`;
+}
+
+// ---------- Fikstür filtreleri ----------
+const FX_FILTERS = {
+    comp:  { all: () => true, super_lig: m => m.competition === "super_lig", uefa: m => m.competition === "uefa" },
+    venue: { all: () => true, home: m => m.home === "Fenerbahçe", away: m => m.away === "Fenerbahçe" },
+    state: { all: () => true, played: m => m.status === "finished", upcoming: m => m.status !== "finished" },
+};
+const fxFilter = { comp: "all", venue: "all", state: "all" };
+let fxAll = null;           // son yüklenen maç listesi (filtre değişince yeniden çizilir)
+
+function initFixtureFilters() {
+    const bar = document.querySelector(".fx-filters");
+    if (!bar) return;
+    bar.addEventListener("click", e => {
+        const btn = e.target.closest("button[data-value]");
+        if (!btn) return;
+        const group = btn.closest("[data-group]").dataset.group;
+        fxFilter[group] = btn.dataset.value;
+        btn.closest("[data-group]").querySelectorAll("button").forEach(b =>
+            b.setAttribute("aria-pressed", String(b === btn)));
+        const container = document.querySelector(".fixtures-grid");
+        if (container && fxAll) {
+            delete container.dataset.autoScrolled;   // filtre değişince sıradaki maça yeniden kay
+            renderFixtures(container, fxAll);
+        }
+    });
 }
 
 function renderFixtures(container, matches) {
@@ -873,10 +923,13 @@ function renderFixtures(container, matches) {
         (a.match_date || "9999").localeCompare(b.match_date || "9999") ||
         (a.kickoff_time || "").localeCompare(b.kickoff_time || ""));
     const next = list.find(m => m.status !== "finished");
+    fxAll = matches;
+
+    const shown = list.filter(m => Object.entries(fxFilter).every(([g, v]) => FX_FILTERS[g][v](m)));
 
     // Aylara göre grupla
     const groups = new Map();
-    list.forEach(m => {
+    shown.forEach(m => {
         const key = m.match_date ? m.match_date.slice(0, 7) : "tbd";
         if (!groups.has(key)) groups.set(key, []);
         groups.get(key).push(m);
@@ -887,33 +940,39 @@ function renderFixtures(container, matches) {
         return `${MONTHS_TR[mo - 1]} ${y}`;
     };
 
-    container.innerHTML = [...groups].map(([key, ms]) => `<section class="fx-month" aria-label="${monthTitle(key)}">
-        <h3 class="fx-month-title">${monthTitle(key)}<span>${ms.length} maç</span></h3>
-        <div class="fx-list">${ms.map(m => fixtureCard(m, m === next)).join("")}</div>
-    </section>`).join("");
+    container.innerHTML = groups.size
+        ? [...groups].map(([key, ms]) => `<section class="fx-month" aria-label="${monthTitle(key)}">
+            <h3 class="fx-month-title">${monthTitle(key)}<span>${ms.length} maç</span></h3>
+            <div class="fx-list">${ms.map(m => fixtureCard(m, m === next)).join("")}</div>
+        </section>`).join("")
+        : `<p class="empty-note">${icon("info")}Bu filtreye uyan maç yok.</p>`;
 
     renderForm(list);
     fixtureList = list;
     renderHeroStrip();
 
-    // Sezon özeti: oynanan maçların G/B/M dağılımı
-    const played = list.filter(m => m.status === "finished" && m.home_score !== null);
+    // Özet: filtredeki oynanmış maçların G/B/M dağılımı
+    const played = shown.filter(m => m.status === "finished" && m.home_score !== null);
     const count = r => played.filter(m => resultOf(m) === r).length;
     const summary = document.getElementById("fxSummary");
-    if (summary && played.length) {
-        summary.innerHTML = `${played.length} maç oynandı
+    if (summary) {
+        summary.innerHTML = played.length ? `${played.length} maç oynandı
             <span class="res-badge win">${count("win")}G</span>
             <span class="res-badge draw">${count("draw")}B</span>
-            <span class="res-badge loss">${count("loss")}M</span>`;
+            <span class="res-badge loss">${count("loss")}M</span>` : "";
     }
 
-    // İlk yüklemede liste sıradaki maça kayar (sayfa kaydırılmaz)
-    const nextCard = container.querySelector(".fx-card.is-next, .fx-card.is-live");
-    if (nextCard && !container.dataset.autoScrolled) {
+    // İlk yüklemede (ve filtre değişince) liste sıradaki maça kayar; sayfa kaydırılmaz
+    if (!container.dataset.autoScrolled) {
         container.dataset.autoScrolled = "1";
-        const header = nextCard.closest(".fx-month").querySelector(".fx-month-title");
-        container.scrollTop += nextCard.getBoundingClientRect().top - container.getBoundingClientRect().top
-            - header.offsetHeight - 12;
+        const nextCard = container.querySelector(".fx-card.is-next, .fx-card.is-live");
+        if (nextCard) {
+            const header = nextCard.closest(".fx-month").querySelector(".fx-month-title");
+            container.scrollTop += nextCard.getBoundingClientRect().top - container.getBoundingClientRect().top
+                - header.offsetHeight - 12;
+        } else {
+            container.scrollTop = 0;
+        }
     }
 }
 
@@ -938,6 +997,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initSquadControls();
     loadSquad();
     loadAbsences();
+    initFixtureFilters();
     loadUpcomingMatches();
     loadFixtures();
     setInterval(loadUpcomingMatches, 60 * 1000);   // kartlar dakikada bir
