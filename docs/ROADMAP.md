@@ -95,9 +95,12 @@
 - [ ] Lighthouse: performans, erişilebilirlik ve SEO 90'ın altındaysa iyileştir. 400 karelik arka plan animasyonunu özellikle kontrol et.
 
 ## Aşama 10: Portföy
-- [ ] README'yi güncelle: tüm özellikler, mimari diyagramı (Mermaid), ekran görüntüsü ve demo GIF'i için yer, kurulum, ortam değişkenleri tablosu, API uç noktaları, test komutu.
-- [ ] docs/ altına kısa bir "Teknik kararlar" notu: neden WebSocket proxy, neden Postgres, istek bütçesi nasıl yönetildi.
-- [ ] .env.example güncel olsun.
+- [x] README'yi güncelle: tüm özellikler, mimari diyagramı (Mermaid), ekran görüntüsü ve demo GIF'i için yer, kurulum, ortam değişkenleri tablosu, API uç noktaları, test komutu.
+  - "Mühendislik açısından öne çıkanlar" bölümü, CI ve teknoloji rozetleri, 4 güncel ekran görüntüsü (docs/screenshots), İngilizce özet. Demo GIF'i henüz yok (canlı maç kaydından sonra eklenebilir).
+- [x] docs/ altına kısa bir "Teknik kararlar" notu: neden WebSocket proxy, neden Postgres, istek bütçesi nasıl yönetildi.
+  - docs/teknik-kararlar.md: 8 karar (sorun, çözüm, bedel) + test/CI. Ayrıca .github/workflows/ci.yml: her push'ta pytest ve node --test.
+- [x] .env.example güncel olsun.
+  - SPORTS_API_KEY ve DATABASE_URL (temizlik aşamasında eklendi); README'de ortam değişkenleri tablosu.
 
 ## Aşama 11: Akıllı içerik (ücretsiz)
 Ücretli yapay zekâ API'si kullanılmaz. İçerik kural, şablon ve istatistik modeliyle üretilir; tamamen
