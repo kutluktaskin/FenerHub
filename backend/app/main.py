@@ -11,6 +11,7 @@ from .migrate import run_migrations
 from .forum import forum_router
 from .routers import standings, squad, matches, absences
 from .auto_sync import sync_loop
+from . import cache, live
 
 
 @asynccontextmanager
@@ -23,16 +24,20 @@ async def lifespan(app: FastAPI):
         print("UYARI: Render'da DATABASE_URL tanımlı değil, geçici SQLite kullanılıyor! "
               "Environment'a Neon adresini ekleyin.", flush=True)
 
-    task = asyncio.create_task(sync_loop())
+    cache.seed_from_files()   # api_cache boşsa repodaki eski önbellek dosyalarını alır
+
+    tasks = [asyncio.create_task(sync_loop()), asyncio.create_task(live.live_loop())]
 
     try:
         yield
     finally:
-        task.cancel()
-        try:
-            await task
-        except asyncio.CancelledError:
-            pass
+        for task in tasks:
+            task.cancel()
+        for task in tasks:
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
 
 
 app = FastAPI(
@@ -59,6 +64,7 @@ app.include_router(squad.router)
 app.include_router(matches.router)
 app.include_router(absences.router)
 app.include_router(forum_router)
+app.include_router(live.router)
 
 
 @app.get("/api/health")

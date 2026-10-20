@@ -6,3 +6,5 @@ python-dotenv
 # Postgres (Neon) sürücüsü ve şema migration'ları
 psycopg[binary]>=3.2
 alembic>=1.13
+# Canlı maç: SportsAPI WebSocket istemcisi (app/live.py)
+websockets>=14
