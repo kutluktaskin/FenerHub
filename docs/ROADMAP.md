@@ -58,7 +58,8 @@
 
 ## Aşama 4: Görseller ve maç öncesi bilgiler
 - [ ] Takım logoları (/api/teams/{id}/image) ve oyuncu fotoğrafları (/api/players/{id}/image) bir kez çekilsin, URL'leri veritabanında tutulsun. Her sayfa açılışında API'ye istek gitmesin. Yüklenemeyen görselde mevcut avatar gösterilsin.
-- [ ] Sıradaki maç kartı: V6 /match/{id}/h2h ile son 5 karşılaşma ve iki takımın son 5 maç formu. Ligdeki sıralar mevcut puan durumundan alınsın. Günde bir kez çek.
+- [x] Sıradaki maç kartı: V6 /match/{id}/h2h ile son 5 karşılaşma ve iki takımın son 5 maç formu. Ligdeki sıralar mevcut puan durumundan alınsın. Günde bir kez çek.
+  - V2 /match/{id}/h2h (son karşılaşmaların G/B/M sayısı; tek tek liste ucu yok, h2h/events 404) + /match/{id}/pregame-form (iki takımın ligdeki son 5 maçı, eskiden yeniye). Sıradaki maç 7 gün içindeyse günde bir kez, 2 istek. Sıralar kendi puan durumumuzdan. Ana kartta "Son N karşılaşma" çubuğu ve iki takımın lig formu.
 
 ## Aşama 5: Skor tahmin oyunu (12. Adam)
 - [ ] Kullanıcı kimliği: hesap açtırmadan, cihazda saklanan anonim kimlik + takma ad (forumdaki owner mantığıyla uyumlu). İleride giriş eklenebilecek şekilde tasarla.

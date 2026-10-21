@@ -592,6 +592,7 @@ function renderMatchCard(card, m, key) {
                 <div class="mc-team">${crest(m.away, "crest-lg")}<span class="mc-name">${esc(m.away)}</span></div>
             </div>
             <div class="mc-strip" id="heroStrip" hidden></div>
+            ${previewHTML(m)}
             <p class="mc-meta">${icon(fbHome ? "home" : "plane")}${fbHome ? HOME_STADIUM : "Deplasman"}</p>
             ${absencesHTML(m)}
             <button type="button" class="btn btn-primary open-sim-btn" onclick="openSimulation('${key}')">${icon("zap")}${label}</button>`;
@@ -608,6 +609,40 @@ function renderMatchCard(card, m, key) {
         <p class="mc-meta">${icon("calendar")}${esc(shortDate(m))}<span aria-hidden="true">·</span>${fbHome ? "İç saha" : "Deplasman"}</p>
         ${absencesHTML(m, true)}
         <button type="button" class="btn open-sim-btn" onclick="openSimulation('${key}')">${icon("zap")}${label}</button>`;
+}
+
+// Maç öncesi (sıradaki maç; backend günde bir kez çeker): son karşılaşmalar, iki takımın
+// ligdeki son 5 maçı (eskiden yeniye) ve lig sıraları. Veri yoksa bölüm hiç çizilmez.
+const FORM_KEY = { W: "win", D: "draw", L: "loss" };
+
+function previewHTML(m) {
+    const p = m.preview;
+    if (!p || m.status !== "scheduled") return "";
+    const rival = esc(p.rival);
+    const dots = arr => `<ol class="form-dots pv-dots" aria-label="Eskiden yeniye">${(arr || []).map(r => {
+        const k = FORM_KEY[r];
+        return k ? `<li class="${k}" title="${RESULT[k].label}">${RESULT[k].letter}</li>` : "";
+    }).join("")}</ol>`;
+    let h2h = "";
+    if (p.h2h) {
+        const { fb_wins: a, draws: d, rival_wins: b } = p.h2h;
+        const n = a + d + b;
+        if (n) h2h = `<div class="pv-block">
+            <span class="strip-label">Son ${n} karşılaşma</span>
+            <div class="pv-bar" role="img" aria-label="Fenerbahçe ${a} galibiyet, ${d} beraberlik, ${rival} ${b} galibiyet">
+                <i class="pv-fb" style="flex:${a}"></i><i class="pv-draw" style="flex:${d}"></i><i class="pv-rv" style="flex:${b}"></i>
+            </div>
+            <div class="pv-legend"><span><b>${a}</b> Fenerbahçe</span><span><b>${d}</b> beraberlik</span><span><b>${b}</b> ${rival}</span></div>
+        </div>`;
+    }
+    const pos = p.positions || {};
+    const posTxt = x => (x ? `${x}.` : "–");
+    const form = p.form ? `<div class="pv-block pv-form">
+        <span class="strip-label">Ligdeki son 5 maç</span>
+        <div class="pv-row"><span class="pv-team">Fenerbahçe <small>${posTxt(pos.fb)} sırada</small></span>${dots(p.form.fb)}</div>
+        <div class="pv-row"><span class="pv-team">${rival} <small>${posTxt(pos.rival)} sırada</small></span>${dots(p.form.rival)}</div>
+    </div>` : "";
+    return h2h || form ? `<section class="mc-preview" aria-label="Maç öncesi">${h2h}${form}</section>` : "";
 }
 
 // Hero şeridi: geri sayım ile stat arasında Fenerbahçe'nin son 5 maçı ve "maça kalan" çubuğu.

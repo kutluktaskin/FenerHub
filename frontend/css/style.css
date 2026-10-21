@@ -1376,6 +1376,31 @@ table { font-variant-numeric: tabular-nums; }
 }
 .sim-note { margin: var(--s-2) 0 0; color: var(--c-text-3); font-size: var(--fs-xs); }
 
+/* Ana maç kartı: maç öncesi (son karşılaşmalar, lig formu, sıralar) */
+.mc-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--s-3) var(--s-5);
+    padding: var(--s-3) var(--s-4);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-md);
+    background: rgb(4 11 34 / 0.45);
+}
+.pv-block { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.pv-bar { display: flex; gap: 3px; height: 10px; border-radius: 5px; overflow: hidden; }
+.pv-bar i { min-width: 4px; }
+.pv-fb { background: var(--c-accent); }
+.pv-draw { background: var(--c-draw); }
+.pv-rv { background: var(--rival, var(--c-loss)); }
+.pv-legend { display: flex; justify-content: space-between; gap: var(--s-2); color: var(--c-text-2); font-size: var(--fs-xs); }
+.pv-legend b { color: var(--c-text); font-family: var(--f-display); font-size: 1.05rem; }
+.pv-legend span:first-child b { color: var(--c-accent); }
+.pv-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.pv-team { min-width: 0; overflow: hidden; color: var(--c-text); font-size: var(--fs-sm); font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.pv-team small { margin-left: 4px; color: var(--c-text-3); font-weight: 500; }
+.pv-dots { flex: none; }
+.pv-dots li { width: 22px; height: 22px; font-size: 10px; }
+
 /* Maç özeti sekmesi (js/summary.js) */
 .sm-head, .sm-stat {
     display: grid;
