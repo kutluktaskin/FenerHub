@@ -47,8 +47,8 @@
   - auto_sync.summary_targets/fetch_summary: başlamadan 2 sa 15 dk sonra, 2 güne kadar, kota ≥ 43 iken bir kez (3 istek). /detail -> summary, /api/matches -> has_summary. Simülasyonda "Maç özeti" sekmesi (frontend/js/summary.js): xG/şut özeti, SVG şut haritası, baskı grafiği (gol işaretli), en iyi 5 oyuncu; fikstürde oynanmış maçta düğme.
 - [x] Maç günü eksikleri /lineups içindeki missingPlayers'tan otomatik gelsin (maça 24 saatten az kala 3 saatte bir, son 2 saatte 30 dakikada bir).
   - app/absences_sync.py; REST (auto_sync.lineups_every) ve maç sırasında WS lineups kanalından. Açıklamalar Türkçeye çevrilir, dönüş tarihi "10 Aralık" biçiminde.
-- [ ] Genel sakatlık raporu V6 injuries'ten günde 2 kez gelsin, isimler kadroyla eşleştirilsin, eşleşmeyenler loglansın.
-  - Değişti: V6 injuries'te oyuncu adı boş geliyor. Genel rapor şimdilik en yeni kadro verisindeki missingPlayers'tan güncelleniyor (isim eşleşmeyenler loglanıyor). V6 eklenip eklenmeyeceği kullanıcı kararı bekliyor.
+- [x] Genel sakatlık raporu V6 injuries'ten günde 2 kez gelsin, isimler kadroyla eşleştirilsin, eşleşmeyenler loglansın.
+  - V6 listesinde ad boş gelir; ad /v6/football/player/{id} ile oyuncu ilk görüldüğünde bir kez sorulup kalıcı saklanır (çalışma başına en fazla 5 yeni oyuncu). Genel rapor = en yeni kadro verisi + V6 (aynı oyuncuda kadro verisi kazanır). absences_sync.apply_v6_injuries, auto_sync'te 12 saatte bir, kota > 45 iken.
 - [x] Sakatlık kayıtlarında source alanı olsun (api / manual). Otomatik güncelleme elle girilenleri silmesin.
   - Alembic 0004; mevcut kayıtlar manual. Aynı oyuncu için elle kayıt varsa otomatik kayıt eklenmez. Testler: tests/test_absences_sync.py.
 - [x] Demo modu: ?demo=live ile geçmiş bir maçın olayları sırayla yeniden oynatılsın.
