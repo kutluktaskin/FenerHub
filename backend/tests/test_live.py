@@ -184,3 +184,45 @@ def test_auto_sync_skips_rest_while_ws_covers(match, monkeypatch):
     finally:
         live.covered.discard(API_ID)
     assert not [c for c in calls if c[0] == API_ID]
+
+
+# 20 Ekim Fenerbahçe - Slavia Prag maçında match:{id} kanalından gelen gerçek mesaj biçimleri
+# (scripts/probe_ws_record.py kaydından; alanlar noktalı düz anahtar, mesajlar kısmi)
+REAL_SEQUENCE = [
+    ({"homeScore.current": 0, "awayScore.current": 0}, ("scheduled", None, None, None)),
+    ({"status.code": 6, "status.type": "inprogress", "time.currentPeriodStartTimestamp": 1792514754,
+      "time.initial": 0, "time.max": 2700}, ("live", 6, None, None)),
+    ({"homeScore.current": 1, "homeScore.display": 1, "homeScore.period1": 1}, ("live", 6, 1, 0)),
+    ({"awayScore.current": 1, "awayScore.display": 1}, ("live", 6, 1, 1)),
+    ({"cardsCode": "00"}, ("live", 6, 1, 1)),
+    ({"status.code": 31, "status.description": "Halftime", "time.lastPeriodEndTimestamp": 1792517615,
+      "lastPeriod": None}, ("live", 31, 1, 1)),
+    ({"time.injuryTime1": 2}, ("live", 31, 1, 1)),
+    ({"status.code": 7, "time.currentPeriodStartTimestamp": 1792518526, "time.initial": 2700},
+     ("live", 7, 1, 1)),
+    ({"awayScore.current": 2, "awayScore.display": 2}, ("live", 7, 1, 2)),
+    ({"winnerCode": 2, "status.code": 100, "status.type": "finished", "lastPeriod": None},
+     ("finished", None, 1, 2)),
+]
+
+
+def test_real_match_channel_sequence(match, monkeypatch):
+    """Devre arası anında işlenir (saat 45+ diye saymaya devam etmez), kısmi skorlar birleşir."""
+    rec = Recorder()
+    monkeypatch.setattr(live, "hub", rec)
+    f = live.Follower(live.pick_match())
+    run(f.start())
+    for data, (status, code, home, away) in REAL_SEQUENCE:
+        run(f.handle({"channel": f"match:{API_ID}", "type": "update", "data": {**data, "id": API_ID}}))
+        m = live.state["match"]
+        assert (m["status"], m["status_code"], m["home_score"], m["away_score"]) == (status, code, home, away), data
+        if code == 6:
+            assert m["period_start"] == 1792514754 and m["period_initial"] == 0
+        if code == 7:
+            assert m["period_start"] == 1792518526 and m["period_initial"] == 2700
+    assert m["period_start"] is None                       # maç bitince dakika sayacı temizlenir
+
+
+def test_unflatten():
+    assert live.unflatten({"a.b": 1, "a.c": 2, "d": 3}) == {"a": {"b": 1, "c": 2}, "d": 3}
+    assert live.unflatten({"statusTime": {"x": 1}}) == {"statusTime": {"x": 1}}

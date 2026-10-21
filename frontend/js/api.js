@@ -426,6 +426,9 @@ function liveMinute(m) {
     const secs = Math.floor(Date.now() / 1000) - m.period_start + (m.period_initial || 0);
     const min = Math.floor(secs / 60) + 1;
     const cap = m.status_code === 6 ? 45 : 90;
+    // İlk yarı uzatması 10, ikinci yarınınki 15 dakikayı geçmez: daha fazlası devre arası /
+    // maç sonu bilgisinin gecikmesidir; saat "45+12'" gibi saymaya devam etmesin
+    if (min > cap + (m.status_code === 6 ? 10 : 15)) return `${cap}+'`;
     return min > cap ? `${cap}+${min - cap}'` : `${min}'`;
 }
 

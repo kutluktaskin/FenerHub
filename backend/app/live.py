@@ -160,38 +160,74 @@ def load_match(match_id):
         return serialize_match(m) if m else None
 
 
+def unflatten(data: dict) -> dict:
+    """WS match kanalı alanları noktalı düz anahtarlarla gönderir ("status.code": 31);
+    iç içe biçime çevirir ({"status": {"code": 31}}). İç içe gelen alanlar olduğu gibi kalır."""
+    out: dict = {}
+    for key, value in data.items():
+        node = out
+        *path, last = key.split(".")
+        for part in path:
+            node = node.setdefault(part, {}) if isinstance(node.get(part, {}), dict) else node
+        node[last] = value
+    return out
+
+
+# Canlı sayılan durum kodları: 6 ilk yarı, 7 ikinci yarı, 31 devre arası, uzatmalar ve penaltılar
+LIVE_CODES = {6, 7, 31, 32, 33, 34, 41, 42, 50}
+
+
 def event_fields(data):
-    """match:{id} kanalının skor/durum mesajından (maç listesindeki 'event' biçimi) alanlar."""
-    ev = data.get("event") if isinstance(data, dict) and isinstance(data.get("event"), dict) else data
-    if not isinstance(ev, dict):
+    """match:{id} kanalının skor/durum mesajından alanlar. Mesajlar kısmidir: sadece değişen
+    alanlar gelir (ör. devre arasında yalnız status.code=31). Gelmeyen alan None'dır ve
+    veritabanındaki değeri değiştirmez. Kayıt: 20 Ekim Slavia maçı (scripts/probe_ws_record.py)."""
+    if not isinstance(data, dict):
         return None
-    st = ev.get("status") or {}
-    if not (st or "homeScore" in ev):
-        return None
-    return {
+    ev = data.get("event") if isinstance(data.get("event"), dict) else unflatten(data)
+    st = ev.get("status") if isinstance(ev.get("status"), dict) else {}
+    tm = ev.get("time") if isinstance(ev.get("time"), dict) else {}
+    f = {
         "home": sync.score(ev.get("homeScore")),
         "away": sync.score(ev.get("awayScore")),
-        "status": sync.map_status(st) if st.get("type") else None,
+        "status_type": st.get("type"),
         "status_code": st.get("code"),
-        "period_start": (ev.get("time") or {}).get("currentPeriodStartTimestamp"),
-        "period_initial": (ev.get("time") or {}).get("initial"),
+        "period_start": tm.get("currentPeriodStartTimestamp"),
+        "period_initial": tm.get("initial"),
     }
+    return f if any(v is not None for v in f.values()) else None
 
 
 def save_event(match_id, f):
+    """Kısmi durum mesajını maça işler; değişen maçın güncel hâlini döndürür."""
     with SessionLocal() as db, db.begin():
         m = match_query(db).filter(models.Match.id == match_id).first()
         if not m:
             return None
-        if f["home"] is not None and f["away"] is not None:
-            m.home_score, m.away_score = f["home"], f["away"]
-        if f["status"]:
-            m.status = f["status"]
-        live = f["status"] == "live"
-        if f["status"]:
-            m.status_code = f["status_code"] if live else None
-            m.period_start = f["period_start"] if live else None
-            m.period_initial = f["period_initial"] if live else None
+        code = f.get("status_code")
+        if f.get("status_type"):
+            m.status = sync.map_status({"type": f["status_type"]})
+        elif code == 100:
+            m.status = "finished"
+        elif code in LIVE_CODES:
+            m.status = "live"
+        if m.status == "live":
+            if code is not None:
+                m.status_code = code
+            if f.get("period_start") is not None:
+                m.period_start = f["period_start"]
+            if f.get("period_initial") is not None:
+                m.period_initial = f["period_initial"]
+        elif m.status == "finished":
+            m.status_code = m.period_start = m.period_initial = None
+        # Skor mesajları da kısmi: golde sadece atan tarafın skoru gelir. Maç başlamadan gelen
+        # 0-0 mesajı kartı "0 - 0" göstermesin diye sadece başlamış maçta işlenir.
+        if m.status != "scheduled" and (f.get("home") is not None or f.get("away") is not None):
+            if f.get("home") is not None:
+                m.home_score = f["home"]
+            if f.get("away") is not None:
+                m.away_score = f["away"]
+            m.home_score = m.home_score or 0
+            m.away_score = m.away_score or 0
         db.flush()
         return serialize_match(m)
 

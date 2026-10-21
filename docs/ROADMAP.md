@@ -37,9 +37,12 @@
 Önce bana SportsAPI planımı (Free/Pro/Ultra) ve Render'ın ücretsiz olup olmadığını sor.
 - [x] Keşif: Son biten maç için /match/{id}/lineups (missingPlayers), /incidents, /statistics ve V6 /search?q=Fenerbahce + /team/{id}/injuries yapılarını en fazla 8 istekle incele, özetle.
   - 3 istek (injuries, shotmap, best-players); lineups/incidents/statistics önbellekten. missingPlayers isim + description + expectedEndDate veriyor; V6 injuries'te oyuncu adı boş (sadece V6 id). WS snapshot'ları REST ile aynı yapıda. 20 Ekim Slavia maçı WS kaydı için scripts/probe_ws_record.py hazır.
-- [ ] Canlı maç SportsAPI WebSocket'ten (wss://api.sportsapipro.com/v2/football/ws, kotadan sayılmıyor) alınsın. Bağlantıyı backend kursun, API anahtarı tarayıcıya gitmesin. Fenerbahçe maçı başlamadan 15 dakika önce abone olsun, bitince kapatsın. Koparsa artan beklemeyle yeniden bağlansın, hiç çalışmazsa 60 saniyelik REST yedeği devreye girsin.
-- [ ] Veri sitenin kendi WebSocket kanalından (/ws/live) frontend'e aktarılsın.
-- [ ] Frontend: anlık skor ve dakika, gol animasyonu ve bildirimi (toast), olay akışı (gol/kart/değişiklik/VAR), gerçek maç istatistikleri, gerçek olaylara tepki veren 2D simülasyon.
+- [x] Canlı maç SportsAPI WebSocket'ten (wss://api.sportsapipro.com/v2/football/ws, kotadan sayılmıyor) alınsın. Bağlantıyı backend kursun, API anahtarı tarayıcıya gitmesin. Fenerbahçe maçı başlamadan 15 dakika önce abone olsun, bitince kapatsın. Koparsa artan beklemeyle yeniden bağlansın, hiç çalışmazsa 60 saniyelik REST yedeği devreye girsin.
+  - app/live.py. 20 Ekim Slavia maçında canlı doğrulandı. match kanalı alanları noktalı düz anahtar ve kısmi geliyor ("status.code": 31); unflatten + kısmi güncelleme ile devre arası/ikinci yarı/maç sonu anında işleniyor (testi gerçek mesaj dizisiyle).
+- [x] Veri sitenin kendi WebSocket kanalından (/ws/live) frontend'e aktarılsın.
+  - state/update/goal/source mesajları; simülasyon bağlanıyor, bağlantı yoksa 20 sn REST yedeği.
+- [x] Frontend: anlık skor ve dakika, gol animasyonu ve bildirimi (toast), olay akışı (gol/kart/değişiklik/VAR), gerçek maç istatistikleri, gerçek olaylara tepki veren 2D simülasyon.
+  - Simülasyonda gerçek kadro, gol/kart/değişiklik/VAR/penaltı animasyonu ve bandı, canlı anlatıcı (Aşama 11 ile). Maçta doğrulandı; sadece devre arasında saatin 45+ diye ilerlemesi sorunu vardı, düzeltildi (backend anında devre arası + frontend uzatma sınırı).
 - [ ] Maç bitince /graph, /shotmap ve /best-players bir kez çekilip kaydedilsin, maç özeti olarak gösterilsin.
 - [x] Maç günü eksikleri /lineups içindeki missingPlayers'tan otomatik gelsin (maça 24 saatten az kala 3 saatte bir, son 2 saatte 30 dakikada bir).
   - app/absences_sync.py; REST (auto_sync.lineups_every) ve maç sırasında WS lineups kanalından. Açıklamalar Türkçeye çevrilir, dönüş tarihi "10 Aralık" biçiminde.
