@@ -3,7 +3,7 @@ izlemiyorsa) maç detayları. Günlük kotayı korumak için her iş kendi aral�
 import asyncio
 import time
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from . import absences_sync, cache, live, models, sync
 from .database import SessionLocal
@@ -125,6 +125,40 @@ def lineups_ready(aid):
     return bool((data.get("data") or {}).get("confirmed"))
 
 
+SUMMARY_AFTER = timedelta(hours=2, minutes=15)   # başlamadan bu kadar sonra veriler kesinleşmiş olur
+SUMMARY_WINDOW = timedelta(days=2)               # daha eski maçlar için özet çekilmez (kota)
+SUMMARY_MIN_QUOTA = live.QUOTA_STOP + 3          # özet 3 istek: günlük %60 sınırını aşmasın
+
+
+def summary_targets(now=None):
+    """Özeti çekilecek maçlar: bitmiş, başlamasından 2 saat 15 dk geçmiş, en fazla 2 günlük,
+    özeti henüz alınmamış."""
+    now = now or datetime.now(sync.TR_TZ)
+    out = []
+    with SessionLocal() as db:
+        rows = db.query(models.Match).filter(
+            models.Match.status == "finished", models.Match.api_id.is_not(None),
+            models.Match.match_date.is_not(None), models.Match.kickoff_time.is_not(None),
+        ).all()
+        for m in rows:
+            ko = datetime.combine(m.match_date, m.kickoff_time, tzinfo=sync.TR_TZ)
+            if ko + SUMMARY_AFTER <= now <= ko + SUMMARY_WINDOW:
+                out.append(m.api_id)
+    return [a for a in out if not cache.get(f"detail:{a}:summary_done")]
+
+
+def fetch_summary(api_id):
+    """Maç sonu özeti: baskı grafiği, şut haritası, en iyi oyuncular (3 istek, bir kez)."""
+    q = sync.quota_remaining
+    if q is not None and q < SUMMARY_MIN_QUOTA:
+        return
+    for kind in ("graph", "shotmap", "best-players"):
+        if cache.get(f"detail:{api_id}:{kind}") is None:
+            fetch_kind(api_id, kind)
+    cache.put(f"detail:{api_id}:summary_done", True)
+    print(f"Maç özeti kaydedildi: {api_id}", flush=True)
+
+
 def tick():
     ms = snapshot()
     live_now = [m for m in ms if in_live_window(m)]
@@ -135,6 +169,10 @@ def tick():
     if due(next_p, MATCHES_LIVE if live_now else MATCHES_IDLE):
         full = due(last_p, LAST_LIVE if live_now else LAST_IDLE)
         guard("matches", lambda: refresh_matches(full))
+
+    # maç sonu özeti: bitmiş maçlar için bir kez
+    for aid in summary_targets():
+        guard(f"sum{aid}", lambda a=aid: fetch_summary(a))
 
     # puan durumu: 30 dakikada bir
     global standings_at

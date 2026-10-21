@@ -143,6 +143,71 @@ def trim_stats(data):
     return None
 
 
+# ---------- Maç sonu özeti (graph / shotmap / best-players; auto_sync maç bitince bir kez çeker) ----------
+SUMMARY_KINDS = ("graph", "shotmap", "best-players")
+
+
+def trim_graph(data):
+    """Baskı grafiği: [[dakika, değer], ...]; değer > 0 ev sahibi, < 0 deplasman baskısı."""
+    points = (data or {}).get("graphPoints") or []
+    if not points:
+        return None
+    return {"points": [[p.get("minute"), p.get("value")] for p in points],
+            "periodTime": data.get("periodTime") or 45}
+
+
+def trim_shotmap(data):
+    """Şutlar: x = kaleye uzaklık (saha boyunun %'si), y = yan konum (0-100), xg, sonuç."""
+    shots = (data or {}).get("shotmap") or []
+    if not shots:
+        return None
+    out = []
+    for s in shots:
+        c = s.get("playerCoordinates") or {}
+        if c.get("x") is None or c.get("y") is None:
+            continue
+        out.append({
+            "x": c["x"], "y": c["y"], "xg": round(s.get("xg") or 0, 3),
+            "type": s.get("shotType"),            # goal | save | miss | block | post
+            "isHome": s.get("isHome"),
+            "player": (s.get("player") or {}).get("name"),
+            "time": s.get("time"), "addedTime": s.get("addedTime"),
+            "situation": s.get("situation"), "bodyPart": s.get("bodyPart"),
+        })
+    return out or None
+
+
+def trim_best(data):
+    """En iyi oyuncular: maçın ilk 5'i ve iki takımın en iyisi (puan)."""
+    if not data:
+        return None
+    def row(e):
+        if not e:
+            return None
+        return {"name": (e.get("player") or {}).get("name"), "position": (e.get("player") or {}).get("position"),
+                "team": (e.get("team") or {}).get("name"), "rating": e.get("value")}
+    top = [row(e) for e in (data.get("leaderboard") or [])[:5]]
+    best = {"home": row(data.get("bestHomeTeamPlayer")), "away": row(data.get("bestAwayTeamPlayer")), "top": top}
+    return best if (best["home"] or best["away"] or top) else None
+
+
+def read_summary(api_id):
+    if not api_id:
+        return None
+    graph = trim_graph(read_cache(api_id, "graph"))
+    shots = trim_shotmap(read_cache(api_id, "shotmap"))
+    best = trim_best(read_cache(api_id, "best-players"))
+    if not (graph or shots or best):
+        return None
+    return {"graph": graph, "shotmap": shots, "best": best}
+
+
+def summary_ids(db) -> set:
+    """Özeti önbellekte olan maçların api id'leri (tek sorgu; fikstürdeki "Maç özeti" düğmesi için)."""
+    keys = db.query(models.ApiCache.key).filter(models.ApiCache.key.like("detail:%:best-players")).all()
+    return {int(k.split(":")[1]) for (k,) in keys if k.split(":")[1].isdigit()}
+
+
 def trim_lineups(data):
     if not data or not data.get("confirmed"):
         return None
@@ -172,7 +237,8 @@ def list_matches(competition: str | None = None, db: Session = Depends(get_db)):
         q = q.filter(models.Match.competition == competition)
 
     q = q.order_by(models.Match.match_date.is_(None), models.Match.match_date)
-    return [serialize_match(m) for m in q.all()]
+    with_summary = summary_ids(db)
+    return [{**serialize_match(m), "has_summary": m.api_id in with_summary} for m in q.all()]
 
 
 @router.get("/upcoming")
@@ -201,6 +267,7 @@ def match_detail(match_id: int, db: Session = Depends(get_db)):
         "incidents": trim_incidents(read_cache(m.api_id, "incidents")),
         "statistics": trim_stats(read_cache(m.api_id, "statistics")),
         "lineups": trim_lineups(read_cache(m.api_id, "lineups")),
+        "summary": read_summary(m.api_id),
     }
 
 
