@@ -1425,7 +1425,7 @@ table { font-variant-numeric: tabular-nums; }
 .pr-table tr.is-me td { background: var(--c-accent-soft); }
 .pr-table td small { color: var(--c-accent); }
 .pr-motm-box { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-4); border: 1px solid var(--c-accent-line); border-radius: var(--r-lg); background: var(--c-accent-soft); }
-.pr-motm { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 6px; }
+.pr-motm { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 6px; }
 .pr-vote {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 70px 38px 34px;
