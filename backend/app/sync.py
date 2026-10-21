@@ -22,6 +22,7 @@ from .migrate import run_migrations
 
 load_dotenv()
 BASE = "https://api.sportsapipro.com/v2/football/api"
+V6_BASE = "https://api.sportsapipro.com/v6/football"
 FB_ID = 3052
 SEASON_START = 1782864000  # 1 Temmuz 2026 (UTC); öncesi eski sezon
 TR_TZ = timezone(timedelta(hours=3))
@@ -56,11 +57,11 @@ STANDINGS_MAX_AGE = 3 * 3600  # saniye (3 saat): 2 istek x 8 = günde 16 istek (
 quota_remaining = None
 
 
-def api_get(path):
+def api_get(path, base=BASE):
     global quota_remaining
     headers = {"x-api-key": os.environ["SPORTS_API_KEY"], "User-Agent": "curl/8"}
     for attempt in range(4):
-        r = requests.get(BASE + path, headers=headers, timeout=30)
+        r = requests.get(base + path, headers=headers, timeout=30)
         # Kalan günlük kota her istekte loglanır (anahtar loga yazılmaz)
         print(f"deneme {attempt + 1}: {path} -> {r.status_code} · kalan kota: "
               f"{r.headers.get('x-ratelimit-remaining', '?')}/{r.headers.get('x-ratelimit-limit', '?')}")

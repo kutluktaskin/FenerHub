@@ -6,14 +6,19 @@ tahmini dönüş tarihi. Buradan iki şey güncellenir:
   - o maçın eksikleri (absences.match_id = maç)
   - genel sakatlık raporu (match_id boş): en yeni kadro verisindeki liste esas alınır
 
+Genel rapor iki kaynağın birleşimidir: en yeni kadro verisindeki eksikler ve SportsAPI V6
+sakatlık listesi (günde 2 kez, apply_v6_injuries). V6 listesinde oyuncu adı boş gelir; ad,
+oyuncu V6'da ilk görüldüğünde bir kez sorulup kalıcı saklanır (v6player:<id>). Aynı oyuncu iki
+kaynakta da varsa tahmini dönüş tarihi olan kadro verisi esas alınır.
+
 Sadece source="api" kayıtlar değişir; elle girilenler (source="manual") korunur. Aynı
 oyuncu için elle girilmiş kayıt varsa otomatik kayıt eklenmez (elle girilen kazanır).
 Kadroda bulunamayan isimler loglanır.
 """
 import unicodedata
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
-from . import models
+from . import cache, models, sync
 from .database import SessionLocal
 
 FB = "Fenerbahçe"
@@ -117,7 +122,76 @@ def apply_lineups(api_id: int, data: dict | None, general: bool = True) -> None:
             return
         items = [parse_missing(m) for m in side.get("missingPlayers") or [] if (m.get("player") or {}).get("name")]
         added, unmatched = _replace(db, fb.id, match.id, items)
-        if general:
-            _replace(db, fb.id, None, items)
     print(f"Eksikler (maç {api_id}): {added} otomatik kayıt"
           + (f"; kadroda bulunamayan: {unmatched}" if unmatched else ""), flush=True)
+    if general:
+        cache.put("absences:lineups", items)
+        rebuild_general()
+
+
+# ---------- Genel rapor: kadro verisi + V6 sakatlık listesi ----------
+V6_TEAM = "59gklziew2a17xd"          # Fenerbahçe'nin V6 kimliği
+V6_EVERY = 12 * 3600                 # günde 2 kez
+V6_NEW_PLAYERS_MAX = 5               # bir çalışmada en fazla bu kadar yeni oyuncu adı sorulur (kota)
+
+
+def merge_general(lineup_items: list[dict], v6_items: list[dict]) -> list[dict]:
+    """İki kaynağı birleştirir; aynı oyuncu iki kaynakta da varsa kadro verisi kazanır."""
+    seen = {norm(i["name"]) for i in lineup_items}
+    return lineup_items + [i for i in v6_items if norm(i["name"]) not in seen]
+
+
+def rebuild_general() -> None:
+    items = merge_general(cache.get("absences:lineups") or [], cache.get("absences:v6") or [])
+    with SessionLocal() as db, db.begin():
+        fb = db.query(models.Team).filter_by(name=FB).first()
+        if not fb:
+            return
+        added, unmatched = _replace(db, fb.id, None, items)
+    print(f"Genel sakatlık raporu: {added} otomatik kayıt"
+          + (f"; kadroda bulunamayan: {unmatched}" if unmatched else ""), flush=True)
+
+
+def v6_player_name(pid: str) -> str | None:
+    """V6 oyuncu kimliğinden ad; ilk görüldüğünde bir kez sorulur, sonra hep önbellekten."""
+    key = f"v6player:{pid}"
+    known = cache.get(key)
+    if known is not None:
+        return known or None
+    data = sync.api_get(f"/player/{pid}", base=sync.V6_BASE)
+    name = ((data or {}).get("player") or {}).get("name") or ""
+    cache.put(key, name)
+    return name or None
+
+
+def parse_v6(item: dict, name: str, today: date | None = None) -> dict:
+    reason = (item.get("reason") or "").strip()
+    end = item.get("endTime") or 0
+    note = None
+    if end:
+        note = return_note(datetime.fromtimestamp(end, timezone.utc).strftime("%Y-%m-%dT00:00:00+00:00"), today)
+    return {
+        "name": name,
+        "type": "suspension" if any(w in reason.lower() for w in SUSPENSION_WORDS) else "injury",
+        "reason": reason_tr(reason),
+        "return_note": note,
+    }
+
+
+def apply_v6_injuries() -> None:
+    """V6 sakatlık listesini çeker (1 istek + yeni oyuncular için ad), genel raporu günceller."""
+    data = sync.api_get(f"/team/{V6_TEAM}/injuries", base=sync.V6_BASE)
+    items, asked = [], 0
+    for inj in (data or {}).get("injuries") or []:
+        pid = (inj.get("player") or {}).get("id")
+        if not pid:
+            continue
+        if cache.get(f"v6player:{pid}") is None:
+            if asked >= V6_NEW_PLAYERS_MAX:
+                continue                     # kalan yeni oyuncular bir sonraki çalışmada
+            asked += 1
+        name = v6_player_name(pid)
+        if name:
+            items.append(parse_v6(inj, name))
+    cache.put("absences:v6", items)
+    rebuild_general()

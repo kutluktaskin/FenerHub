@@ -200,6 +200,11 @@ def tick():
     for aid in summary_targets():
         guard(f"sum{aid}", lambda a=aid: fetch_summary(a))
 
+    # V6 sakatlık listesi: günde 2 kez (genel rapora eklenir); kota bütçesi elverirse
+    q = sync.quota_remaining
+    if due("absences:v6", absences_sync.V6_EVERY) and (q is None or q > live.QUOTA_STOP + 5):
+        guard("v6", absences_sync.apply_v6_injuries)
+
     # puan durumu: 30 dakikada bir
     global standings_at
     if time.time() - standings_at >= STANDINGS_EVERY:

@@ -103,3 +103,71 @@ def test_lineups_schedule():
     assert auto_sync.lineups_every(-10 * 60) == 3 * 3600      # son 24 saatte 3 saatte bir
     assert auto_sync.lineups_every(-90) == 1800               # son 2 saatte 30 dakikada bir
     assert auto_sync.lineups_every(10) is None                # maç başladı: WS ya da durur
+
+
+V6_INJURIES = {"success": True, "injuries": [
+    {"player": {"id": "v6diz", "name": ""}, "type": 1, "reason": "Knee injury", "endTime": 0},
+    {"player": {"id": "v6aşil", "name": ""}, "type": 1, "reason": "Achilles tendon problems",
+     "endTime": 4102444800},                                          # 1 Ocak 2100
+    {"player": {"id": "v6yok", "name": ""}, "type": 1, "reason": "Illness", "endTime": 0},
+]}
+V6_NAMES = {"v6diz": "Test Diz", "v6aşil": "Test Ceza", "v6yok": "Kadroda Olmayan"}
+
+
+def fake_v6(calls):
+    def api_get(path, base=None):
+        calls.append(path)
+        if path.endswith("/injuries"):
+            return V6_INJURIES
+        return {"player": {"name": V6_NAMES[path.rsplit("/", 1)[1]]}}
+    return api_get
+
+
+def test_v6_injuries_merge_and_name_cache(world, monkeypatch):
+    from app import cache, sync
+    for k in ("absences:lineups", "absences:v6", *[f"v6player:{p}" for p in V6_NAMES]):
+        cache.delete(k)
+    calls = []
+    monkeypatch.setattr(sync, "api_get", fake_v6(calls))
+
+    # Kadro verisinde Test Diz var (dönüş tarihiyle): iki kaynakta da olunca kadro verisi kazanır
+    absences_sync.apply_lineups(API_ID, lineups([missing("Test Diz", "Knee Injury")]))
+    absences_sync.apply_v6_injuries()
+    general = {r[0]: r for r in rows(None)}
+    assert general["Test Diz"][3] == "10 Aralık 2099"                 # kadro verisinden
+    assert general["Test Ceza"][2:] == ("Aşil tendonu sorunu", "1 Ocak 2100", "api")   # V6'dan
+    assert len(calls) == 4                                             # liste + 3 yeni oyuncu adı
+
+    calls.clear()
+    absences_sync.apply_v6_injuries()
+    assert calls == ["/team/59gklziew2a17xd/injuries"]                 # adlar artık önbellekten
+
+    # Oyuncu iyileşti: V6 listesinden çıktı, kadro verisinde de yok -> rapordan düşer
+    monkeypatch.setattr(absences_sync, "V6_NEW_PLAYERS_MAX", 0)
+    V6_INJURIES_SAVED = list(V6_INJURIES["injuries"])
+    V6_INJURIES["injuries"] = V6_INJURIES_SAVED[:1]
+    try:
+        absences_sync.apply_lineups(API_ID, lineups([]))
+        absences_sync.apply_v6_injuries()
+        assert {r[0] for r in rows(None)} == {"Test Diz"}
+    finally:
+        V6_INJURIES["injuries"] = V6_INJURIES_SAVED
+
+
+def test_v6_new_player_limit(world, monkeypatch):
+    from app import cache, sync
+    for k in ("absences:lineups", "absences:v6", *[f"v6player:{p}" for p in V6_NAMES]):
+        cache.delete(k)
+    calls = []
+    monkeypatch.setattr(sync, "api_get", fake_v6(calls))
+    monkeypatch.setattr(absences_sync, "V6_NEW_PLAYERS_MAX", 1)
+    absences_sync.apply_v6_injuries()
+    assert len(calls) == 2                       # liste + sadece 1 yeni oyuncu (kota)
+    absences_sync.apply_v6_injuries()
+    assert len(calls) == 4                       # sonraki çalışmada bir yeni oyuncu daha
+
+
+def test_merge_general_precedence():
+    a = [{"name": "Tést Kişi", "reason": "kadro"}]
+    b = [{"name": "Test Kişi", "reason": "v6"}, {"name": "Başka", "reason": "v6"}]
+    assert [i["reason"] for i in absences_sync.merge_general(a, b)] == ["kadro", "v6"]
