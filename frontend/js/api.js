@@ -129,7 +129,11 @@ function initials(name) {
 
 function playerAvatar(p) {
     const num = p.shirt_number ?? null;
-    return `<span class="avatar" aria-hidden="true">${esc(initials(p.name))}` +
+    // Fotoğraf varsa baş harflerin üstüne biner; yüklenemezse kendini siler, baş harfler görünür
+    const photo = p.api_id && playerPhotos.has(p.api_id)
+        ? `<img class="avatar-photo" src="img/players/${Number(p.api_id)}.png" alt="" loading="lazy" onerror="this.remove()">`
+        : "";
+    return `<span class="avatar" aria-hidden="true">${esc(initials(p.name))}${photo}` +
         (num !== null ? `<b class="avatar-num">${esc(num)}</b>` : "") + `</span>`;
 }
 
@@ -250,6 +254,7 @@ async function loadSquad() {
     if (!tbody) return;
     try {
         squadState.players = await apiGet("/api/squad");
+        await photosReady;
         renderSquad();
         renderReadiness(squadState.players);
         renderSquadSummary(squadState.players);
@@ -372,12 +377,12 @@ function monogram(name) {
 // ---------- Takım bilgisi: API id, kulüp renkleri, logo ----------
 // /api/matches cevabındaki home_api_id / home_color alanlarından doldurulur.
 const teamInfo = {};
-// download_logos.py'nin indirdiği logolar (img/teams/index.json); yoksa boş küme
+// scripts/download_images.py'nin indirdiği görseller (img/teams|players/index.json); yoksa boş küme
 let teamLogos = new Set();
-const logosReady = fetch("img/teams/index.json")
-    .then(r => (r.ok ? r.json() : []))
-    .then(ids => { teamLogos = new Set(ids); })
-    .catch(() => {});
+let playerPhotos = new Set();
+const loadIndex = path => fetch(path).then(r => (r.ok ? r.json() : [])).catch(() => []);
+const logosReady = loadIndex("img/teams/index.json").then(ids => { teamLogos = new Set(ids); });
+const photosReady = loadIndex("img/players/index.json").then(ids => { playerPhotos = new Set(ids); });
 
 function rememberTeams(matches) {
     matches.forEach(m => {
@@ -407,10 +412,17 @@ function crest(name, size = "") {
         return `<img class="crest ${size}" src="img/fenerbahce-logo.png" alt="" loading="lazy">`;
     }
     const t = teamInfo[name];
+    const badge = monoCrest(name, t, size);
     if (t && teamLogos.has(t.id)) {
-        return `<img class="crest ${size}" src="img/teams/${t.id}.png" alt="" loading="lazy">`;
+        // Logo yüklenemezse renkli rozete döner
+        return `<img class="crest ${size}" src="img/teams/${Number(t.id)}.png" alt="" loading="lazy"
+            data-fallback="${esc(badge)}" onerror="this.outerHTML=this.dataset.fallback">`;
     }
-    // Logo yoksa: kulübün ana rengiyle daire, ikincil renkte halka, okunur kısaltma
+    return badge;
+}
+
+// Logo yoksa: kulübün ana rengiyle daire, ikincil renkte halka, okunur kısaltma
+function monoCrest(name, t, size) {
     const code = (TEAM_BADGE[name] || [monogram(name)])[0];
     const bg = (t && hexRGB(t.c1) && t.c1) || (TEAM_BADGE[name] && TEAM_BADGE[name][1]);
     const ring = (t && hexRGB(t.c2) && t.c2) || (TEAM_BADGE[name] && TEAM_BADGE[name][2]) || "var(--c-ring)";

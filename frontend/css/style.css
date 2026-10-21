@@ -1855,6 +1855,9 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
 .player-stats-table tr:has(.st-injured) { background: color-mix(in srgb, var(--c-injury) 7%, transparent); }
 .player-stats-table tr:has(.st-suspended) { background: color-mix(in srgb, var(--c-susp) 7%, transparent); }
 .player-stats-table tr.is-out .avatar { filter: grayscale(0.8); opacity: 0.6; }
+/* Oyuncu fotoğrafı baş harflerin üstüne biner (yüklenemezse silinir, baş harfler görünür) */
+.avatar-photo { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: top; background: var(--c-navy-700); }
+.avatar-num { z-index: 1; }
 .player-stats-table tr.is-out .stat-badge { filter: grayscale(1); }
 
 /* Durum rozeti ve ipucu (tooltip) */
