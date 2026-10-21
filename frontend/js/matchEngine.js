@@ -182,6 +182,7 @@ function simStartFeed(matchKey, meta) {
     players = makePlayers('4-3-3', '4-3-3');
     hideBanner();
     pushFeed([], false);
+    if (typeof renderSummaryTab === 'function') renderSummaryTab(null, null);
     if (!feed.id) {
         setStatus('Canlı veri bağlantısı yok (maç verisi API’den gelmedi).');
         return;
@@ -201,6 +202,12 @@ async function simPoll() {
     }
     if (f !== feed) return;           // bu arada başka maç açıldı
     applyDetail(d.match, d.incidents, d.statistics, d.lineups);
+    // Maç sonu özeti (js/summary.js): varsa "Maç özeti" sekmesi görünür
+    const hasSummary = typeof renderSummaryTab === 'function' && renderSummaryTab(d.summary, d.match, d.incidents);
+    if (hasSummary && window.summaryWanted) {
+        window.summaryWanted = false;
+        switchTab('summaryTab');
+    }
 }
 
 function applyDetail(m, incidents, statistics, lineups) {

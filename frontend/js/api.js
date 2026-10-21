@@ -886,6 +886,7 @@ function fixtureCard(m, isNext) {
             <div class="fx-center">${center}</div>
             ${fxTeam(m.away, "away", awayCls)}
         </div>
+        ${done && m.has_summary ? `<button type="button" class="fx-summary-btn" onclick="openMatchSummary(${Number(m.id)})">${icon("target")}Maç özeti: şut haritası, baskı grafiği, en iyiler</button>` : ""}
     </article>`;
 }
 

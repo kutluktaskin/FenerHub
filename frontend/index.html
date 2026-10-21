@@ -16,10 +16,10 @@
     <!-- Arka planın ilk karesi erkenden insin (background.js aynı dosyayı kullanır) -->
     <link rel="preload" as="image" href="frames/frame_0001.jpg" fetchpriority="high">
     <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style.css?v=20261021h">
+    <link rel="stylesheet" href="css/style.css?v=20261021j">
 </head>
 <body>
-    <script src="js/ui.js?v=20261021h"></script>
+    <script src="js/ui.js?v=20261021j"></script>
     <a class="skip-link" href="#icerik">İçeriğe geç</a>
 
     <!-- SABİT ÜST MENÜ -->
@@ -95,6 +95,7 @@
                             <button type="button" class="tab-btn active" id="btn-pitchTab" onclick="switchTab('pitchTab')"><svg class="ico" aria-hidden="true"><use href="#i-ball"/></svg>2D simülasyon</button>
                             <button type="button" class="tab-btn" id="btn-statsTab" onclick="switchTab('statsTab')"><svg class="ico" aria-hidden="true"><use href="#i-chart"/></svg>İstatistikler</button>
                             <button type="button" class="tab-btn" id="btn-lineupTab" onclick="switchTab('lineupTab')"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg>İlk 11</button>
+                            <button type="button" class="tab-btn" id="btn-summaryTab" onclick="switchTab('summaryTab')" hidden><svg class="ico" aria-hidden="true"><use href="#i-target"/></svg>Maç özeti</button>
                         </div>
                         <button type="button" class="close-sim-btn" onclick="closeSimulation()"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg>Kapat</button>
                     </div>
@@ -125,6 +126,13 @@
                         <div class="info-panel">
                             <h3 class="panel-title"><svg class="ico" aria-hidden="true"><use href="#i-chart"/></svg>Karşılaşma istatistikleri</h3>
                             <div id="statsBody"></div>
+                        </div>
+                    </div>
+
+                    <div id="summaryTab" class="tab-content">
+                        <div class="info-panel">
+                            <h3 class="panel-title"><svg class="ico" aria-hidden="true"><use href="#i-target"/></svg>Maç özeti</h3>
+                            <div id="summaryBody"></div>
                         </div>
                     </div>
 
@@ -358,14 +366,15 @@
     </aside>
 
     <!-- Harici JS Dosyaları -->
-    <script defer src="js/background.js?v=20261021h"></script>
-    <script defer src="js/commentary.js?v=20261021h"></script>
-    <script defer src="js/matchEngine.js?v=20261021h"></script>
-    <script defer src="js/fx.js?v=20261021h"></script>
-    <script defer src="js/api.js?v=20261021h"></script>
-    <script defer src="js/main.js?v=20261021h"></script>
-    <script defer src="js/nav.js?v=20261021h"></script>
-    <script defer src="js/forum.js?v=20261021h"></script>
-    <script defer src="js/demo.js?v=20261021h"></script>
+    <script defer src="js/background.js?v=20261021j"></script>
+    <script defer src="js/commentary.js?v=20261021j"></script>
+    <script defer src="js/summary.js?v=20261021j"></script>
+    <script defer src="js/matchEngine.js?v=20261021j"></script>
+    <script defer src="js/fx.js?v=20261021j"></script>
+    <script defer src="js/api.js?v=20261021j"></script>
+    <script defer src="js/main.js?v=20261021j"></script>
+    <script defer src="js/nav.js?v=20261021j"></script>
+    <script defer src="js/forum.js?v=20261021j"></script>
+    <script defer src="js/demo.js?v=20261021j"></script>
 </body>
 </html>
