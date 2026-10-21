@@ -106,8 +106,10 @@ function nextPass() {
     return pool[Math.floor(Math.random() * pool.length)];
 }
 
+const isHalftime = () => !!(feed.m && feed.m.status_code === 31);
+
 function pickState() {
-    if (simMode !== 'live') return 'idle';
+    if (simMode !== 'live' || isHalftime()) return 'idle';     // devre arasında oyun durur
     const p = feed.fbPoss;            // gerçek topla oynama oranı
     const r = Math.random();
     if (r < p * 0.55) return 'attack_fb';
@@ -117,6 +119,7 @@ function pickState() {
 
 function idleCaption() {
     if (simMode === 'finished') return { ic: 'flag', text: 'Maç bitti.' };
+    if (isHalftime()) return { ic: 'pause', text: `Devre arası • ${feed.m.home} ${feed.m.home_score ?? 0} - ${feed.m.away_score ?? 0} ${feed.m.away}` };
     if (feed.fbForm && feed.rivForm) {
         return { ic: 'clock', text: `Maç başlamadı • Diziliş: Fenerbahçe ${feed.fbForm} • ${feed.rivName} ${feed.rivForm}` };
     }
@@ -316,6 +319,7 @@ function incTime(i) {
 }
 
 function describeIncident(i, m) {
+    if (typeof i.time === 'number' && i.time < 0) return null;   // maç öncesi (ör. teknik ekibe kart)
     const team = (i.isHome === null || i.isHome === undefined) ? '' : (i.isHome ? m.home : m.away);
     const who = i.player ? ` ${i.player}` : '';
     const t = incTime(i);

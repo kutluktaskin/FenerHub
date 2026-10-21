@@ -183,6 +183,7 @@
        secondYellow (bu kart ikinci sarı mı) }. Döner: cümle ya da null. */
     function line(i, ctx) {
         if (!i || !ctx) return null;
+        if (typeof i.time === "number" && i.time < 0) return null;   // maç öncesi olay (ör. teknik ekibe kart)
         const fbIsHome = !!ctx.fbIsHome;
         const fbSide = i.isHome === undefined || i.isHome === null ? null : i.isHome === fbIsHome;
         const rakip = fbIsHome ? ctx.away : ctx.home;

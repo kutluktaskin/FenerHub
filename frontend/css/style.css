@@ -1376,6 +1376,58 @@ table { font-variant-numeric: tabular-nums; }
 }
 .sim-note { margin: var(--s-2) 0 0; color: var(--c-text-3); font-size: var(--fs-xs); }
 
+/* Demo modu çubuğu (js/demo.js) */
+.demo-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2) var(--s-3);
+    margin-bottom: var(--s-3);
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--c-accent-line);
+    border-radius: var(--r-md);
+    background: var(--c-accent-soft);
+    font-size: var(--fs-sm);
+}
+.demo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+    border-radius: var(--r-pill);
+    background: var(--c-accent);
+    color: var(--c-accent-ink);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.demo-badge .ico { width: 14px; height: 14px; }
+.demo-info { flex: 1; min-width: 200px; color: var(--c-text-2); }
+.demo-speed { display: inline-flex; padding: 2px; border: 1px solid var(--c-line); border-radius: var(--r-pill); background: var(--c-inset); }
+.demo-speed button { padding: 3px 10px; border: 0; border-radius: var(--r-pill); background: none; color: var(--c-text-3); font-weight: 700; }
+.demo-speed button[aria-pressed="true"] { background: var(--c-accent); color: var(--c-accent-ink); }
+.demo-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-pill);
+    background: none;
+    color: var(--c-text-2);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    text-decoration: none;
+}
+.demo-btn:hover { color: var(--c-text); border-color: var(--c-accent); }
+.demo-btn .ico { width: 14px; height: 14px; }
+.demo-track { flex: 1 1 100%; height: 4px; border-radius: 2px; background: var(--c-inset); overflow: hidden; }
+.demo-fill { display: block; height: 100%; width: 0; background: var(--c-accent); transition: width 0.25s linear; }
+.demo-left { margin-left: auto; color: var(--c-text-3); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+.footer-demo { display: inline-flex; align-items: center; gap: 6px; color: var(--c-accent); font-weight: 600; text-decoration: none; }
+.footer-demo:hover { text-decoration: underline; }
+.footer-demo .ico { width: 16px; height: 16px; }
+
 /* Anlatım akışı: en yeni olay üstte, ilk satır vurgulu */
 .sim-feed {
     display: flex;
