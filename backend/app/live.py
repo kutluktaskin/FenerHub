@@ -197,37 +197,47 @@ def event_fields(data):
     return f if any(v is not None for v in f.values()) else None
 
 
+def apply_event(m, f) -> None:
+    """Kısmi durum mesajını (event_fields çıktısı) maç nesnesine işler. m: status, status_code,
+    period_start, period_initial, home_score, away_score alanları olan herhangi bir nesne
+    (veritabanı satırı ya da demo üretirken basit nesne, bkz. scripts/build_demo.py)."""
+    code = f.get("status_code")
+    if f.get("status_type"):
+        m.status = sync.map_status({"type": f["status_type"]})
+    elif code == 100:
+        m.status = "finished"
+    elif code in LIVE_CODES:
+        m.status = "live"
+    if m.status == "live":
+        if code is not None:
+            m.status_code = code
+        if f.get("period_start") is not None:
+            m.period_start = f["period_start"]
+        if f.get("period_initial") is not None:
+            m.period_initial = f["period_initial"]
+    elif m.status == "finished":
+        m.status_code = m.period_start = m.period_initial = None
+    if m.status != "scheduled":            # başlamış maçta skor yoksa 0-0 ("v" görünmesin)
+        m.home_score = m.home_score or 0
+        m.away_score = m.away_score or 0
+    # Skor mesajları da kısmi: golde sadece atan tarafın skoru gelir. Maç başlamadan gelen
+    # 0-0 mesajı kartı "0 - 0" göstermesin diye sadece başlamış maçta işlenir.
+    if m.status != "scheduled" and (f.get("home") is not None or f.get("away") is not None):
+        if f.get("home") is not None:
+            m.home_score = f["home"]
+        if f.get("away") is not None:
+            m.away_score = f["away"]
+        m.home_score = m.home_score or 0
+        m.away_score = m.away_score or 0
+
+
 def save_event(match_id, f):
-    """Kısmi durum mesajını maça işler; değişen maçın güncel hâlini döndürür."""
+    """Kısmi durum mesajını veritabanındaki maça işler; değişen maçın güncel hâlini döndürür."""
     with SessionLocal() as db, db.begin():
         m = match_query(db).filter(models.Match.id == match_id).first()
         if not m:
             return None
-        code = f.get("status_code")
-        if f.get("status_type"):
-            m.status = sync.map_status({"type": f["status_type"]})
-        elif code == 100:
-            m.status = "finished"
-        elif code in LIVE_CODES:
-            m.status = "live"
-        if m.status == "live":
-            if code is not None:
-                m.status_code = code
-            if f.get("period_start") is not None:
-                m.period_start = f["period_start"]
-            if f.get("period_initial") is not None:
-                m.period_initial = f["period_initial"]
-        elif m.status == "finished":
-            m.status_code = m.period_start = m.period_initial = None
-        # Skor mesajları da kısmi: golde sadece atan tarafın skoru gelir. Maç başlamadan gelen
-        # 0-0 mesajı kartı "0 - 0" göstermesin diye sadece başlamış maçta işlenir.
-        if m.status != "scheduled" and (f.get("home") is not None or f.get("away") is not None):
-            if f.get("home") is not None:
-                m.home_score = f["home"]
-            if f.get("away") is not None:
-                m.away_score = f["away"]
-            m.home_score = m.home_score or 0
-            m.away_score = m.away_score or 0
+        apply_event(m, f)
         db.flush()
         return serialize_match(m)
 

@@ -191,7 +191,7 @@ def test_auto_sync_skips_rest_while_ws_covers(match, monkeypatch):
 REAL_SEQUENCE = [
     ({"homeScore.current": 0, "awayScore.current": 0}, ("scheduled", None, None, None)),
     ({"status.code": 6, "status.type": "inprogress", "time.currentPeriodStartTimestamp": 1792514754,
-      "time.initial": 0, "time.max": 2700}, ("live", 6, None, None)),
+      "time.initial": 0, "time.max": 2700}, ("live", 6, 0, 0)),           # başladı: 0-0
     ({"homeScore.current": 1, "homeScore.display": 1, "homeScore.period1": 1}, ("live", 6, 1, 0)),
     ({"awayScore.current": 1, "awayScore.display": 1}, ("live", 6, 1, 1)),
     ({"cardsCode": "00"}, ("live", 6, 1, 1)),
