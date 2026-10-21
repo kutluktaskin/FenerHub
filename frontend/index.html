@@ -16,10 +16,10 @@
     <!-- Arka planın ilk karesi erkenden insin (background.js aynı dosyayı kullanır) -->
     <link rel="preload" as="image" href="frames/frame_0001.jpg" fetchpriority="high">
     <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style.css?v=20261021m">
+    <link rel="stylesheet" href="css/style.css?v=20261021o">
 </head>
 <body>
-    <script src="js/ui.js?v=20261021m"></script>
+    <script src="js/ui.js?v=20261021o"></script>
     <a class="skip-link" href="#icerik">İçeriğe geç</a>
 
     <!-- SABİT ÜST MENÜ -->
@@ -34,6 +34,7 @@
             <button type="button" onclick="openSimulation('alanya')">Canlı Simülasyon</button>
             <button type="button" data-section="puanlar" onclick="scrollToSection('puanlar')">Puan Durumu</button>
             <button type="button" data-section="fikstur" onclick="scrollToSection('fikstur')">Fikstür</button>
+            <button type="button" data-section="tahmin" onclick="scrollToSection('tahmin')">Tahmin</button>
             <button type="button" class="nav-forum" data-forum-toggle aria-controls="fchat" aria-expanded="false" onclick="toggleForum()">12. Adam</button>
         </div>
         <button type="button" class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Menüyü aç"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></button>
@@ -314,6 +315,28 @@
             </div>
         </section>
 
+        <!-- 5. BÖLÜM: SKOR TAHMİN OYUNU (js/predict.js) -->
+        <section class="page-section fixtures-full-section predict-section reveal" id="tahmin" aria-label="Skor tahmin oyunu">
+            <div class="fx-head">
+                <h2 class="box-title"><svg class="ico" aria-hidden="true"><use href="#i-target"/></svg>Skor tahmin oyunu <small>Taraftarlar vs İstatistik modeli</small></h2>
+                <p class="fx-summary" id="prWho"></p>
+            </div>
+            <p class="pr-rules">Maç başlayana kadar tahmin yap. Tam skor <b>5</b>, doğru gol farkı <b>3</b>, doğru sonuç <b>1</b> puan. Hesap gerekmez; tahminlerin bu cihazda saklanan anonim kimliğinle kaydedilir.</p>
+            <label class="pr-nick-row" id="prNickRow" hidden>Takma adın
+                <input type="text" id="prNick" maxlength="20" placeholder="Takma adını yaz (2-20 harf)" autocomplete="nickname">
+            </label>
+            <div class="pr-open" id="prOpen"><div class="fx-card skel-card"><span class="skel skel-w80"></span></div></div>
+            <div class="pr-motm-box" id="prMotm" hidden></div>
+            <div class="pr-board-head">
+                <h3 class="pr-sub"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg>Liderlik tablosu</h3>
+                <div class="fx-seg" role="group" aria-label="Dönem">
+                    <button type="button" data-scope="season" aria-pressed="true">Sezon</button>
+                    <button type="button" data-scope="week" aria-pressed="false">Son 7 gün</button>
+                </div>
+            </div>
+            <div id="prBoard"></div>
+        </section>
+
     </main>
 
     <footer class="site-footer">
@@ -366,15 +389,16 @@
     </aside>
 
     <!-- Harici JS Dosyaları -->
-    <script defer src="js/background.js?v=20261021m"></script>
-    <script defer src="js/commentary.js?v=20261021m"></script>
-    <script defer src="js/summary.js?v=20261021m"></script>
-    <script defer src="js/matchEngine.js?v=20261021m"></script>
-    <script defer src="js/fx.js?v=20261021m"></script>
-    <script defer src="js/api.js?v=20261021m"></script>
-    <script defer src="js/main.js?v=20261021m"></script>
-    <script defer src="js/nav.js?v=20261021m"></script>
-    <script defer src="js/forum.js?v=20261021m"></script>
-    <script defer src="js/demo.js?v=20261021m"></script>
+    <script defer src="js/background.js?v=20261021o"></script>
+    <script defer src="js/commentary.js?v=20261021o"></script>
+    <script defer src="js/summary.js?v=20261021o"></script>
+    <script defer src="js/matchEngine.js?v=20261021o"></script>
+    <script defer src="js/fx.js?v=20261021o"></script>
+    <script defer src="js/api.js?v=20261021o"></script>
+    <script defer src="js/main.js?v=20261021o"></script>
+    <script defer src="js/nav.js?v=20261021o"></script>
+    <script defer src="js/forum.js?v=20261021o"></script>
+    <script defer src="js/predict.js?v=20261021o"></script>
+    <script defer src="js/demo.js?v=20261021o"></script>
 </body>
 </html>

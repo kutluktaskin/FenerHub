@@ -1376,6 +1376,81 @@ table { font-variant-numeric: tabular-nums; }
 }
 .sim-note { margin: var(--s-2) 0 0; color: var(--c-text-3); font-size: var(--fs-xs); }
 
+/* Skor tahmin oyunu (js/predict.js) */
+.pr-rules { margin: 0; color: var(--c-text-2); font-size: var(--fs-sm); }
+.pr-rules b { color: var(--c-accent); }
+.pr-nick-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); color: var(--c-text-2); font-size: var(--fs-sm); font-weight: 600; }
+.pr-nick-row input { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid var(--c-line-strong); border-radius: var(--r-md); background: var(--c-inset); color: var(--c-text); font: inherit; }
+.pr-open { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--s-3); }
+.pr-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    padding: var(--s-4);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-lg);
+    background: var(--c-surface-2);
+}
+.pr-when { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--c-text-3); font-size: var(--fs-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.pr-teams { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-2); }
+.pr-score { display: flex; align-items: center; justify-content: center; gap: var(--s-2); }
+.pr-team { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: var(--fs-sm); }
+.pr-team b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pr-team.is-away { justify-content: flex-end; text-align: right; }
+.pr-dash { color: var(--c-text-3); font-weight: 700; }
+.pr-step { display: inline-flex; align-items: center; border: 1px solid var(--c-line-strong); border-radius: var(--r-md); overflow: hidden; }
+.pr-step button { width: 28px; height: 36px; border: 0; background: var(--c-inset); color: var(--c-text); font-size: 1.1rem; font-weight: 700; }
+.pr-step button:hover { background: var(--c-accent-soft); color: var(--c-accent); }
+.pr-step input { width: 36px; height: 36px; border: 0; background: var(--c-navy-950); color: var(--c-accent); font-family: var(--f-display); font-size: 1.3rem; text-align: center; -moz-appearance: textfield; }
+.pr-step input::-webkit-inner-spin-button, .pr-step input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.pr-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3); }
+.pr-msg { color: var(--c-text-2); font-size: var(--fs-xs); }
+.pr-model { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--c-text-2); font-size: var(--fs-xs); }
+.pr-model b { color: var(--c-text); }
+.pr-crowd { display: flex; gap: 2px; height: 8px; border-radius: 4px; overflow: hidden; }
+.pr-crowd i { min-width: 2px; }
+.pr-fb { background: var(--c-accent); }
+.pr-d { background: var(--c-draw); }
+.pr-rv { background: var(--c-loss); }
+.pr-note { margin: 4px 0 0; color: var(--c-text-3); font-size: var(--fs-xs); }
+.pr-sub { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--c-text); font-size: var(--fs-md); }
+.pr-sub small { color: var(--c-text-3); font-family: var(--f-body); font-size: var(--fs-xs); font-weight: 500; letter-spacing: 0; text-transform: none; }
+.pr-board-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2); margin-top: var(--s-3); }
+.pr-vs { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); margin-bottom: var(--s-2); color: var(--c-text-2); font-size: var(--fs-sm); }
+.pr-vs span { display: inline-flex; align-items: center; gap: 6px; }
+.pr-vs b { color: var(--c-accent); }
+.pr-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.pr-table th { padding: 8px; color: var(--c-text-3); font-size: var(--fs-xs); text-align: left; text-transform: uppercase; border-bottom: 1px solid var(--c-line-strong); }
+.pr-table td { padding: 8px; border-bottom: 1px solid var(--c-line); }
+.pr-table tr.is-me td { background: var(--c-accent-soft); }
+.pr-table td small { color: var(--c-accent); }
+.pr-motm-box { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-4); border: 1px solid var(--c-accent-line); border-radius: var(--r-lg); background: var(--c-accent-soft); }
+.pr-motm { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 6px; }
+.pr-vote {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 70px 38px 34px;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-md);
+    background: var(--c-inset);
+    color: var(--c-text);
+    font: inherit;
+    font-size: var(--fs-sm);
+    text-align: left;
+}
+.pr-vote:not(:disabled):hover { border-color: var(--c-accent); }
+.pr-vote.is-mine { border-color: var(--c-accent); box-shadow: inset 3px 0 0 var(--c-accent); }
+.pr-vname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pr-vbar { height: 6px; border-radius: 3px; background: var(--c-line); overflow: hidden; }
+.pr-vbar i { display: block; height: 100%; background: var(--c-accent); }
+.pr-vnum { color: var(--c-text-2); font-size: var(--fs-xs); text-align: right; }
+.pr-rating { padding: 1px 4px; border-radius: var(--r-sm); background: var(--c-win-soft); color: var(--c-win); font-size: var(--fs-xs); text-align: center; }
+@media (max-width: 520px) {
+    .pr-motm { grid-template-columns: 1fr; }
+}
+
 /* Forum: bildir düğmesi (bildirilince soluk) */
 .fc2-report.is-done { opacity: 0.4; cursor: default; }
 

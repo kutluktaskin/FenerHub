@@ -62,12 +62,18 @@
   - V2 /match/{id}/h2h (son karşılaşmaların G/B/M sayısı; tek tek liste ucu yok, h2h/events 404) + /match/{id}/pregame-form (iki takımın ligdeki son 5 maçı, eskiden yeniye). Sıradaki maç 7 gün içindeyse günde bir kez, 2 istek. Sıralar kendi puan durumumuzdan. Ana kartta "Son N karşılaşma" çubuğu ve iki takımın lig formu.
 
 ## Aşama 5: Skor tahmin oyunu (12. Adam)
-- [ ] Kullanıcı kimliği: hesap açtırmadan, cihazda saklanan anonim kimlik + takma ad (forumdaki owner mantığıyla uyumlu). İleride giriş eklenebilecek şekilde tasarla.
-- [ ] Her maç için skor tahmini, maç başlayınca kilitlensin.
-- [ ] Puanlama: tam skor 5, doğru gol farkı 3, doğru sonuç 1 puan.
-- [ ] Maç bitince puanlar otomatik hesaplansın. Sezonluk ve haftalık liderlik tablosu olsun.
-- [ ] Aynı cihazdan/IP'den aşırı tahmin girişi sınırlansın.
-- [ ] Maçın oyuncusu oylaması: maç bitince 24 saat açık kalsın, taraftar oyu ile API puanı yan yana gösterilsin.
+- [x] Kullanıcı kimliği: hesap açtırmadan, cihazda saklanan anonim kimlik + takma ad (forumdaki owner mantığıyla uyumlu). İleride giriş eklenebilecek şekilde tasarla.
+  - Forumla ortak fhOwner + fhNick; sunucuda anahtarın özeti (predictions.player) saklanır, ileride bir hesaba bağlanabilir. Takma ad küfür filtresinden geçer.
+- [x] Her maç için skor tahmini, maç başlayınca kilitlensin.
+  - POST /api/predict: başlamadan değiştirilebilir, başlama saatinde (sunucu saati) 409. 14 gün içindeki maçlar açık. Alembic 0007.
+- [x] Puanlama: tam skor 5, doğru gol farkı 3, doğru sonuç 1 puan.
+  - predictions.points_for; testli (parametrik).
+- [x] Maç bitince puanlar otomatik hesaplansın. Sezonluk ve haftalık liderlik tablosu olsun.
+  - predictions.settle auto_sync'te (istek atmaz). /api/predict/leaderboard?scope=season|week (son 7 gün); "Taraftarlar vs Model" satırı.
+- [x] Aynı cihazdan/IP'den aşırı tahmin girişi sınırlansın.
+  - Cihaz başına maç başı tek tahmin (güncellenir), IP başına saatte 30 istek.
+- [x] Maçın oyuncusu oylaması: maç bitince 24 saat açık kalsın, taraftar oyu ile API puanı yan yana gösterilsin.
+  - /api/motm: başlamadan 2-26 saat sonra açık, adaylar ilk 11 + oyuna girenler, kişi başı bir oy, yanında SportsAPI puanı ve API'nin seçimi.
 
 ## Aşama 6: Forum güvenliği ve moderasyon
 - [x] Tüm kullanıcı metinleri ekrana düz metin olarak eklensin (textContent ya da güvenli escape). innerHTML ile kullanıcı verisi basılmasın (XSS).
@@ -128,7 +134,8 @@ Ortak kurallar:
 - [ ] Maç sonu raporu (şablonlu): olaylar, istatistikler (topla oynama, şut, xG), şut haritası ve oyuncu puanlarından paragraflar ("İlk yarıda baskılı başlayan Fenerbahçe…"). Maç bitince bir kez üretilir (Aşama 3'teki maç özeti verisiyle).
 - [x] Canlı maç anlatıcısı: her olay türü (gol, kart, ikinci sarı, değişiklik, VAR, penaltı, devre, maç sonu) için 10-15 spiker cümlesi kalıbı; oyuncu adı, dakika ve skor eklenir. `/ws/live` ile simülasyon bandına ve alt satıra gider.
   - frontend/js/commentary.js (13 olay grubu, ana gruplarda 10-12 kalıp, cümle olay kimliğinden seçilir); simülasyonda alt satır + anlatım akışı. Testler: frontend/tests/commentary.test.cjs.
-- [ ] İstatistik modeliyle tahmin rakibi: takımların attığı/yediği gol ortalamasından (ev/deplasman ayrı) Poisson modeli ile skor ve sonuç olasılıkları (%G / %B / %M). Maç başlamadan kilitlenir; Aşama 5'teki tahmin oyununda "Taraftarlar vs Model" tablosu. Modelin nasıl çalıştığı sitede kısaca anlatılır.
+- [x] İstatistik modeliyle tahmin rakibi: takımların attığı/yediği gol ortalamasından (ev/deplasman ayrı) Poisson modeli ile skor ve sonuç olasılıkları (%G / %B / %M). Maç başlamadan kilitlenir; Aşama 5'teki tahmin oyununda "Taraftarlar vs Model" tablosu. Modelin nasıl çalıştığı sitede kısaca anlatılır.
+  - app/model.py (Poisson, puan durumundaki gollerden hücum/savunma gücü, saha etkisi, az maçta ortalamaya çekme). Model her maça başlamadan 24 saat içinde tahmin bırakır, liderlikte ayrı satır.
 - [ ] Maçın oyuncusu kartı (şablonlu): Aşama 5'teki oylama bitince kazanana API puanı ve maç istatistikleriyle kısa tanıtım.
 - [ ] İsteğe bağlı: ücretsiz kotası olan bir dil modeliyle (örn. Gemini/Groq) sadece maç raporu cümlelerine "cila". Sağlayıcıdan bağımsız arayüz; kota biterse, hata olursa ya da anahtar yoksa şablonlu metin gösterilir. Forum mesajı gibi kullanıcı verisi gönderilmez. Sağlayıcının güncel ücretsiz plan koşulları başlamadan önce kontrol edilir.
 
