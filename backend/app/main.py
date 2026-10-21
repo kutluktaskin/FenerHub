@@ -56,8 +56,8 @@ app.add_middleware(
         "http://localhost:5500",
         "https://fenerhub.vercel.app",
     ],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],       # site sadece okur ve forumda gönderir
+    allow_headers=["Content-Type"],
 )
 
 

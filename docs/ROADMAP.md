@@ -70,10 +70,14 @@
 - [ ] Maçın oyuncusu oylaması: maç bitince 24 saat açık kalsın, taraftar oyu ile API puanı yan yana gösterilsin.
 
 ## Aşama 6: Forum güvenliği ve moderasyon
-- [ ] Tüm kullanıcı metinleri ekrana düz metin olarak eklensin (textContent ya da güvenli escape). innerHTML ile kullanıcı verisi basılmasın (XSS).
-- [ ] "Mesajı bildir" butonu. 3 farklı kullanıcıdan bildirim alan mesaj otomatik gizlensin.
-- [ ] Küfür filtresi ayrı bir dosyaya taşınsın, Türkçe karakter varyasyonlarını da yakalasın.
-- [ ] CORS sadece kendi alan adlarımla (Vercel, localhost) sınırlı kalsın.
+- [x] Tüm kullanıcı metinleri ekrana düz metin olarak eklensin (textContent ya da güvenli escape). innerHTML ile kullanıcı verisi basılmasın (XSS).
+  - Denetlendi: forum mesajı/takma ad/alıntı textContent ile, diğer innerHTML'ler sabit metin ya da esc(). Yerelde <img onerror>/<script> içeren mesajla doğrulandı (çalışmadı, düz metin). frontend/vercel.json: frame-ancestors, nosniff, Referrer/Permissions-Policy.
+- [x] "Mesajı bildir" butonu. 3 farklı kullanıcıdan bildirim alan mesaj otomatik gizlensin.
+  - POST /api/forum/posts/{id}/report; bildiren = IP özeti (IP saklanmaz), mesaj başına bir kez, kendi mesajı bildirilemez, saatte 20 sınırı. 3 farklı IP -> posts.hidden + WebSocket "hide". Alembic 0006.
+- [x] Küfür filtresi ayrı bir dosyaya taşınsın, Türkçe karakter varyasyonlarını da yakalasın.
+  - app/profanity.py: büyük/küçük harf, aksan, rakam (s1ktir), araya noktalama (s.i.k), harf tekrarı. Küçük ı ayrı harf (sıkıştırdık sansürlenmez); belirsiz kökler tam kelime (götür, sikke korunur). Testler: tests/test_profanity.py.
+- [x] CORS sadece kendi alan adlarımla (Vercel, localhost) sınırlı kalsın.
+  - İzinli kaynaklar: fenerhub.vercel.app ve localhost:5500; yöntemler GET/POST, başlık Content-Type.
 
 ## Aşama 7: PWA, takvim ve paylaşım
 - [ ] PWA: manifest.json, ikonlar, service worker. Statik dosyalar önbellekte olsun, API verisi her zaman ağdan gelsin.

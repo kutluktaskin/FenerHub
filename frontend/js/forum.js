@@ -127,7 +127,8 @@ document.addEventListener("keydown", e => {
     if (isMine) mine.add(p.id);
 
     const el = document.createElement("article");
-    el.className = "fc2-msg" + (isMine ? " is-mine" : "") + (p.deleted ? " is-deleted" : "");
+    const gone = p.deleted || p.hidden;
+    el.className = "fc2-msg" + (isMine ? " is-mine" : "") + (gone ? " is-deleted" : "");
     el.dataset.id = p.id;
 
     const main = document.createElement("div");
@@ -177,10 +178,10 @@ document.addEventListener("keydown", e => {
 
     const body = document.createElement("p");
     body.className = "fc2-body";
-    body.textContent = p.deleted ? "Bu mesaj silindi" : p.body;
+    body.textContent = p.hidden ? "Bu mesaj bildirimler nedeniyle gizlendi" : p.deleted ? "Bu mesaj silindi" : p.body;
     main.append(body);
 
-    if (!p.deleted) {
+    if (!gone) {
       const acts = document.createElement("div");
       acts.className = "fc2-acts";
       
@@ -199,6 +200,11 @@ document.addEventListener("keydown", e => {
       // Backend başkasının mesajını silmeye izin vermez (403)
       if (isMine) {
         acts.append(mkBtn("fc2-act fc2-del", icon("trash"), "Sil", (e) => removePost(p.id, e)));
+      } else {
+        // 3 farklı kullanıcı bildirince mesaj herkes için gizlenir (backend)
+        const rep = mkBtn("fc2-act fc2-report", icon("flag"), "Bildir", () => reportPost(p.id, rep));
+        if (reported.has(p.id)) markReported(rep);
+        acts.append(rep);
       }
       // Balon (main) üstte, tepki ve işlem butonları balonun altında
       el.append(main, acts);
@@ -215,6 +221,49 @@ document.addEventListener("keydown", e => {
     if (mine.delete(id)) saveMine();
     feed.querySelectorAll(`.fc2-quote[data-parent="${id}"] .fc2-quote-body`).forEach(s => {
       s.textContent = "Bu mesaj silindi";
+      s.classList.add("gone");
+    });
+    if (replyTo && replyTo.id === id) clearReply();
+    if (!feed.querySelector(".fc2-msg")) emptyRoom();
+  }
+
+  // Bildirilen mesajlar bu tarayıcıda hatırlanır (düğme tekrar basılamaz)
+  const reported = new Set((() => { try { return JSON.parse(localStorage.getItem("fhReported") || "[]"); } catch { return []; } })());
+  function markReported(btn) {
+    btn.disabled = true;
+    btn.title = "Bildirildi";
+    btn.setAttribute("aria-label", "Bildirildi");
+    btn.classList.add("is-done");
+  }
+
+  async function reportPost(id, btn) {
+    if (!confirm("Bu mesajı uygunsuz diye bildirmek istiyor musun?")) return;
+    err.textContent = "";
+    try {
+      const r = await fetch(`${API}/api/forum/posts/${id}/report`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ owner: owner() })
+      });
+      let d = null;
+      try { d = await r.json(); } catch (e) {}
+      if (!r.ok) {
+        err.textContent = (d && typeof d.detail === "string") ? d.detail : "Bildirilemedi.";
+        return;
+      }
+      reported.add(id);
+      try { localStorage.setItem("fhReported", JSON.stringify([...reported].slice(-200))); } catch (e) {}
+      markReported(btn);
+      err.textContent = "Bildirimin alındı, teşekkürler.";
+      if (d && d.hidden) markHidden(id);
+    } catch { err.textContent = "Sunucuya bağlanılamadı."; }
+  }
+
+  // Bildirimle gizlenen mesaj herkesin ekranından kalkar (WebSocket "hide")
+  function markHidden(id) {
+    const el = feed.querySelector(`.fc2-msg[data-id="${id}"]`);
+    if (el) el.remove();
+    feed.querySelectorAll(`.fc2-quote[data-parent="${id}"] .fc2-quote-body`).forEach(s => {
+      s.textContent = "Bu mesaj gizlendi";
       s.classList.add("gone");
     });
     if (replyTo && replyTo.id === id) clearReply();
@@ -343,6 +392,7 @@ document.addEventListener("keydown", e => {
       if (m.type === "online") setOnline(m.count);
       if (m.type === "post" && m.post.room === room) addPost(m.post);
       if (m.type === "delete") markDeleted(m.id);
+      if (m.type === "hide") markHidden(m.id);
       if (m.type === "react") {
         const el = feed.querySelector(`.fc2-msg[data-id="${m.id}"]`);
         if (el) {

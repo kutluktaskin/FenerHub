@@ -1376,6 +1376,9 @@ table { font-variant-numeric: tabular-nums; }
 }
 .sim-note { margin: var(--s-2) 0 0; color: var(--c-text-3); font-size: var(--fs-xs); }
 
+/* Forum: bildir düğmesi (bildirilince soluk) */
+.fc2-report.is-done { opacity: 0.4; cursor: default; }
+
 /* Ana maç kartı: maç öncesi (son karşılaşmalar, lig formu, sıralar) */
 .mc-preview {
     display: grid;
