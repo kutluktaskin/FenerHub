@@ -43,7 +43,8 @@
   - state/update/goal/source mesajları; simülasyon bağlanıyor, bağlantı yoksa 20 sn REST yedeği.
 - [x] Frontend: anlık skor ve dakika, gol animasyonu ve bildirimi (toast), olay akışı (gol/kart/değişiklik/VAR), gerçek maç istatistikleri, gerçek olaylara tepki veren 2D simülasyon.
   - Simülasyonda gerçek kadro, gol/kart/değişiklik/VAR/penaltı animasyonu ve bandı, canlı anlatıcı (Aşama 11 ile). Maçta doğrulandı; sadece devre arasında saatin 45+ diye ilerlemesi sorunu vardı, düzeltildi (backend anında devre arası + frontend uzatma sınırı).
-- [ ] Maç bitince /graph, /shotmap ve /best-players bir kez çekilip kaydedilsin, maç özeti olarak gösterilsin.
+- [x] Maç bitince /graph, /shotmap ve /best-players bir kez çekilip kaydedilsin, maç özeti olarak gösterilsin.
+  - auto_sync.summary_targets/fetch_summary: başlamadan 2 sa 15 dk sonra, 2 güne kadar, kota ≥ 43 iken bir kez (3 istek). /detail -> summary, /api/matches -> has_summary. Simülasyonda "Maç özeti" sekmesi (frontend/js/summary.js): xG/şut özeti, SVG şut haritası, baskı grafiği (gol işaretli), en iyi 5 oyuncu; fikstürde oynanmış maçta düğme.
 - [x] Maç günü eksikleri /lineups içindeki missingPlayers'tan otomatik gelsin (maça 24 saatten az kala 3 saatte bir, son 2 saatte 30 dakikada bir).
   - app/absences_sync.py; REST (auto_sync.lineups_every) ve maç sırasında WS lineups kanalından. Açıklamalar Türkçeye çevrilir, dönüş tarihi "10 Aralık" biçiminde.
 - [ ] Genel sakatlık raporu V6 injuries'ten günde 2 kez gelsin, isimler kadroyla eşleştirilsin, eşleşmeyenler loglansın.
