@@ -35,8 +35,10 @@ Render'ın ücretsiz sunucusu 15 dakika trafik olmazsa uyuyor ve disk kalıcı d
   yedeği devreye girer; o da kalan kotaya bakar (55'in altında 5 dakikada bir, 40'ın altında durur).
 - WebSocket maçı izlerken periyodik senkron o maç için REST isteği atmaz (`live.covers`).
 
-**Bedel:** Render uyuyorsa izleme başlamaz; maç saatinde birinin siteyi açması gerekir. Çözüm
-seçenekleri yol haritasında (Aşama 3).
+**Bedel:** Render'ın ücretsiz sunucusu 15 dakika istek gelmezse uyur. Maç saatlerinde (17:00-01:00) ücretsiz
+bir zamanlayıcı (cron-job.org) 10 dakikada bir sağlık ucunu çağırır; günün geri kalanında sunucu uyur.
+Sunucu uyanıkken bile maç saatine yakın değilsek veritabanı yarım saatte bir okunur; maç takvimi
+bellekte tutulur. Böylece Neon'un ücretsiz işlem süresi boşa harcanmaz.
 
 ## 3. SQLite'tan PostgreSQL'e (Neon)
 

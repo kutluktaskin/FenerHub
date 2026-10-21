@@ -53,7 +53,8 @@
   - Alembic 0004; mevcut kayıtlar manual. Aynı oyuncu için elle kayıt varsa otomatik kayıt eklenmez. Testler: tests/test_absences_sync.py.
 - [x] Demo modu: ?demo=live ile geçmiş bir maçın olayları sırayla yeniden oynatılsın.
   - 20 Ekim Slavia maçının WS kaydı scripts/build_demo.py ile /ws/live biçiminde 233 KB'lık frontend/demo/*.json'a çevrildi; frontend/js/demo.js ×10/×20/×60 hızla oynatır (canlı akışla aynı işleyiş). Altbilgide ve README'de bağlantı.
-- [ ] Render ücretsizse maç saatinde sunucunun uyanık olması için bir çözüm öner. Ücretsiz planın kurallarına aykırı yöntem kullanma.
+- [x] Render ücretsizse maç saatinde sunucunun uyanık olması için bir çözüm öner. Ücretsiz planın kurallarına aykırı yöntem kullanma.
+  - Seçilen: cron-job.org (ücretsiz), her gün 17:00-01:00 TSİ arası 10 dk'da bir /api/health. Kullanıcı kuracak. Ayrıca maç saatine yakın değilken backend veritabanını yarım saatte bir okur (auto_sync.snapshot/is_busy, live.near_match), Neon boşta uyuyabilir.
 
 ## Aşama 4: Görseller ve maç öncesi bilgiler
 - [ ] Takım logoları (/api/teams/{id}/image) ve oyuncu fotoğrafları (/api/players/{id}/image) bir kez çekilsin, URL'leri veritabanında tutulsun. Her sayfa açılışında API'ye istek gitmesin. Yüklenemeyen görselde mevcut avatar gösterilsin.
