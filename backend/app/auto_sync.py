@@ -8,7 +8,13 @@ from datetime import datetime, timedelta
 from . import absences_sync, cache, live, models, sync
 from .database import SessionLocal
 
-TICK = 60  # her dakika kontrol eder, istek sadece süresi dolan işler için atılır
+TICK = 60  # her dakika uyanır, istek sadece süresi dolan işler için atılır
+
+# Maç saatine yakın değilken (başlamadan 2 sa 10 dk öncesi - 3 sa sonrası dışı) tam kontrol ve
+# maç listesi okuması yarım saatte bir yapılır: veritabanı (Neon) boşta uyuyabilsin, ücretsiz
+# planın işlem süresi boşa harcanmasın. Maç saatinde her dakika.
+IDLE_EVERY = 1800
+BUSY_BEFORE, BUSY_AFTER = -130, 180          # dakika (başlamadan önce / sonra)
 
 # saniye cinsinden aralıklar
 MATCHES_LIVE = 480
@@ -50,26 +56,40 @@ def guard(key, fn):
         return None
 
 
+_snap = {"at": 0.0, "rows": [], "busy": False}   # bitmemiş maçlar: (api_id, durum, başlama)
+_last_full = 0.0
+
+
+def reset():
+    """Bellekteki maç listesini ve son tam kontrol zamanını unutur (sonraki tick DB'yi okur)."""
+    global _last_full
+    _snap["at"] = 0.0
+    _last_full = 0.0
+
+
 def snapshot():
+    """Bitmemiş maçlar ve başlamalarından beri geçen dakika (d). Liste bellekte tutulur:
+    maç saatinde dakikada bir, değilse yarım saatte bir veritabanından yenilenir."""
+    ttl = TICK if _snap["busy"] else IDLE_EVERY
+    if time.time() - _snap["at"] >= ttl:
+        with SessionLocal() as db:
+            rows = db.query(models.Match).filter(
+                models.Match.status != "finished", models.Match.match_date.is_not(None)
+            ).all()
+            _snap["rows"] = [
+                (m.api_id, m.status, datetime.combine(m.match_date, m.kickoff_time, tzinfo=sync.TR_TZ))
+                for m in rows if m.kickoff_time
+            ]
+        _snap["at"] = time.time()
     now = datetime.now(sync.TR_TZ)
-    out = []
-    db = SessionLocal()
-    try:
-        rows = db.query(models.Match).filter(
-            models.Match.status != "finished", models.Match.match_date.is_not(None)
-        ).all()
-        for m in rows:
-            if not m.kickoff_time:
-                continue
-            ko = datetime.combine(m.match_date, m.kickoff_time, tzinfo=sync.TR_TZ)
-            out.append({
-                "id": m.api_id,
-                "status": m.status,
-                "d": (now - ko).total_seconds() / 60,  # başlamasından beri dakika
-            })
-    finally:
-        db.close()
+    out = [{"id": aid, "status": st, "d": (now - ko).total_seconds() / 60} for aid, st, ko in _snap["rows"]]
+    _snap["busy"] = is_busy(out)
     return out
+
+
+def is_busy(ms):
+    """Maç saatine yakın mıyız (kadro, canlı maç, maç sonu özeti için sık kontrol gerekir)?"""
+    return any(BUSY_BEFORE <= m["d"] <= BUSY_AFTER or (m["status"] == "live" and m["d"] <= 240) for m in ms)
 
 
 def in_live_window(m):
@@ -91,6 +111,7 @@ def refresh_matches(full):
         raise
     finally:
         db.close()
+    _snap["at"] = 0.0           # maç durumları değişmiş olabilir: listeyi yeniden oku
 
 
 def refresh_standings():
@@ -160,7 +181,12 @@ def fetch_summary(api_id):
 
 
 def tick():
+    global _last_full
     ms = snapshot()
+    # Maç saatine yakın değilsek tam kontrol yarım saatte bir (önbellek yaşları da DB'de)
+    if not is_busy(ms) and time.time() - _last_full < IDLE_EVERY:
+        return
+    _last_full = time.time()
     live_now = [m for m in ms if in_live_window(m)]
     next_p = "pages:next_0"
     last_p = "pages:last_0"

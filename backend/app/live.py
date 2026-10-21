@@ -93,6 +93,29 @@ def live_state():
 
 
 # ---------- Hangi maç izlenecek ----------
+# Başlama saatleri bellekte tutulur ve yarım saatte bir yenilenir; veritabanına (pick_match)
+# sadece bir maçın izleme penceresindeysek gidilir. Böylece maç yokken Neon uyuyabilir.
+SCHEDULE_TTL = 1800
+_schedule = {"at": 0.0, "kickoffs": []}
+
+
+def near_match(now: float | None = None) -> bool:
+    """Başlamasına 15 dk'dan az kalmış ya da 4 saatten yeni başlamış bitmemiş maç var mı?"""
+    if time.time() - _schedule["at"] >= SCHEDULE_TTL:
+        with SessionLocal() as db:
+            rows = db.query(models.Match).filter(
+                models.Match.status != "finished", models.Match.api_id.is_not(None),
+                models.Match.match_date.is_not(None), models.Match.kickoff_time.is_not(None),
+            ).all()
+            _schedule["kickoffs"] = [
+                datetime.combine(m.match_date, m.kickoff_time, tzinfo=sync.TR_TZ).timestamp() for m in rows
+            ]
+        _schedule["at"] = time.time()
+    now = now if now is not None else time.time()
+    pre, length = PRE_MATCH.total_seconds(), MAX_LENGTH.total_seconds()
+    return any(ko - pre <= now <= ko + length for ko in _schedule["kickoffs"])
+
+
 def pick_match(now: datetime | None = None):
     """Şu an izlenmesi gereken Fenerbahçe maçı: başlamasına 15 dk'dan az kalmış ya da
     başlamış, bitmemiş ve 4 saatten eski olmayan ilk maç."""
@@ -413,7 +436,7 @@ async def live_loop():
         return
     while True:
         try:
-            target = await run_in_threadpool(pick_match)
+            target = await run_in_threadpool(pick_match) if await run_in_threadpool(near_match) else None
             if target:
                 await Follower(target).run()
                 continue

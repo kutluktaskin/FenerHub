@@ -172,6 +172,7 @@ def test_auto_sync_skips_rest_while_ws_covers(match, monkeypatch):
     monkeypatch.setattr(auto_sync, "refresh_matches", lambda full: None)
     monkeypatch.setattr(auto_sync, "refresh_standings", lambda: None)
     auto_sync.backoff.clear()
+    auto_sync.reset()
 
     auto_sync.tick()
     assert (API_ID, "incidents") in calls          # izlenmiyorken REST çalışır
@@ -179,6 +180,7 @@ def test_auto_sync_skips_rest_while_ws_covers(match, monkeypatch):
     cache.delete(f"detail:{API_ID}:incidents")
     cache.delete(f"detail:{API_ID}:statistics")
     live.covered.add(API_ID)
+    auto_sync.reset()
     try:
         auto_sync.tick()
     finally:
@@ -226,3 +228,57 @@ def test_real_match_channel_sequence(match, monkeypatch):
 def test_unflatten():
     assert live.unflatten({"a.b": 1, "a.c": 2, "d": 3}) == {"a": {"b": 1, "c": 2}, "d": 3}
     assert live.unflatten({"statusTime": {"x": 1}}) == {"statusTime": {"x": 1}}
+
+
+class CountingSessions:
+    """SessionLocal yerine geçer: kaç kez veritabanı oturumu açıldığını sayar."""
+    def __init__(self, real):
+        self.real, self.count = real, 0
+
+    def __call__(self):
+        self.count += 1
+        return self.real()
+
+
+def test_idle_tick_lets_database_sleep(monkeypatch):
+    """Maç saatine yakın değilken ikinci tick veritabanına hiç gitmez (Neon uyuyabilsin)."""
+    from app import auto_sync
+    monkeypatch.setattr(auto_sync, "refresh_matches", lambda full: None)
+    monkeypatch.setattr(auto_sync, "refresh_standings", lambda: None)
+    monkeypatch.setattr(auto_sync, "summary_targets", lambda: [])
+    auto_sync.reset()
+    auto_sync.tick()                                  # ilk tick: listeyi okur
+    assert not auto_sync._snap["busy"]
+    sessions = CountingSessions(auto_sync.SessionLocal)
+    monkeypatch.setattr(auto_sync, "SessionLocal", sessions)
+    ages = []
+    monkeypatch.setattr(auto_sync.cache, "age", lambda key: ages.append(key) or 0)
+    auto_sync.tick()
+    assert sessions.count == 0 and ages == []
+
+
+def test_busy_tick_runs_every_minute(match, monkeypatch):
+    """Maç saatinde (fixture: 30 dk önce başladı) her tick tam çalışır."""
+    from app import auto_sync
+    monkeypatch.setattr(auto_sync, "refresh_matches", lambda full: None)
+    monkeypatch.setattr(auto_sync, "refresh_standings", lambda: None)
+    monkeypatch.setattr(auto_sync, "fetch_kind", lambda a, k: {})
+    auto_sync.reset()
+    auto_sync.tick()
+    assert auto_sync._snap["busy"]
+    ages = []
+    real_age = auto_sync.cache.age
+    monkeypatch.setattr(auto_sync.cache, "age", lambda key: ages.append(key) or real_age(key))
+    auto_sync.tick()
+    assert ages, "maç saatinde tick önbellek yaşlarını kontrol etmeli"
+
+
+def test_live_schedule_from_memory(match, monkeypatch):
+    live._schedule["at"] = 0.0
+    assert live.near_match()                          # fixture maçı 30 dk önce başladı
+    sessions = CountingSessions(live.SessionLocal)
+    monkeypatch.setattr(live, "SessionLocal", sessions)
+    assert live.near_match()
+    assert not live.near_match(time.time() + 6 * 3600)  # 6 saat sonra pencere dışı
+    assert sessions.count == 0                        # takvim bellekten
+    live._schedule["at"] = 0.0
