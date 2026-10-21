@@ -1,5 +1,8 @@
 # FenerHub Yol Haritası
 
+> **Durum (21 Ekim 2026): proje kapatıldı.** Aşama 1, 2, 3, 5, 6, 7 ve 10 tamam. İşaretsiz kalan maddeler
+> **gelecek planıdır**; ayrıntılar en alttaki "Proje durumu" bölümünde.
+
 ## Çalışma kuralları (her aşama için geçerli)
 - Aşamalar sırayla yapılır. Bir aşamaya başlamadan önce kodu incele, kısa bir plan sun ve onayımı bekle.
 - Her aşama için ayrı bir branch aç (feat/..., fix/..., chore/...). İş bitince yerelde test et, neye bakmam gerektiğini yaz, onaydan sonra main'e merge et ve push yap. Render main'den otomatik deploy ediyor.
@@ -58,6 +61,7 @@
 
 ## Aşama 4: Görseller ve maç öncesi bilgiler
 - [ ] Takım logoları (/api/teams/{id}/image) ve oyuncu fotoğrafları (/api/players/{id}/image) bir kez çekilsin, URL'leri veritabanında tutulsun. Her sayfa açılışında API'ye istek gitmesin. Yüklenemeyen görselde mevcut avatar gösterilsin.
+  - Gelecek planı: indirme aracı hazır (backend/scripts/download_images.py, öncelik sırası: sıradaki rakipler, kadro, geçmiş rakipler; günde en fazla 15 istek). Görseller statik dosya olarak repoya girer. Bekleyen ~63 görsel indirilene kadar sitede baş harfli yedek logo/avatar görünüyor.
 - [x] Sıradaki maç kartı: V6 /match/{id}/h2h ile son 5 karşılaşma ve iki takımın son 5 maç formu. Ligdeki sıralar mevcut puan durumundan alınsın. Günde bir kez çek.
   - V2 /match/{id}/h2h (son karşılaşmaların G/B/M sayısı; tek tek liste ucu yok, h2h/events 404) + /match/{id}/pregame-form (iki takımın ligdeki son 5 maçı, eskiden yeniye). Sıradaki maç 7 gün içindeyse günde bir kez, 2 istek. Sıralar kendi puan durumumuzdan. Ana kartta "Son N karşılaşma" çubuğu ve iki takımın lig formu.
 
@@ -93,7 +97,7 @@
 - [x] SEO: anlamlı title, meta description, lang="tr", favicon. → ayrıca canonical, theme-color, apple-touch-icon.
 - [x] Footer notu: "Bu site Fenerbahçe SK ile resmi bir bağlantısı olmayan bir taraftar projesidir. Veriler SportsAPI Pro'dan alınmaktadır."
 
-## Aşama 8: İçerik ve analiz
+## Aşama 8: İçerik ve analiz (gelecek planı)
 - [ ] Oyuncu detay paneli: tıklayınca açılsın. İçinde attribute-overviews radar grafiği, güçlü/zayıf yönler, sezon maç puanları grafiği ve transfer geçmişi olsun. Sadece tıklanınca çek, 24 saat önbellekte tut.
 - [ ] Oyuncu karşılaştırma: iki oyuncu radar grafikte yan yana.
 - [ ] Sezon istatistikleri sayfası: xG trendi, gol dakikası dağılımı (goal-distributions), iç saha/deplasman karşılaştırması.
@@ -102,9 +106,11 @@
 - [ ] Fenerbahçe haberleri (V1 news, günde 2 kez): sadece başlık, görsel ve kaynağa link.
 - [ ] Grafikler için hafif bir kütüphane kullan (önce bana sor) ya da SVG ile çiz.
 
-## Aşama 9: Kalite, test ve izleme
-- [ ] Backend için pytest testleri: puan durumu ayrıştırma, oyuncu istatistiği toplama, sakatlık eşleştirme, tahmin puanlama, forum doğrulamaları. API çağrıları mock'lansın.
+## Aşama 9: Kalite, test ve izleme (kalanlar gelecek planı)
+- [x] Backend için pytest testleri: puan durumu ayrıştırma, oyuncu istatistiği toplama, sakatlık eşleştirme, tahmin puanlama, forum doğrulamaları. API çağrıları mock'lansın.
+  - 106 backend + 13 frontend testi; conftest her türlü HTTP isteğini engeller, testler geçici SQLite kullanır.
 - [ ] GitHub Actions: her push ve PR'da lint (ruff) ve testler. README'ye durum rozeti.
+  - Kısmen: .github/workflows/ci.yml testleri çalıştırıyor, ama GitHub hesabındaki ödeme kilidi yüzünden işler başlamıyor. Kilit kalkınca ruff ve rozet eklenecek.
 - [ ] Sentry (ücretsiz plan): backend ve frontend hataları, DSN ortam değişkeninde.
 - [ ] Yapılandırılmış loglama: istek kotası, sync süreleri, WebSocket bağlantı durumu.
 - [ ] /api/health gerçek durumu döndürsün: veritabanı bağlantısı, son sync zamanı, kalan API kotası.
@@ -119,7 +125,7 @@
 - [x] .env.example güncel olsun.
   - SPORTS_API_KEY ve DATABASE_URL (temizlik aşamasında eklendi); README'de ortam değişkenleri tablosu.
 
-## Aşama 11: Akıllı içerik (ücretsiz)
+## Aşama 11: Akıllı içerik (ücretsiz, kalanlar gelecek planı)
 Ücretli yapay zekâ API'si kullanılmaz. İçerik kural, şablon ve istatistik modeliyle üretilir; tamamen
 ücretsiz ve uydurma yapmaz. (Önceki "Claude API" planı ücret nedeniyle değiştirildi; sohbet botu ve
 günün tribün özeti çıkarıldı, forum moderasyonu Aşama 6'da kalıyor.)
@@ -141,14 +147,13 @@ Ortak kurallar:
 
 ---
 
-## Ek: Bilinen durum (önceki oturumlardan, 2026-10-20)
+## Proje durumu (kapanış, 21 Ekim 2026)
 Yeni oturumda bağlam kaybolmasın diye eklendi; yol haritası maddesi değildir.
-- SportsAPI planı: **Free (100 istek/gün)** → bütçe %60 = **60 istek/gün**. Kota her gece **03:00 TSİ (00:00 UTC)** yenilenir.
-- Render: **ücretsiz plan, 15 dk trafik olmazsa uyuyor**; disk kalıcı değil.
-- Puan durumu 30 dk'dan 3 saate çekildi (commit 17a2c73); `sync.api_get` her cevapta kalan kotayı logluyor.
-- Aşama 3 keşfinin bir kısmı yapıldı: WebSocket kotasız ve abone olunca **snapshot** veriyor (bitmiş maçlar dahil): lineups + `missingPlayers` (ad, `missing`/`doubtful`, açıklama, `expectedEndDate`), incidents, stats. V6 Fenerbahçe id: `59gklziew2a17xd`. Kalan keşif (3 istek): V6 `/team/{id}/injuries` içeriği, V1 arama (kotasız V1 görsel id'si), V2 `/teams/3052/image`. Script: `backend/scripts/probe_sportsapi.py` (git dışı).
-- Önerilen bütçe planı (~25 istek/gün, WS yedeği 60 sn yerine 5 dk) kullanıcı onayı bekliyor.
-- Logolar: `backend/download_logos.py` ile bir kez indirilip `frontend/img/teams/` altına konacak (henüz indirilmedi, kota yetmedi).
+- **Canlıda:** site https://fenerhub.vercel.app (Vercel), API https://fenerhub.onrender.com (Render ücretsiz, 15 dk trafiksiz uyur), veritabanı Neon Postgres. Render main'den otomatik deploy eder; şema migration'ları açılışta çalışır.
+- **SportsAPI:** Free plan, 100 istek/gün, bütçe %60 = 60 istek/gün; kota 03:00 TSİ yenilenir. WebSocket kotasız; canlı maç oradan izlenir. Maç saatine yakın değilken backend veritabanını yarım saatte bir okur.
+- **Ortam değişkenleri (Render):** SPORTS_API_KEY, DATABASE_URL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY (bildirim anahtarları yoksa bildirim düğmesi gizli kalır).
+- **Elle yapılacaklar:** cron-job.org ile 17:00-01:00 TSİ arası 10 dk'da bir /api/health (maç saatinde sunucu uyanık kalsın); GitHub ödeme kilidini kaldırıp CI'yi açmak; görselleri günde 15'er indirmek (`python -m scripts.download_images --max 15 --keep 40`).
+- **Gelecek planı (öncelik sırasıyla):** görsellerin tamamlanması (Aşama 4), maç önü/maç sonu şablonlu metinler ve maçın oyuncusu kartı (Aşama 11), oyuncu detay paneli ve sezon istatistikleri (Aşama 8), izleme: Sentry, /api/health'te gerçek durum, Lighthouse (Aşama 9).
 
 ## Temizlik yapıldı (20 Ekim 2026, chore/cleanup)
 - Deneme scriptleri ve ham API çıktıları silindi; pycache, editör ayarı ve dosya önbellekleri git'ten çıkarıldı (yerelde duruyor). Tek kök `.gitignore`, `backend/.env.example`, README, MIT LICENSE eklendi.
