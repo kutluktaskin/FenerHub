@@ -5,7 +5,7 @@ import time
 import traceback
 from datetime import datetime, timedelta
 
-from . import absences_sync, cache, live, models, sync
+from . import absences_sync, cache, live, models, predictions, sync
 from .database import SessionLocal
 
 TICK = 60  # her dakika uyanır, istek sadece süresi dolan işler için atılır
@@ -197,6 +197,9 @@ def tick():
     if due(next_p, MATCHES_LIVE if live_now else MATCHES_IDLE):
         full = due(last_p, LAST_LIVE if live_now else LAST_IDLE)
         guard("matches", lambda: refresh_matches(full))
+
+    # skor tahmin oyunu: biten maçları puanla, yaklaşan maçlara model tahmini (istek atmaz)
+    guard("predict", predictions.settle)
 
     # maç sonu özeti: bitmiş maçlar için bir kez
     for aid in summary_targets():

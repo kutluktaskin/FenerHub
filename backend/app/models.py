@@ -126,3 +126,31 @@ class ApiCache(Base):
     key = Column(String(128), primary_key=True)          # "pages:next_0", "detail:16938965:incidents"
     data = Column(Text, nullable=False)                  # JSON metni
     fetched_at = Column(Float, nullable=False, default=0)  # Unix zamanı; 0 = bir sonraki turda yenile
+
+
+class Prediction(Base):
+    """Skor tahmini. player: cihaz anahtarının özeti (anahtarın kendisi saklanmaz);
+    "model" ise istatistik modelinin tahminidir. points maç bitince hesaplanır."""
+    __tablename__ = "predictions"
+    __table_args__ = (UniqueConstraint("match_id", "player", name="uq_predictions_match_player"),
+                      Index("ix_predictions_player", "player"))
+    id = Column(Integer, primary_key=True)
+    match_id = Column(Integer, ForeignKey("matches.id", ondelete="CASCADE"), nullable=False)
+    player = Column(String(64), nullable=False)
+    nick = Column(String(40), nullable=False)
+    home = Column(Integer, nullable=False)
+    away = Column(Integer, nullable=False)
+    ts = Column(Integer, nullable=False)
+    points = Column(Integer)
+    match = relationship("Match")
+
+
+class MotmVote(Base):
+    """Maçın oyuncusu oyu: maç bitince 24 saat açık, kişi başı bir oy."""
+    __tablename__ = "motm_votes"
+    __table_args__ = (UniqueConstraint("match_id", "player", name="uq_motm_match_player"),)
+    id = Column(Integer, primary_key=True)
+    match_id = Column(Integer, ForeignKey("matches.id", ondelete="CASCADE"), nullable=False)
+    player = Column(String(64), nullable=False)
+    choice = Column(String(80), nullable=False)
+    ts = Column(Integer, nullable=False)
