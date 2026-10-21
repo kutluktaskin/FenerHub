@@ -202,6 +202,44 @@ def read_summary(api_id):
     return {"graph": graph, "shotmap": shots, "best": best}
 
 
+# ---------- Maç öncesi (sıradaki maç için h2h + pregame-form; auto_sync günde bir kez çeker) ----------
+def standing_position(db, competition: str, team: str):
+    row = (
+        db.query(models.Standing.position)
+        .join(models.Team, models.Standing.team_id == models.Team.id)
+        .filter(models.Standing.competition == competition, models.Team.name == team)
+        .first()
+    )
+    return row[0] if row else None
+
+
+def read_preview(db, m: models.Match):
+    """Fenerbahçe açısından maç öncesi: son karşılaşmalar (galibiyet/beraberlik/mağlubiyet),
+    iki takımın ligdeki son 5 maçı (eskiden yeniye, W/D/L) ve lig sıraları (kendi puan
+    durumumuzdan; yoksa API'nin verdiği sıra)."""
+    h2h = read_cache(m.api_id, "h2h")
+    form = read_cache(m.api_id, "pregame-form")
+    if not (h2h or form):
+        return None
+    fb_home = m.home_team.name == "Fenerbahçe"
+    rival = m.away_team.name if fb_home else m.home_team.name
+    out = {"rival": rival}
+    duel = (h2h or {}).get("teamDuel")
+    if duel:
+        home_w, away_w = duel.get("homeWins", 0), duel.get("awayWins", 0)
+        out["h2h"] = {"fb_wins": home_w if fb_home else away_w, "rival_wins": away_w if fb_home else home_w,
+                      "draws": duel.get("draws", 0)}
+    if form:
+        fb_f = form.get("homeTeam" if fb_home else "awayTeam") or {}
+        rv_f = form.get("awayTeam" if fb_home else "homeTeam") or {}
+        out["form"] = {"fb": fb_f.get("form") or [], "rival": rv_f.get("form") or []}
+        out["positions"] = {
+            "fb": standing_position(db, m.competition, "Fenerbahçe") or fb_f.get("position"),
+            "rival": standing_position(db, m.competition, rival) or rv_f.get("position"),
+        }
+    return out
+
+
 def summary_ids(db) -> set:
     """Özeti önbellekte olan maçların api id'leri (tek sorgu; fikstürdeki "Maç özeti" düğmesi için)."""
     keys = db.query(models.ApiCache.key).filter(models.ApiCache.key.like("detail:%:best-players")).all()
@@ -254,7 +292,7 @@ def upcoming_matches(limit: int = 3, db: Session = Depends(get_db)):
         )
         .limit(limit)
     )
-    return [serialize_match(m, with_absences=True) for m in q.all()]
+    return [{**serialize_match(m, with_absences=True), "preview": read_preview(db, m)} for m in q.all()]
 
 
 @router.get("/{match_id}/detail")

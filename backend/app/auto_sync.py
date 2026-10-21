@@ -146,6 +146,8 @@ def lineups_ready(aid):
     return bool((data.get("data") or {}).get("confirmed"))
 
 
+PREVIEW_DAYS = 7                                 # sıradaki maç bu kadar gün içindeyse maç öncesi çekilir
+PREVIEW_EVERY = 24 * 3600                        # günde bir kez
 SUMMARY_AFTER = timedelta(hours=2, minutes=15)   # başlamadan bu kadar sonra veriler kesinleşmiş olur
 SUMMARY_WINDOW = timedelta(days=2)               # daha eski maçlar için özet çekilmez (kota)
 SUMMARY_MIN_QUOTA = live.QUOTA_STOP + 3          # özet 3 istek: günlük %60 sınırını aşmasın
@@ -199,6 +201,14 @@ def tick():
     # maç sonu özeti: bitmiş maçlar için bir kez
     for aid in summary_targets():
         guard(f"sum{aid}", lambda a=aid: fetch_summary(a))
+
+    # Maç öncesi: sıradaki maç 7 gün içindeyse h2h + form günde bir kez (2 istek)
+    upcoming = [m for m in ms if m["id"] and -PREVIEW_DAYS * 1440 <= m["d"] < 0]
+    if upcoming:
+        nxt = max(upcoming, key=lambda m: m["d"])          # başlamasına en az kalan
+        q = sync.quota_remaining
+        if due(f"detail:{nxt['id']}:pregame-form", PREVIEW_EVERY) and (q is None or q > live.QUOTA_STOP + 5):
+            guard(f"pre{nxt['id']}", lambda a=nxt["id"]: [fetch_kind(a, k) for k in ("h2h", "pregame-form")])
 
     # V6 sakatlık listesi: günde 2 kez (genel rapora eklenir); kota bütçesi elverirse
     q = sync.quota_remaining
