@@ -9,7 +9,7 @@
 Fenerbahçe taraftarları için canlı maç merkezi: canlı skor ve 2D maç simülasyonu, kadro istatistikleri,
 puan durumu, sezon fikstürü ve taraftar sohbeti.
 
-**[Canlı demo](https://fenerhub.vercel.app)** · **[API dokümanı](https://fenerhub.onrender.com/docs)** · **[Teknik kararlar](docs/teknik-kararlar.md)**
+**[Canlı site](https://fenerhub.vercel.app)** · **[Maç demosu ▶](https://fenerhub.vercel.app/?demo=live)** · **[API dokümanı](https://fenerhub.onrender.com/docs)** · **[Teknik kararlar](docs/teknik-kararlar.md)**
 
 ![Ana sayfa](docs/screenshots/anasayfa.png)
 
@@ -21,7 +21,7 @@ puan durumu, sezon fikstürü ve taraftar sohbeti.
 
 - **Canlı veri, ücretsiz kotayla:** Günde 100 isteklik plana bütçe kuralı, veritabanında önbellek ve uyarlanan sorgu aralıklarıyla sığıyor.
 - **WebSocket proxy:** Maç saatinde backend tek bağlantıyla canlı veriyi alır ve tüm izleyicilere yayar. API anahtarı tarayıcıya gitmez.
-- **Gerçek olaylarla simülasyon:** Goller, kartlar, değişiklikler ve VAR sahada canlanır; şablonlu bir spiker her olayı anlatır.
+- **Gerçek olaylarla simülasyon:** Goller, kartlar, değişiklikler ve VAR sahada canlanır; şablonlu bir spiker her olayı anlatır. [Demo](https://fenerhub.vercel.app/?demo=live): 20 Ekim Fenerbahçe – Slavia Prag maçının gerçek canlı kaydı, hızlandırılmış.
 - **Veri kaybı olmadan altyapı:** SQLite'tan PostgreSQL'e geçiş, komut satırı olmayan sunucuda açılışta çalışan migration'lar.
 - **Testli:** 33 backend (pytest) ve 7 frontend (`node --test`) testi, GitHub Actions iş akışı.
 

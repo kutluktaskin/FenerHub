@@ -51,6 +51,7 @@ GitHub Actions ikisini her push'ta çalıştırır: `.github/workflows/ci.yml`.
 | `python -m scripts.add_absence liste` | Sakatlık ve ceza kayıtlarını listeler; `ekle` ve `sil` alt komutları da var |
 | `python -m scripts.download_logos --dry-run` | Eksik takım logolarını sayar; parametresiz çalışınca indirir (her logo 1 istek) |
 | `python -m scripts.migrate_to_postgres --dry-run` | Yerel SQLite verisini Postgres'e aktarır (tek seferlik) |
+| `python -m scripts.build_demo` | Canlı maç kaydından (`scripts/probe_ws_record.py`) sitedeki `?demo=live` dosyasını üretir |
 | `python -m scripts.seed` | **Veritabanını siler** ve eski örnek verileri yükler; onay ister, canlıda kullanılmaz |
 
 ## API uç noktaları

@@ -50,7 +50,8 @@
   - Değişti: V6 injuries'te oyuncu adı boş geliyor. Genel rapor şimdilik en yeni kadro verisindeki missingPlayers'tan güncelleniyor (isim eşleşmeyenler loglanıyor). V6 eklenip eklenmeyeceği kullanıcı kararı bekliyor.
 - [x] Sakatlık kayıtlarında source alanı olsun (api / manual). Otomatik güncelleme elle girilenleri silmesin.
   - Alembic 0004; mevcut kayıtlar manual. Aynı oyuncu için elle kayıt varsa otomatik kayıt eklenmez. Testler: tests/test_absences_sync.py.
-- [ ] Demo modu: ?demo=live ile geçmiş bir maçın olayları sırayla yeniden oynatılsın.
+- [x] Demo modu: ?demo=live ile geçmiş bir maçın olayları sırayla yeniden oynatılsın.
+  - 20 Ekim Slavia maçının WS kaydı scripts/build_demo.py ile /ws/live biçiminde 233 KB'lık frontend/demo/*.json'a çevrildi; frontend/js/demo.js ×10/×20/×60 hızla oynatır (canlı akışla aynı işleyiş). Altbilgide ve README'de bağlantı.
 - [ ] Render ücretsizse maç saatinde sunucunun uyanık olması için bir çözüm öner. Ücretsiz planın kurallarına aykırı yöntem kullanma.
 
 ## Aşama 4: Görseller ve maç öncesi bilgiler
