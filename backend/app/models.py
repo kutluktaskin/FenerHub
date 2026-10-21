@@ -106,6 +106,17 @@ class ForumPost(Base):
     owner = Column(String(64))                           # gizli sahiplik anahtarı, API'ye verilmez
     parent_id = Column(Integer, ForeignKey("posts.id", ondelete="SET NULL"))
     deleted = Column(Boolean, nullable=False, default=False, server_default=false())
+    hidden = Column(Boolean, nullable=False, default=False, server_default=false())   # bildirimle gizlendi
+
+
+class PostReport(Base):
+    """Mesaj bildirimi. reporter: bildirenin IP'sinin özeti (IP'nin kendisi saklanmaz)."""
+    __tablename__ = "post_reports"
+    __table_args__ = (UniqueConstraint("post_id", "reporter", name="uq_post_reports_post_reporter"),)
+    id = Column(Integer, primary_key=True)
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
+    reporter = Column(String(64), nullable=False)
+    ts = Column(Integer, nullable=False)
 
 
 class ApiCache(Base):

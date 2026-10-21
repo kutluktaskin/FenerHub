@@ -9,7 +9,7 @@ from app import forum
 from app.database import engine
 
 OWNER = "test-owner-12345"
-FIELDS = {"id", "room", "nick", "body", "fire", "heart", "ts", "parent_id", "deleted",
+FIELDS = {"id", "room", "nick", "body", "fire", "heart", "ts", "parent_id", "deleted", "hidden",
           "parent_nick", "parent_body", "parent_deleted", "mine"}
 
 
@@ -69,3 +69,52 @@ def test_invalid_room_and_missing_post():
     with pytest.raises(HTTPException) as e:
         asyncio.run(forum.react(999_999, forum.ReactIn(type="heart")))
     assert e.value.status_code == 404
+
+
+def report(pid, ip, owner="baskasi-123456"):
+    return asyncio.run(forum.report_post(pid, forum.ReportIn(owner=owner), req(ip)))
+
+
+def test_report_hides_after_three_different_users(monkeypatch):
+    sent = []
+
+    async def fake_broadcast(data):
+        sent.append(data)
+    monkeypatch.setattr(forum.hub, "broadcast", fake_broadcast)
+    forum.report_log.clear()
+    pid = post("bildirilecek mesaj", ip="88.230.9.1")["id"]
+
+    with pytest.raises(HTTPException) as e:                 # kendi mesajını bildiremez
+        report(pid, "88.230.9.2", owner=OWNER)
+    assert e.value.status_code == 400
+
+    assert report(pid, "88.230.9.3")["hidden"] is False
+    assert report(pid, "88.230.9.3")["already"] is True       # aynı kullanıcı ikinci kez sayılmaz
+    assert report(pid, "88.230.9.4")["hidden"] is False
+    assert report(pid, "88.230.9.5")["hidden"] is True        # 3. farklı kullanıcı: gizlendi
+    assert {"type": "hide", "id": pid} in sent
+
+    listed = [p for p in forum.list_posts("genel", 100, "") if p["id"] == pid][0]
+    assert listed["hidden"] is True and listed["body"] == ""
+
+    with pytest.raises(HTTPException):
+        report(999999, "88.230.9.7")                          # olmayan mesaj: 404
+
+
+def test_report_rate_limit(monkeypatch):
+    async def fake_broadcast(data):
+        pass
+    monkeypatch.setattr(forum.hub, "broadcast", fake_broadcast)
+    forum.report_log.clear()
+    monkeypatch.setattr(forum, "REPORTS_PER_HOUR", 2)
+    ids = [post(f"m{i}", ip=f"88.230.8.{i}")["id"] for i in range(3)]
+    report(ids[0], "88.230.7.1")
+    report(ids[1], "88.230.7.1")
+    with pytest.raises(HTTPException) as e:
+        report(ids[2], "88.230.7.1")
+    assert e.value.status_code == 429
+
+
+def test_profanity_filter_in_posts():
+    created = post("s.i.k.t.i.r hakem, topu götür!", ip="88.230.6.1")
+    assert created["body"] == "*** hakem, topu götür!"

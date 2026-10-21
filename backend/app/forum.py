@@ -1,19 +1,21 @@
 """12. Adam forumu: oda bazlı mesajlar, yanıt, tepki, silme ve /ws/forum canlı yayını."""
+import hashlib
 import hmac
-import re
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased
 from starlette.concurrency import run_in_threadpool
 
 from .database import SessionLocal
-from .models import ForumPost
+from .models import ForumPost, PostReport
 from .net import client_ip
+from .profanity import mask
 
 forum_router = APIRouter(tags=["forum"])
 
@@ -51,7 +53,8 @@ def valid_room(room: str) -> bool:
     return room in ROOMS or room in {"mac-" + m["id"] for m in FIXTURES}
 
 
-BAD = ["küfür1", "küfür2"]          # kendi yasaklı kelimelerini ekle
+REPORT_LIMIT = 3                    # bu kadar farklı kullanıcı (IP) bildirince mesaj gizlenir
+REPORTS_PER_HOUR = 20               # bir IP'nin saatte en fazla bildirim sayısı
 last_post = {}                      # ip -> son mesaj zamanı
 POST_INTERVAL = 4                   # aynı IP'den iki mesaj arası en az saniye
 LAST_POST_TTL = 60                  # bundan eski kayıtlar sözlükten silinir
@@ -75,26 +78,26 @@ def prune_last_post(now: float) -> None:
 # Mesaj + yanıtlanan mesajın özeti (eski SELECT_POST sorgusunun karşılığı)
 Parent = aliased(ForumPost)
 SELECT_POST = (
-    select(ForumPost, Parent.nick, Parent.body, Parent.deleted)
+    select(ForumPost, Parent.nick, Parent.body, Parent.deleted | Parent.hidden)
     .outerjoin(Parent, Parent.id == ForumPost.parent_id)
 )
 
 
 def row_to_post(row, owner: str = ""):
-    """API cevabı eskisiyle aynı alanlar: id, room, nick, body, fire, heart, ts,
-    parent_id, deleted, parent_nick, parent_body, parent_deleted, mine."""
+    """API cevabı: id, room, nick, body, fire, heart, ts, parent_id, deleted, hidden,
+    parent_nick, parent_body, parent_deleted (silinmiş ya da gizlenmiş), mine."""
     post, parent_nick, parent_body, parent_deleted = row
     data = {
         "id": post.id, "room": post.room, "nick": post.nick, "body": post.body,
         "fire": post.fire, "heart": post.heart, "ts": post.ts,
-        "parent_id": post.parent_id, "deleted": bool(post.deleted),
+        "parent_id": post.parent_id, "deleted": bool(post.deleted), "hidden": bool(post.hidden),
         "parent_nick": parent_nick, "parent_body": parent_body,
         "parent_deleted": bool(parent_deleted),
     }
     # Gizli sahiplik anahtarı API yanıtına konmaz, sadece "mine" hesaplanır
     data["mine"] = bool(owner and post.owner and hmac.compare_digest(post.owner, owner))
 
-    if data["deleted"]:
+    if data["deleted"] or data["hidden"]:
         data["body"] = ""
     if data["parent_deleted"]:
         data["parent_body"] = ""
@@ -135,10 +138,8 @@ hub = Hub()
 
 
 def clean(text: str) -> str:
-    text = re.sub(r"\s+", " ", text).strip()
-    for word in BAD:
-        text = re.sub(re.escape(word), "***", text, flags=re.IGNORECASE)
-    return text
+    """Boşlukları sadeleştirir, küfürleri *** yapar (app/profanity.py)."""
+    return mask(text)
 
 
 class PostIn(BaseModel):
@@ -155,6 +156,18 @@ class ReactIn(BaseModel):
 
 class DelIn(BaseModel):
     owner: str = Field(min_length=8, max_length=64)
+
+
+class ReportIn(BaseModel):
+    owner: str = Field(min_length=8, max_length=64)
+
+
+report_log = {}                     # ip özeti -> son bir saatteki bildirim zamanları
+
+
+def reporter_key(ip: str) -> str:
+    """Bildirenin kimliği: IP'nin özeti (veritabanına IP yazılmaz)."""
+    return hashlib.sha256(f"fenerhub-report:{ip}".encode()).hexdigest()
 
 
 @forum_router.get("/api/forum/next-match")
@@ -237,6 +250,42 @@ async def delete_post(pid: int, data: DelIn):
     await run_in_threadpool(soft_delete)
     await hub.broadcast({"type": "delete", "id": pid})
     return {"ok": True}
+
+
+@forum_router.post("/api/forum/posts/{pid}/report")
+async def report_post(pid: int, data: ReportIn, request: Request):
+    """Mesajı bildir: aynı kullanıcı (IP) bir mesajı bir kez bildirir, kendi mesajını bildiremez.
+    REPORT_LIMIT farklı kullanıcı bildirince mesaj gizlenir ve herkesin ekranından kalkar."""
+    who = reporter_key(client_ip(request))
+    now = time.time()
+    recent = [t for t in report_log.get(who, []) if now - t < 3600]
+    if len(recent) >= REPORTS_PER_HOUR:
+        raise HTTPException(status_code=429, detail="Çok fazla bildirim; biraz sonra tekrar dene.")
+
+    def add_report():
+        with SessionLocal() as session, session.begin():
+            post = session.get(ForumPost, pid)
+            if not post or post.deleted:
+                raise HTTPException(status_code=404, detail="Mesaj yok")
+            if post.owner and hmac.compare_digest(post.owner, data.owner):
+                raise HTTPException(status_code=400, detail="Kendi mesajını bildiremezsin.")
+            try:
+                with session.begin_nested():
+                    session.add(PostReport(post_id=pid, reporter=who, ts=int(now)))
+            except IntegrityError:
+                return {"ok": True, "already": True, "hidden": bool(post.hidden)}
+            count = session.scalar(select(func.count()).select_from(PostReport).where(PostReport.post_id == pid))
+            newly_hidden = count >= REPORT_LIMIT and not post.hidden
+            if newly_hidden:
+                post.hidden = True
+            return {"ok": True, "already": False, "hidden": bool(post.hidden), "newly_hidden": newly_hidden}
+
+    result = await run_in_threadpool(add_report)
+    if not result.get("already"):
+        report_log[who] = recent + [now]
+    if result.pop("newly_hidden", False):
+        await hub.broadcast({"type": "hide", "id": pid})
+    return result
 
 
 @forum_router.post("/api/forum/posts/{pid}/react")
