@@ -34,6 +34,7 @@ def get_squad(db: Session = Depends(get_db)):
         absence = absence_by_player.get(p.id)
         result.append({
             "id": p.id,
+            "api_id": p.api_id,           # fotoğraf: img/players/<api_id>.png (varsa)
             "name": p.name,
             "position": p.position,
             "shirt_number": p.shirt_number,

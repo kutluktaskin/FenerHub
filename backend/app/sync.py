@@ -343,9 +343,11 @@ def sync_squad(db, items):
         if row:
             row.position = p.get("position")
             row.shirt_number = shirt
+            row.api_id = p.get("id") or row.api_id
             updated += 1
         else:
-            db.add(models.Player(name=p["name"], position=p.get("position"), shirt_number=shirt, team_id=team.id))
+            db.add(models.Player(name=p["name"], position=p.get("position"), shirt_number=shirt,
+                                 team_id=team.id, api_id=p.get("id")))
             created += 1
         seen.add(p["name"])
     print(f"Kadro ({team.name}): {created} yeni, {updated} güncellendi")
@@ -388,6 +390,21 @@ def sync_standings(db, tables):
             .delete(synchronize_session=False)
         )
         print(f"Puan durumu ({comp}): {len(rows)} takım yazıldı")
+
+
+def fill_player_ids() -> int:
+    """Kimliği boş oyuncuları önbellekteki kadro cevabından (squad_raw) doldurur; istek atmaz.
+    Uygulama açılışında çalışır (kadro senkronu elle çalıştırıldığı için)."""
+    raw = cache.get("squad_raw") or {}
+    ids = {(i.get("player") or {}).get("name"): (i.get("player") or {}).get("id")
+           for i in (raw.get("data") or {}).get("players") or []}
+    filled = 0
+    with SessionLocal() as db, db.begin():
+        for pl in db.query(models.Player).filter(models.Player.api_id.is_(None)):
+            if ids.get(pl.name):
+                pl.api_id = ids[pl.name]
+                filled += 1
+    return filled
 
 
 def remove_excluded(db):

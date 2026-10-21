@@ -12,7 +12,7 @@ from .migrate import run_migrations
 from .forum import forum_router
 from .routers import standings, squad, matches, absences
 from .auto_sync import sync_loop
-from . import cache, live
+from . import cache, live, sync
 
 
 @asynccontextmanager
@@ -26,6 +26,7 @@ async def lifespan(app: FastAPI):
               "Environment'a Neon adresini ekleyin.", flush=True)
 
     cache.seed_from_files()   # api_cache boşsa repodaki eski önbellek dosyalarını alır
+    sync.fill_player_ids()    # oyuncu fotoğrafı eşleşmesi için kimlikler (önbellekten, istek atmaz)
 
     tasks = [asyncio.create_task(sync_loop()), asyncio.create_task(live.live_loop())]
 

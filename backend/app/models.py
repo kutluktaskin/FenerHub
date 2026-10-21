@@ -21,6 +21,7 @@ class Player(Base):
     position = Column(String)
     shirt_number = Column(Integer)
     team_id = Column(Integer, ForeignKey("teams.id"))
+    api_id = Column(Integer)               # SportsAPI oyuncu kimliği (fotoğraf: img/players/<api_id>.png)
     team = relationship("Team")
     stats = relationship("PlayerStat", back_populates="player")
 
