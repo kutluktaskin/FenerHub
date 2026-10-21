@@ -3080,3 +3080,32 @@ th[aria-sort="ascending"] .sort-ico, th[aria-sort="descending"] .sort-ico { opac
     }
     .fh-word span { opacity: 1; transform: none; }
 }
+
+/* Fikstür: takvime abone ol menüsü (ical) */
+.fx-cal-add { position: relative; }
+.fx-cal-add > summary { list-style: none; cursor: pointer; }
+.fx-cal-add > summary::-webkit-details-marker { display: none; }
+.fx-cal-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: min(290px, calc(100vw - 32px));
+    padding: var(--s-3);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: var(--c-navy-950);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 0.45);
+}
+.fx-cal-menu p { margin: 0 0 4px; color: var(--c-text-3); font-size: var(--fs-xs); }
+.fx-cal-menu a { padding: 8px 10px; border-radius: var(--r-md); color: var(--c-text); font-size: var(--fs-sm); font-weight: 600; text-decoration: none; }
+.fx-cal-menu a:hover, .fx-cal-menu a:focus-visible { background: var(--c-accent-soft); color: var(--c-accent); }
+@media (max-width: 640px) { .fx-cal-add { width: 100%; } .fx-cal-menu { left: 0; right: auto; } }
+
+/* Gol/maç bildirimleri düğmesi (js/push.js) */
+.push-btn, .push-note { order: 2; }
+.push-btn[aria-pressed="true"] { border-color: var(--c-accent-line); background: var(--c-accent-soft); color: var(--c-accent); }
+.push-note { margin: calc(-1 * var(--s-2)) 0 0; color: var(--c-text-3); font-size: var(--fs-xs); max-width: 52ch; }

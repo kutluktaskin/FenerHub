@@ -4,6 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FENERHUB | Fenerbahçe Canlı Maç Merkezi</title>
+    <meta name="description" content="Fenerbahçe maçları için taraftar yapımı canlı maç merkezi: canlı skor ve olaylar, kadro, fikstür, puan durumu, maç özeti, skor tahmin oyunu ve taraftar forumu.">
+    <meta name="theme-color" content="#061233">
+    <link rel="canonical" href="https://fenerhub.vercel.app/">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="FenerHub">
+    <!-- Paylaşım önizlemesi (WhatsApp, X, Discord...) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="FenerHub">
+    <meta property="og:locale" content="tr_TR">
+    <meta property="og:title" content="FENERHUB | Fenerbahçe Canlı Maç Merkezi">
+    <meta property="og:description" content="Canlı skor, maç özeti, fikstür, skor tahmin oyunu ve taraftar forumu tek sayfada.">
+    <meta property="og:url" content="https://fenerhub.vercel.app/">
+    <meta property="og:image" content="https://fenerhub.vercel.app/img/og.png">
+    <meta property="og:image:width" content="1280">
+    <meta property="og:image:height" content="640">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="FENERHUB | Fenerbahçe Canlı Maç Merkezi">
+    <meta name="twitter:description" content="Canlı skor, maç özeti, fikstür, skor tahmin oyunu ve taraftar forumu tek sayfada.">
+    <meta name="twitter:image" content="https://fenerhub.vercel.app/img/og.png">
     <!-- GSAP: defer ile sayfa çizimini bekletmez; aşağıdaki betikler de defer, sıra korunur -->
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -16,10 +36,10 @@
     <!-- Arka planın ilk karesi erkenden insin (background.js aynı dosyayı kullanır) -->
     <link rel="preload" as="image" href="frames/frame_0001.jpg" fetchpriority="high">
     <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style.css?v=20261021o">
+    <link rel="stylesheet" href="css/style.css?v=20261021p">
 </head>
 <body>
-    <script src="js/ui.js?v=20261021o"></script>
+    <script src="js/ui.js?v=20261021p"></script>
     <a class="skip-link" href="#icerik">İçeriğe geç</a>
 
     <!-- SABİT ÜST MENÜ -->
@@ -58,6 +78,8 @@
             <div class="hero-head">
                 <div class="hero-eyebrow"><span class="live-pulse"></span>Canlı maç merkezi · 2026/27</div>
                 <h1 class="hero-heading">Yakın Maçlar</h1>
+                <button type="button" class="btn push-btn" id="pushBtn" hidden aria-pressed="false"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg><span>Gol bildirimlerini aç</span></button>
+                <p class="push-note" id="pushNote" role="status" hidden></p>
             </div>
 
             <!-- Kartlar api.js'te (renderMatchCard) veriden çizilir; id'ler simülasyon için sabit -->
@@ -270,6 +292,15 @@
                     <button type="button" data-view="cal" aria-pressed="true"><svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg>Takvim</button>
                     <button type="button" data-view="list" aria-pressed="false"><svg class="ico" aria-hidden="true"><use href="#i-list"/></svg>Liste</button>
                 </div>
+                <details class="fx-cal-add">
+                    <summary class="btn"><svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg>Takvime ekle</summary>
+                    <div class="fx-cal-menu">
+                        <p>Maçlar telefonunun takvimine düşer, saat değişirse kendiliğinden güncellenir.</p>
+                        <a data-cal="webcal" href="webcal://fenerhub.onrender.com/api/calendar.ics">iPhone / Mac takvimi</a>
+                        <a data-cal="google" href="https://calendar.google.com/calendar/render?cid=webcal%3A%2F%2Ffenerhub.onrender.com%2Fapi%2Fcalendar.ics" target="_blank" rel="noopener">Google Takvim</a>
+                        <a data-cal="https" href="https://fenerhub.onrender.com/api/calendar.ics">Outlook / diğer (.ics adresi)</a>
+                    </div>
+                </details>
             </div>
 
             <!-- Filtreler: her grupta bir seçim (api.js initFixtureFilters) -->
@@ -341,9 +372,9 @@
 
     <footer class="site-footer">
         <div class="footer-brand"><img class="fh-mark" src="img/favicon.svg" alt="" width="28" height="32" loading="lazy"><span>FENER<b>HUB</b></span></div>
-        <p>Maç, kadro ve puan verileri SportsAPI Pro üzerinden otomatik alınır; canlı skorlar birkaç dakika gecikebilir.</p>
+        <p>Canlı skorlar birkaç saniye ile birkaç dakika arasında gecikebilir.</p>
         <p><a class="footer-demo" href="?demo=live"><svg class="ico" aria-hidden="true"><use href="#i-radio"/></svg>Geçmiş bir maçı canlıymış gibi izle (demo)</a></p>
-        <p>Taraftar projesidir, Fenerbahçe SK ile resmi bir bağı yoktur. · <span id="footerYear">2026</span></p>
+        <p>Bu site Fenerbahçe SK ile resmi bir bağlantısı olmayan bir taraftar projesidir. Veriler SportsAPI Pro'dan alınmaktadır. · <span id="footerYear">2026</span></p>
     </footer>
 
     <!-- 12. ADAM: taraftar forumu (forum.js) -->
@@ -389,16 +420,17 @@
     </aside>
 
     <!-- Harici JS Dosyaları -->
-    <script defer src="js/background.js?v=20261021o"></script>
-    <script defer src="js/commentary.js?v=20261021o"></script>
-    <script defer src="js/summary.js?v=20261021o"></script>
-    <script defer src="js/matchEngine.js?v=20261021o"></script>
-    <script defer src="js/fx.js?v=20261021o"></script>
-    <script defer src="js/api.js?v=20261021o"></script>
-    <script defer src="js/main.js?v=20261021o"></script>
-    <script defer src="js/nav.js?v=20261021o"></script>
-    <script defer src="js/forum.js?v=20261021o"></script>
-    <script defer src="js/predict.js?v=20261021o"></script>
-    <script defer src="js/demo.js?v=20261021o"></script>
+    <script defer src="js/background.js?v=20261021p"></script>
+    <script defer src="js/commentary.js?v=20261021p"></script>
+    <script defer src="js/summary.js?v=20261021p"></script>
+    <script defer src="js/matchEngine.js?v=20261021p"></script>
+    <script defer src="js/fx.js?v=20261021p"></script>
+    <script defer src="js/api.js?v=20261021p"></script>
+    <script defer src="js/main.js?v=20261021p"></script>
+    <script defer src="js/nav.js?v=20261021p"></script>
+    <script defer src="js/forum.js?v=20261021p"></script>
+    <script defer src="js/predict.js?v=20261021p"></script>
+    <script defer src="js/push.js?v=20261021p"></script>
+    <script defer src="js/demo.js?v=20261021p"></script>
 </body>
 </html>

@@ -42,6 +42,8 @@ GitHub Actions ikisini her push'ta çalıştırır: `.github/workflows/ci.yml`.
 | `SPORTS_API_KEY` | SportsAPI Pro anahtarı. Sadece backend'de; tarayıcıya gitmez. |
 | `DATABASE_URL` | Postgres adresi (Neon pooled). Boşsa yerel SQLite. Uygulama bunu `.env`'den kendisi okumaz; yerelde Postgres'e bağlanmak için kabukta açıkça verin. |
 | `RENDER` | Render'ın kendisi tanımlar; Render'da SQLite'a düşülürse log'a uyarı yazdırır. |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Gol bildirimi (Web Push) anahtarları; `python scripts/vapid_keys.py` üretir. Boşsa bildirim özelliği kapalı. |
+| `VAPID_SUBJECT` | İsteğe bağlı iletişim adresi (`mailto:` ya da site adresi); varsayılan site adresi. |
 
 ## Elle çalıştırılan araçlar (backend klasöründe)
 

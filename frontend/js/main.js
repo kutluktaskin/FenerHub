@@ -55,3 +55,23 @@ function switchTab(tabId) {
         }, 50);
     }
 }
+
+// PWA: service worker (sw.js). Yerelde geliştirmeyi önbellek karıştırmasın diye sadece
+// canlı sitede; yerelde denemek için adrese ?sw=1 eklenir.
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || /[?&]sw=1/.test(location.search))) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}
+
+// Takvim aboneliği bağlantıları: yerelde yerel backend'e işaret etsin (index.html'deki varsayılan canlı adres)
+(function () {
+    if (typeof API_BASE === 'undefined') return;
+    const ics = `${API_BASE}/api/calendar.ics`;
+    const webcal = ics.replace(/^https?:/, 'webcal:');
+    document.querySelectorAll('[data-cal]').forEach(a => {
+        a.href = { webcal, https: ics, google: `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcal)}` }[a.dataset.cal];
+    });
+    document.addEventListener('click', e => {
+        const open = document.querySelector('.fx-cal-add[open]');
+        if (open && !open.contains(e.target)) open.removeAttribute('open');
+    });
+})();

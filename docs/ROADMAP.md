@@ -86,12 +86,12 @@
   - İzinli kaynaklar: fenerhub.vercel.app ve localhost:5500; yöntemler GET/POST, başlık Content-Type.
 
 ## Aşama 7: PWA, takvim ve paylaşım
-- [ ] PWA: manifest.json, ikonlar, service worker. Statik dosyalar önbellekte olsun, API verisi her zaman ağdan gelsin.
-- [ ] Gol bildirimi (Web Push): izin veren kullanıcıya site kapalıyken bile gol ve maç başlangıç bildirimi. VAPID anahtarları ortam değişkeninde.
-- [ ] Takvime ekle: /api/calendar.ics ile fikstür takvim aboneliği, saat değişince takvim güncellensin. Fikstür bölümüne "Takvime ekle" butonu.
-- [ ] Paylaşım önizlemesi (Open Graph / Twitter Card): başlık, açıklama ve sıradaki maçı gösteren görsel. Dinamik üretilemiyorsa sabit kapak görseli.
-- [ ] SEO: anlamlı title, meta description, lang="tr", favicon.
-- [ ] Footer notu: "Bu site Fenerbahçe SK ile resmi bir bağlantısı olmayan bir taraftar projesidir. Veriler SportsAPI Pro'dan alınmaktadır."
+- [x] PWA: manifest.json, ikonlar, service worker. Statik dosyalar önbellekte olsun, API verisi her zaman ağdan gelsin. → manifest.webmanifest + sw.js (sayfa önce ağdan, statik dosyalar stale-while-revalidate, API/video/kareler hiç önbelleğe girmez), offline.html yedeği.
+- [x] Gol bildirimi (Web Push): izin veren kullanıcıya site kapalıyken bile gol ve maç başlangıç bildirimi. VAPID anahtarları ortam değişkeninde. → app/push.py + js/push.js; başladı/gol/bitti, sadece bilinen push servisleri, tekrar gönderim engelli. Anahtar yoksa düğme gizli.
+- [x] Takvime ekle: /api/calendar.ics ile fikstür takvim aboneliği, saat değişince takvim güncellensin. Fikstür bölümüne "Takvime ekle" butonu. → app/ical.py (UTC saat, 1 saat önce hatırlatma); iPhone/Google/Outlook bağlantıları.
+- [x] Paylaşım önizlemesi (Open Graph / Twitter Card): başlık, açıklama ve sıradaki maçı gösteren görsel. Dinamik üretilemiyorsa sabit kapak görseli. → sabit kapak img/og.png (1280×640).
+- [x] SEO: anlamlı title, meta description, lang="tr", favicon. → ayrıca canonical, theme-color, apple-touch-icon.
+- [x] Footer notu: "Bu site Fenerbahçe SK ile resmi bir bağlantısı olmayan bir taraftar projesidir. Veriler SportsAPI Pro'dan alınmaktadır."
 
 ## Aşama 8: İçerik ve analiz
 - [ ] Oyuncu detay paneli: tıklayınca açılsın. İçinde attribute-overviews radar grafiği, güçlü/zayıf yönler, sezon maç puanları grafiği ve transfer geçmişi olsun. Sadece tıklanınca çek, 24 saat önbellekte tut.
