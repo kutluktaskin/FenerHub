@@ -9,3 +9,5 @@ psycopg[binary]==3.3.6
 alembic==1.20.0
 # Canlı maç: SportsAPI WebSocket istemcisi (app/live.py)
 websockets==17.2
+# Web Push bildirimleri (app/push.py)
+pywebpush==2.5.0

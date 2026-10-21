@@ -22,7 +22,7 @@ import websockets
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from starlette.concurrency import run_in_threadpool
 
-from . import absences_sync, cache, models, sync
+from . import absences_sync, cache, models, push, sync
 from .database import SessionLocal
 from .routers.matches import match_query, serialize_match, trim_incidents, trim_lineups, trim_stats
 
@@ -198,6 +198,7 @@ def unflatten(data: dict) -> dict:
 
 # Canlı sayılan durum kodları: 6 ilk yarı, 7 ikinci yarı, 31 devre arası, uzatmalar ve penaltılar
 LIVE_CODES = {6, 7, 31, 32, 33, 34, 41, 42, 50}
+START_PUSH_WINDOW = 20 * 60
 
 
 def event_fields(data):
@@ -296,6 +297,15 @@ class Follower:
                                  or {}).get("data", {}).get("incidents"))
         await hub.broadcast({"type": "state", **state})
 
+    def announce(self, before, match):
+        """Durum değişince bildirim: maç başladı (başlama saatinden en fazla 20 dk sonra;
+        sunucu maç ortasında yeniden açılırsa "başladı" gitmesin) ve maç bitti."""
+        was = (before or {}).get("status")
+        if match["status"] == "live" and was != "live" and time.time() - self.kickoff < START_PUSH_WINDOW:
+            push.fire(*push.message_for("start", match))
+        elif match["status"] == "finished" and was == "live":
+            push.fire(*push.message_for("end", match))
+
     async def set_source(self, source):
         if state.get("source") != source:
             state["source"] = source
@@ -329,16 +339,20 @@ class Follower:
             match = await run_in_threadpool(save_match, self.match_id, *new_score,
                                             "finished" if finished else "live")
             if match:
+                self.announce(state["match"], match)
                 state["match"] = match
                 await hub.broadcast({"type": "update", "kind": "match", "data": match})
             if old_score and sum(new_score) > sum(old_score):
                 goal = next((i for i in state["incidents"] or [] if i["incidentType"] == "goal"), None)
                 await hub.broadcast({"type": "goal", "score": new_score, "incident": goal})
+                if match:
+                    push.fire(*push.message_for("goal", match, goal))
         if finished and self.ft_at is None:
             self.ft_at = time.time()
             await run_in_threadpool(cache.put, f"detail:{self.api_id}:done", True)
             match = await run_in_threadpool(save_match, self.match_id, None, None, "finished")
             if match:
+                self.announce(state["match"], match)
                 state["match"] = match
                 await hub.broadcast({"type": "update", "kind": "match", "data": match})
             print(f"Canlı maç {self.api_id}: bitti (FT), {AFTER_FT // 60} dk sonra kapanacak", flush=True)
@@ -349,6 +363,7 @@ class Follower:
             return
         match = await run_in_threadpool(save_event, self.match_id, f)
         if match:
+            self.announce(state.get("match"), match)
             state["match"] = match
             state["updated"] = time.time()
             await hub.broadcast({"type": "update", "kind": "match", "data": match})

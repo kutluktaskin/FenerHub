@@ -12,7 +12,7 @@ from .migrate import run_migrations
 from .forum import forum_router
 from .routers import standings, squad, matches, absences
 from .auto_sync import sync_loop
-from . import cache, live, predictions, sync
+from . import cache, ical, live, predictions, push, sync
 
 
 @asynccontextmanager
@@ -68,6 +68,8 @@ app.include_router(absences.router)
 app.include_router(forum_router)
 app.include_router(live.router)
 app.include_router(predictions.router)
+app.include_router(ical.router)
+app.include_router(push.router)
 
 
 @app.get("/api/health")

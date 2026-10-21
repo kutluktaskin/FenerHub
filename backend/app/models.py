@@ -154,3 +154,14 @@ class MotmVote(Base):
     player = Column(String(64), nullable=False)
     choice = Column(String(80), nullable=False)
     ts = Column(Integer, nullable=False)
+
+
+class PushSubscription(Base):
+    """Web Push aboneliği (tarayıcının verdiği uç nokta ve şifreleme anahtarları). Kimlik yok;
+    tarayıcı aboneliği iptal edince ya da push servisi 404/410 dönünce silinir."""
+    __tablename__ = "push_subscriptions"
+    id = Column(Integer, primary_key=True)
+    endpoint = Column(String(600), unique=True, nullable=False)
+    p256dh = Column(String(200), nullable=False)
+    auth = Column(String(100), nullable=False)
+    ts = Column(Integer, nullable=False)
